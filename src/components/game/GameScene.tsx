@@ -114,6 +114,17 @@ export const GameScene = () => {
     return () => clearInterval(weatherInterval);
   }, []);
 
+  // Day/Night Cycle (changes every 60 seconds)
+  const setTimeOfDay = useGameStore(s => s.setTimeOfDay || (() => {}));
+  useEffect(() => {
+    const dayNightInterval = setInterval(() => {
+      const now = Date.now() / 60000;
+      const time = now % 1;
+      setTimeOfDay(time);
+    }, 60000);
+    return () => clearInterval(dayNightInterval);
+  }, []);
+
   // Pet heal interval
   const playerHp = useGameStore(s => s.playerHp);
   const playerMaxHp = useGameStore(s => s.playerMaxHp);

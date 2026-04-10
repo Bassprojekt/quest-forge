@@ -191,6 +191,13 @@ export interface GameState {
   damagePopups: DamagePopup[];
   levelUpEffect: boolean;
   hitEffectPos: [number, number, number] | null;
+  comboCount: number;
+  comboTimer: number;
+  timeOfDay: number;
+  achievements: string[];
+  totalKills: number;
+  totalGoldEarned: number;
+  totalDamageDealt: number;
 
   setPlayerClass: (c: PlayerClass) => void;
   setPlayerPosition: (pos: [number, number, number]) => void;
@@ -228,6 +235,8 @@ export interface GameState {
   setUIOpen: (v: boolean) => void;
   setShowSaveIndicator: (v: boolean) => void;
   setWeather: (weather: 'sunny' | 'rainy' | 'foggy') => void;
+  setTimeOfDay: (time: number) => void;
+  unlockAchievement: (id: string) => void;
 }
 
 const INITIAL_SHOP_ITEMS: ShopItem[] = [
@@ -313,6 +322,13 @@ export const useGameStore = create<GameState>((set, get) => ({
   isUIOpen: false,
   showSaveIndicator: false,
   weather: 'sunny',
+  comboCount: 0,
+  comboTimer: 0,
+  timeOfDay: 0.5,
+  achievements: [],
+  totalKills: 0,
+  totalGoldEarned: 0,
+  totalDamageDealt: 0,
 
   setPlayerClass: (c) => {
     const skills = c ? (CLASS_SKILLS[c] || []).map(s => ({ ...s })) : [];
@@ -326,7 +342,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   attackEnemy: (id) => {
     const state = get();
     const pClass = state.playerClass;
-    // Play attack sound based on class
     if (pClass === 'mage') playMagicCast();
     else if (pClass === 'archer') playArrowShoot();
     else playSwordSlash();
@@ -338,11 +353,19 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
     const equippedWeapon = state.inventory.find(i => i.type === 'weapon' && i.equipped);
     const weaponBonus = equippedWeapon ? equippedWeapon.value : 0;
-    const totalAtk = state.playerAttackPower + bonusDmg + weaponBonus;
+    let totalAtk = state.playerAttackPower + bonusDmg + weaponBonus;
+    
+    // Combo Damage Bonus (+10% per combo, max +50%)
+    const comboBonus = Math.min(state.comboCount * 0.1, 0.5);
+    totalAtk = Math.floor(totalAtk * (1 + comboBonus));
+    
     const critChance = pClass === 'archer' ? 0.25 : 0.15;
     const isCrit = Math.random() < critChance;
     const critMult = pClass === 'archer' ? 2.0 : 1.5;
-    const finalDmg = isCrit ? Math.floor(totalAtk * critMult) : totalAtk;
+    let finalDmg = isCrit ? Math.floor(totalAtk * critMult) : totalAtk;
+    
+    // Track total damage
+    set(s => ({ totalDamageDealt: s.totalDamageDealt + finalDmg, comboTimer: Date.now() }));
 
     const enemies = state.enemies.map(e => {
       if (e.id !== id || !e.alive) return e;
@@ -371,8 +394,33 @@ export const useGameStore = create<GameState>((set, get) => ({
     let xpGain = 0;
     let goldGain = 0;
     if (wasAlive && nowDead && killed) {
-      xpGain = killed.xpReward;
-      goldGain = killed.goldReward;
+      // Level-Gap XP Berechnung
+      const enemyLevel = ZONES.find(z => z.id === killed.zone)?.requiredLevel || 1;
+      const levelDiff = state.playerLevel - enemyLevel;
+      let xpMult = 1;
+      let goldMult = 1;
+      
+      // Wenn Gegner mehr als 10 Level höher ist - weniger XP
+      if (levelDiff < -10) {
+        xpMult = 0.1;
+        goldMult = 0.1;
+      } else if (levelDiff < -5) {
+        xpMult = 0.3;
+        goldMult = 0.4;
+      } else if (levelDiff < -2) {
+        xpMult = 0.6;
+        goldMult = 0.7;
+      } else if (levelDiff > 10) {
+        xpMult = 1.5;
+        goldMult = 1.3;
+      }
+      
+      xpGain = Math.floor(killed.xpReward * xpMult);
+      goldGain = Math.floor(killed.goldReward * goldMult);
+      
+      // Combo erhöhen bei Kill
+      const newCombo = Date.now() - state.comboTimer < 5000 ? Math.min(state.comboCount + 1, 5) : 1;
+      set({ comboCount: newCombo });
       popups.push({
         id: `xp-${popupIdCounter++}`,
         position: [...killed.position] as [number, number, number],
@@ -434,6 +482,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       damagePopups: popups,
       hitEffectPos: hitPos,
       levelUpEffect: didLevelUp,
+      totalKills: nowDead ? state.totalKills + 1 : state.totalKills,
+      totalGoldEarned: nowDead ? state.totalGoldEarned + goldGain : state.totalGoldEarned,
     });
 
     if (didLevelUp) setTimeout(() => set({ levelUpEffect: false }), 2000);
@@ -721,4 +771,6 @@ damagePopups: [...state.damagePopups, {
   setUIOpen: (v) => set({ isUIOpen: v }),
   setShowSaveIndicator: (v) => set({ showSaveIndicator: v }),
   setWeather: (weather) => set({ weather }),
+  setTimeOfDay: (time) => set({ timeOfDay: time }),
+  unlockAchievement: (id) => set(s => ({ achievements: s.achievements.includes(id) ? s.achievements : [...s.achievements, id] })),
 }));
