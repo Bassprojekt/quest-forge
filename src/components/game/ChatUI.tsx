@@ -13,6 +13,7 @@ export const ChatUI = ({ onClose }: Props) => {
   const [chatType, setChatType] = useState<ChatType>('general');
   const [message, setMessage] = useState('');
   const [privateTo, setPrivateTo] = useState('');
+  const [isMinimized, setIsMinimized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const allMessages = useChatStore(s => s.messages);
@@ -53,11 +54,28 @@ export const ChatUI = ({ onClose }: Props) => {
     return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Minimized view
+  if (isMinimized) {
+    return (
+      <div className="fixed bottom-4 left-4 z-40">
+        <button
+          onClick={() => setIsMinimized(false)}
+          className="bg-gray-900/95 hover:bg-gray-800 text-white px-4 py-2 rounded-full border border-gray-700 shadow-lg"
+        >
+          💬 Chat
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed bottom-20 left-4 z-40 w-80" data-chat-open="true">
       <div className="bg-gray-900/95 backdrop-blur-md rounded-t-2xl border border-gray-700">
         {/* Header */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-gray-700">
+          <button onClick={() => setIsMinimized(true)} className="text-white hover:text-gray-300 text-xl">
+            −
+          </button>
           <span className="text-white font-bold text-sm">💬 Chat</span>
           <button onClick={onClose} className="text-gray-400 hover:text-white">✕</button>
         </div>
