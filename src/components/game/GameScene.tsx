@@ -143,21 +143,21 @@ export const GameScene = () => {
     return () => clearInterval(healInterval);
   }, [pets, playerHp, playerMaxHp, playerPosition, setPlayerHp, addDamagePopup]);
 
-  // HP Regeneration (1 HP every 2 seconds when not full)
+  // HP Regeneration (1 HP every 15 seconds when not full)
   useEffect(() => {
     if (playerHp >= playerMaxHp) return;
     const hpRegenInterval = setInterval(() => {
       setPlayerHp(Math.min(playerMaxHp, playerHp + 1));
-    }, 2000);
+    }, 15000);
     return () => clearInterval(hpRegenInterval);
   }, [playerHp, playerMaxHp, setPlayerHp]);
 
-  // MP Regeneration (1 MP every 3 seconds when not full)
+  // MP Regeneration (1 MP every 15 seconds when not full)
   useEffect(() => {
     if (playerMana >= playerMaxMana) return;
     const mpRegenInterval = setInterval(() => {
       setPlayerMana(Math.min(playerMaxMana, playerMana + 1));
-    }, 3000);
+    }, 15000);
     return () => clearInterval(mpRegenInterval);
   }, [playerMana, playerMaxMana, setPlayerMana]);
 
