@@ -189,12 +189,12 @@ export const GameScene = () => {
   const currentUsername = useAccountStore(s => s.getCurrentUsername());
   const logout = useAccountStore(s => s.logout);
 
+  const seenTutorial = useTutorialStore(s => s.seenTutorial);
+  const markTutorialSeen = useTutorialStore(s => s.markTutorialSeen);
+
   if (!isLoggedIn) {
     return <LoginScreen onLogin={() => {}} />;
   }
-
-  const seenTutorial = useTutorialStore(s => s.seenTutorial);
-  const markTutorialSeen = useTutorialStore(s => s.markTutorialSeen);
 
   if (!seenTutorial && playerClass) {
     return <TutorialScreen onComplete={markTutorialSeen} />;

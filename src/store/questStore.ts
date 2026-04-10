@@ -4,12 +4,14 @@ export interface Quest {
   id: string;
   title: string;
   description: string;
-  type: 'kill';
+  type: 'kill' | 'collect' | 'escort';
   target: string;
+  targetItem?: string;
   required: number;
   current: number;
   rewardXp: number;
   rewardGold: number;
+  rewardItem?: string;
   status: 'available' | 'active' | 'completed' | 'claimed';
   npcName: string;
 }
@@ -48,6 +50,10 @@ const INITIAL_QUESTS: Quest[] = [
   { id: 'q18', title: 'Drachenruf', description: 'Bezwinge den Prismadrachen.', type: 'kill', target: 'Prismadrache', required: 1, current: 0, rewardXp: 1200, rewardGold: 600, status: 'available', npcName: 'Gildenmeisterin Gabi' },
   { id: 'q19', title: 'Void-Bezwinger', description: 'Besiege einen Voidwalker.', type: 'kill', target: 'Voidwalker', required: 1, current: 0, rewardXp: 1500, rewardGold: 800, status: 'available', npcName: 'Schmied Vulkan' },
   { id: 'q20', title: 'Chaosbrecher', description: 'Zerstöre ein Chaosphantom.', type: 'kill', target: 'Chaosphantom', required: 1, current: 0, rewardXp: 2000, rewardGold: 1000, status: 'available', npcName: 'Gildenmeisterin Gabi' },
+  // Collect quests
+  { id: 'q21', title: 'Pilzsammler', description: 'Sammle 5 Pilze im Pilzwald.', type: 'collect', target: 'Pilz', targetItem: 'Pilz', required: 5, current: 0, rewardXp: 150, rewardGold: 75, status: 'available', npcName: 'Apothekerin Flora' },
+  { id: 'q22', title: 'Kristallsucher', description: 'Sammle 3 Kristalle.', type: 'collect', target: 'Kristall', targetItem: 'Kristall', required: 3, current: 0, rewardXp: 300, rewardGold: 150, status: 'available', npcName: 'Waffenhändler Erik' },
+  { id: 'q23', title: 'Schattenessenz', description: 'Sammle 4 Schattenperlen.', type: 'collect', target: 'Schattenperle', targetItem: 'Schattenperle', required: 4, current: 0, rewardXp: 400, rewardGold: 200, status: 'available', npcName: 'Schmied Vulkan' },
 ];
 
 export const useQuestStore = create<QuestState>((set, get) => ({

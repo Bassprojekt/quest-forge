@@ -33,7 +33,7 @@ export interface Pet {
   name: string;
   bonus: string;
   bonusValue: number;
-  bonusType: 'damage' | 'speed' | 'defense' | 'heal';
+  bonusType: 'damage' | 'speed' | 'defense' | 'heal' | 'crit';
   price: number;
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   owned: boolean;
@@ -276,6 +276,10 @@ const INITIAL_PETS: Pet[] = [
   { id: 'pet-priestess', name: 'Priesterin Aria', bonus: '+20 HP/5s', bonusValue: 20, bonusType: 'heal', price: 1200, rarity: 'epic', owned: false, equipped: false },
   { id: 'pet-ranger', name: 'Waldläufer Finn', bonus: '+35% Schaden', bonusValue: 0.35, bonusType: 'damage', price: 2000, rarity: 'legendary', owned: false, equipped: false },
   { id: 'pet-wizard', name: 'Zauberer Merlin', bonus: '+40% Schaden', bonusValue: 0.4, bonusType: 'damage', price: 3000, rarity: 'legendary', owned: false, equipped: false },
+  { id: 'pet-fairy', name: 'Wald Fee', bonus: '+10% Krit', bonusValue: 0.1, bonusType: 'crit', price: 400, rarity: 'rare', owned: false, equipped: false },
+  { id: 'pet-ghost', name: 'Geist Gigi', bonus: '+25% Speed', bonusValue: 0.25, bonusType: 'speed', price: 600, rarity: 'rare', owned: false, equipped: false },
+  { id: 'pet-treant', name: 'Treant Torin', bonus: '+35% Defense', bonusValue: 0.35, bonusType: 'defense', price: 2500, rarity: 'legendary', owned: false, equipped: false },
+  { id: 'pet-elemental', name: 'Elementar Emil', bonus: '+50% Schaden', bonusValue: 0.5, bonusType: 'damage', price: 5000, rarity: 'legendary', owned: false, equipped: false },
 ];
 
 const INITIAL_INVENTORY: InventoryItem[] = [
