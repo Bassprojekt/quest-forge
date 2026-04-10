@@ -367,7 +367,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const critChance = pClass === 'archer' ? 0.25 : 0.15;
     const isCrit = Math.random() < critChance;
     const critMult = pClass === 'archer' ? 2.0 : 1.5;
-    let finalDmg = isCrit ? Math.floor(totalAtk * critMult) : totalAtk;
+    const finalDmg = isCrit ? Math.floor(totalAtk * critMult) : totalAtk;
     
     // Track total damage
     set(s => ({ totalDamageDealt: s.totalDamageDealt + finalDmg, comboTimer: Date.now() }));

@@ -19,7 +19,9 @@ import { GuildUI } from './GuildUI';
 import { BankUI } from './BankUI';
 import { PetCompanion } from './PetCompanion';
 import { LoginScreen } from './LoginScreen';
+import { TutorialScreen } from './TutorialScreen';
 import { useAccountStore } from '@/store/accountStore';
+import { useTutorialStore } from '@/store/tutorialStore';
 import { useGameStore } from '@/store/gameStore';
 import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
 import { playZoneMusic, playPortalSound } from '@/hooks/useSound';
@@ -189,6 +191,13 @@ export const GameScene = () => {
 
   if (!isLoggedIn) {
     return <LoginScreen onLogin={() => {}} />;
+  }
+
+  const seenTutorial = useTutorialStore(s => s.seenTutorial);
+  const markTutorialSeen = useTutorialStore(s => s.markTutorialSeen);
+
+  if (!seenTutorial && playerClass) {
+    return <TutorialScreen onComplete={markTutorialSeen} />;
   }
 
   if (!playerClass) {

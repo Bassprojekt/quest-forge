@@ -14,7 +14,7 @@ export const RainParticles = () => {
       const y = (Math.random() - 0.5) * 30;
       const z = (Math.random() - 0.5) * 40;
       
-      let pos = dummy.current.position;
+      const pos = dummy.current.position;
       pos.set(x, y, z);
       pos.y -= 0.3;
       if (pos.y < -15) pos.y = 15;

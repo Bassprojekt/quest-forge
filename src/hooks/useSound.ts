@@ -223,3 +223,56 @@ export function stopZoneMusic() {
     currentMusic = null;
   }
 }
+
+// Footstep sound
+export function playFootstep() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getVolumeMultiplier();
+  if (vol === 0) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(100 + Math.random() * 50, ctx.currentTime);
+  gain.gain.setValueAtTime(0.05 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.08);
+}
+
+// UI click sound
+export function playUIClick() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getVolumeMultiplier();
+  if (vol === 0) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(800, ctx.currentTime);
+  osc.frequency.setValueAtTime(600, ctx.currentTime + 0.05);
+  gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.1);
+}
+
+// Heal/Pickup sound
+export function playPickup() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getVolumeMultiplier();
+  if (vol === 0) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(400, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.15);
+  gain.gain.setValueAtTime(0.12 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.2);
+}
