@@ -45,6 +45,11 @@ export const HUD = () => {
   const setAutoRespawn = useGameStore(s => s.setAutoRespawn);
   const setPlayerPosition = useGameStore(s => s.setPlayerPosition);
   const playerLevel = useGameStore(s => s.playerLevel);
+  const comboCount = useGameStore(s => s.comboCount);
+  const comboTimer = useGameStore(s => s.comboTimer);
+  const totalKills = useGameStore(s => s.totalKills);
+  const totalGoldEarned = useGameStore(s => s.totalGoldEarned);
+  const totalDamageDealt = useGameStore(s => s.totalDamageDealt);
 
   const [showShop, setShowShop] = useState(false);
   const [shopTab, setShopTab] = useState<'items' | 'pets'>('items');
@@ -52,6 +57,8 @@ export const HUD = () => {
   const [showSkillTree, setShowSkillTree] = useState(false);
   const [showParty, setShowParty] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
 
   const language = useSettingsStore(s => s.language);
@@ -225,12 +232,23 @@ export const HUD = () => {
           <div className="text-gray-600 space-y-0.5">
             <div>Kills: <span className="font-bold text-gray-800">{enemies.filter(e => !e.alive).length}</span></div>
             <div>Zone: <span className="font-bold">{zoneFromPosInfo?.requiredLevel || 0}+</span></div>
+            {comboCount > 0 && (
+              <div className="text-orange-500 font-bold">🔥 Combo x{comboCount}</div>
+            )}
           </div>
         </div>
 
-        <button onClick={() => setShowSettings(true)} className="w-10 h-10 bg-white/90 backdrop-blur-md border-2 border-amber-200 rounded-xl flex items-center justify-center hover:bg-gray-100">
-          <span className="text-lg">⚙️</span>
-        </button>
+        <div className="flex gap-1">
+          <button onClick={() => setShowSettings(true)} className="w-10 h-10 bg-white/90 backdrop-blur-md border-2 border-amber-200 rounded-xl flex items-center justify-center hover:bg-gray-100">
+            <span className="text-lg">⚙️</span>
+          </button>
+          <button onClick={() => setShowAchievements(true)} className="w-10 h-10 bg-white/90 backdrop-blur-md border-2 border-amber-200 rounded-xl flex items-center justify-center hover:bg-gray-100">
+            <span className="text-lg">🏆</span>
+          </button>
+          <button onClick={() => setShowLeaderboard(true)} className="w-10 h-10 bg-white/90 backdrop-blur-md border-2 border-amber-200 rounded-xl flex items-center justify-center hover:bg-gray-100">
+            <span className="text-lg">📈</span>
+          </button>
+        </div>
         {activeQuests.length > 0 && (
           <div className="bg-white/90 backdrop-blur-md border-2 border-amber-200 rounded-2xl p-3 min-w-[200px]">
             <div className="text-orange-500 text-xs font-bold mb-2">📋 {t('quests')}</div>
@@ -359,6 +377,69 @@ export const HUD = () => {
         <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-green-500/80 backdrop-blur-sm px-3 py-2 rounded-xl animate-fade-in">
           <div className="animate-spin text-white">⚙️</div>
           <span className="text-white text-xs font-bold">Gespeichert!</span>
+        </div>
+      )}
+
+      {/* Achievements Window */}
+      {showAchievements && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 pointer-events-auto">
+          <div className="bg-white/95 backdrop-blur-md border-2 border-amber-300 rounded-2xl p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-amber-600 font-bold text-lg">🏆 Erfolge</h2>
+              <button onClick={() => setShowAchievements(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+            </div>
+            <div className="space-y-2">
+              <div className={`p-3 rounded-xl border-2 ${totalKills >= 10 ? 'border-green-400 bg-green-50' : 'border-gray-200'}`}>
+                <div className="font-bold text-sm">🎯 Erstelle 10 Kills</div>
+                <div className="text-xs text-gray-500">{totalKills} / 10</div>
+              </div>
+              <div className={`p-3 rounded-xl border-2 ${totalGoldEarned >= 1000 ? 'border-green-400 bg-green-50' : 'border-gray-200'}`}>
+                <div className="font-bold text-sm">💰 Verdiene 1000 Gold</div>
+                <div className="text-xs text-gray-500">{totalGoldEarned} / 1000</div>
+              </div>
+              <div className={`p-3 rounded-xl border-2 ${totalDamageDealt >= 10000 ? 'border-green-400 bg-green-50' : 'border-gray-200'}`}>
+                <div className="font-bold text-sm">⚔️ Teile 10000 Schaden aus</div>
+                <div className="text-xs text-gray-500">{totalDamageDealt} / 10000</div>
+              </div>
+              <div className={`p-3 rounded-xl border-2 ${playerLevel >= 10 ? 'border-green-400 bg-green-50' : 'border-gray-200'}`}>
+                <div className="font-bold text-sm">⬆️ Errreiche Level 10</div>
+                <div className="text-xs text-gray-500">{playerLevel} / 10</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Leaderboard Window */}
+      {showLeaderboard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 pointer-events-auto">
+          <div className="bg-white/95 backdrop-blur-md border-2 border-amber-300 rounded-2xl p-6 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-amber-600 font-bold text-lg">📈 Bestenliste</h2>
+              <button onClick={() => setShowLeaderboard(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-2 bg-amber-50 rounded-xl">
+                <span className="font-bold">Dein Level</span>
+                <span className="font-bold text-amber-600">{playerLevel}</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-amber-50 rounded-xl">
+                <span className="font-bold">Gesamt Kills</span>
+                <span className="font-bold text-amber-600">{totalKills}</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-amber-50 rounded-xl">
+                <span className="font-bold">Verdientes Gold</span>
+                <span className="font-bold text-amber-600">{totalGoldEarned}</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-amber-50 rounded-xl">
+                <span className="font-bold">Ausgeteilter Schaden</span>
+                <span className="font-bold text-amber-600">{totalDamageDealt}</span>
+              </div>
+              <div className="border-t pt-2 mt-2">
+                <div className="text-xs text-gray-500 text-center">Lokal gespeichert im Browser</div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
