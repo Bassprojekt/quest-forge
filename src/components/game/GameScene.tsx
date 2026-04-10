@@ -18,6 +18,8 @@ import { ShopUI } from './ShopUI';
 import { GuildUI } from './GuildUI';
 import { BankUI } from './BankUI';
 import { PetCompanion } from './PetCompanion';
+import { LoginScreen } from './LoginScreen';
+import { useAccountStore } from '@/store/accountStore';
 import { useGameStore } from '@/store/gameStore';
 import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
 import { playZoneMusic, playPortalSound } from '@/hooks/useSound';
@@ -177,6 +179,14 @@ export const GameScene = () => {
     }, 15000);
     return () => clearInterval(mpRegenInterval);
   }, [playerMana, playerMaxMana, setPlayerMana]);
+
+  const isLoggedIn = useAccountStore(s => s.isLoggedIn());
+  const currentUsername = useAccountStore(s => s.getCurrentUsername());
+  const logout = useAccountStore(s => s.logout);
+
+  if (!isLoggedIn) {
+    return <LoginScreen onLogin={() => {}} />;
+  }
 
   if (!playerClass) {
     return <ClassSelect />;
