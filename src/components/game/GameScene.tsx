@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { Player } from './Player';
 import { ThirdPersonCamera } from './ThirdPersonCamera';
 import { EnemyEntity } from './EnemyEntity';
-import { GameWorld, AllZonesWorld } from './GameWorld';
+import { GameWorld } from './GameWorld';
 import { HubBuildings } from './HubBuildings';
 import { NPCEntity } from './NPCEntity';
 import { TeleportNPC } from './TeleportNPC';
@@ -117,9 +117,12 @@ export const GameScene = () => {
   // Pet heal interval
   const playerHp = useGameStore(s => s.playerHp);
   const playerMaxHp = useGameStore(s => s.playerMaxHp);
+  const playerMana = useGameStore(s => s.playerMana);
+  const playerMaxMana = useGameStore(s => s.playerMaxMana);
   const playerPosition = useGameStore(s => s.playerPosition);
   const pets = useGameStore(s => s.pets);
   const setPlayerHp = useGameStore(s => s.setPlayerHp);
+  const setPlayerMana = useGameStore(s => s.setPlayerMana);
   const addDamagePopup = useGameStore(s => s.addDamagePopup);
   
   useEffect(() => {
@@ -134,12 +137,29 @@ export const GameScene = () => {
         position: playerPosition,
         amount: healPet.bonusValue,
         type: 'heal',
-        timestamp: Date.now(),
       });
     }, 5000);
     
     return () => clearInterval(healInterval);
   }, [pets, playerHp, playerMaxHp, playerPosition, setPlayerHp, addDamagePopup]);
+
+  // HP Regeneration (1 HP every 2 seconds when not full)
+  useEffect(() => {
+    if (playerHp >= playerMaxHp) return;
+    const hpRegenInterval = setInterval(() => {
+      setPlayerHp(Math.min(playerMaxHp, playerHp + 1));
+    }, 2000);
+    return () => clearInterval(hpRegenInterval);
+  }, [playerHp, playerMaxHp, setPlayerHp]);
+
+  // MP Regeneration (1 MP every 3 seconds when not full)
+  useEffect(() => {
+    if (playerMana >= playerMaxMana) return;
+    const mpRegenInterval = setInterval(() => {
+      setPlayerMana(Math.min(playerMaxMana, playerMana + 1));
+    }, 3000);
+    return () => clearInterval(mpRegenInterval);
+  }, [playerMana, playerMaxMana, setPlayerMana]);
 
   if (!playerClass) {
     return <ClassSelect />;
