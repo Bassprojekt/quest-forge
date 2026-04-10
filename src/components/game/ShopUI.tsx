@@ -2,14 +2,23 @@ import { useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
 
 type Tab = 'items' | 'pets';
+type ShopType = 'general' | 'weapons' | 'armor' | 'potions';
 
 interface Props {
   onClose: () => void;
   initialTab?: Tab;
+  shopType?: ShopType;
   showOnlyPets?: boolean;
 }
 
-export const ShopUI = ({ onClose, initialTab = 'items', showOnlyPets = false }: Props) => {
+const SHOP_TITLES: Record<ShopType, string> = {
+  general: '🏪 Laden',
+  weapons: '⚔️ Waffen-Schmied',
+  armor: '🛡️ Rüstungs-Schmied',
+  potions: '🧪 Apotheke',
+};
+
+export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', showOnlyPets = false }: Props) => {
   const [tab, setTab] = useState<Tab>(initialTab);
   const gold = useGameStore(s => s.playerGold);
   const shopItems = useGameStore(s => s.shopItems);
@@ -33,7 +42,7 @@ export const ShopUI = ({ onClose, initialTab = 'items', showOnlyPets = false }: 
       <div className="relative bg-white/95 backdrop-blur-md border-2 border-[#E0D5C0] rounded-2xl p-6 max-w-lg w-full mx-4"
         style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[#4169E1] font-bold text-lg">🏪 Laden</h2>
+          <h2 className="text-[#4169E1] font-bold text-lg">{SHOP_TITLES[shopType]}</h2>
           <div className="flex items-center gap-3">
             <span className="text-[#FF9800] text-sm font-bold">💰 {gold} Gold</span>
             <button onClick={onClose} className="text-[#AAA] hover:text-[#333] text-xl">✕</button>
@@ -58,11 +67,16 @@ export const ShopUI = ({ onClose, initialTab = 'items', showOnlyPets = false }: 
         </div>
 
         <div className="space-y-2 max-h-64 overflow-y-auto">
-          {tab === 'items' && shopItems.map(item => (
+          {tab === 'items' && shopItems.filter(item => {
+            if (shopType === 'weapons') return item.type === 'weapon';
+            if (shopType === 'armor') return item.type === 'armor';
+            if (shopType === 'potions') return item.type === 'potion';
+            return true;
+          }).map(item => (
             <div key={item.id} className="bg-[#F8F6F0] rounded-xl p-3 border border-[#E0D5C0] flex items-center justify-between">
               <div>
                 <div className="text-[#333] text-sm font-bold">{item.name}</div>
-                <div className="text-[#888] text-[10px]">{item.type === 'weapon' ? '⚔️' : '🛡️'} {item.stat}</div>
+                <div className="text-[#888] text-[10px]">{item.type === 'weapon' ? '⚔️' : item.type === 'armor' ? '🛡️' : '🧪'} {item.stat}</div>
               </div>
               <div>
                 {item.owned ? (

@@ -78,8 +78,11 @@ export const GameScene = () => {
     return TRANSLATIONS[language]?.[key] || TRANSLATIONS.de[key] || key;
   };
 
-  const handleOpenShop = useCallback((tab: 'items' | 'pets') => {
+  const [shopType, setShopType] = useState<'general' | 'weapons' | 'armor' | 'potions'>('general');
+
+  const handleOpenShop = useCallback((tab: 'items' | 'pets', type?: 'general' | 'weapons' | 'armor' | 'potions') => {
     setShopTab(tab);
+    if (type) setShopType(type);
     setShowShop(false);
     setTimeout(() => setShowShop(true), 0);
   }, []);
@@ -195,7 +198,7 @@ export const GameScene = () => {
   return (
     <div className="w-screen h-screen overflow-hidden">
       <TeleportDialog open={showTeleportDialog} onOpenChange={setShowTeleportDialog} />
-      {showShop && <ShopUI onClose={() => setShowShop(false)} initialTab={shopTab} />}
+      {showShop && <ShopUI onClose={() => setShowShop(false)} initialTab={shopTab} shopType={shopType} />}
       {showGuild && <GuildUI onClose={() => setShowGuild(false)} />}
       {showBank && <BankUI onClose={() => setShowBank(false)} />}
       <HUD />

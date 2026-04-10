@@ -272,7 +272,7 @@ const GLBFountain = () => {
   );
 };
 
-export const HubBuildings = ({ onOpenShop, onOpenGuild, onOpenBank }: { onOpenShop?: (tab: 'items' | 'pets') => void; onOpenGuild?: () => void; onOpenBank?: () => void }) => {
+export const HubBuildings = ({ onOpenShop, onOpenGuild, onOpenBank }: { onOpenShop?: (tab: 'items' | 'pets', shopType?: 'general' | 'weapons' | 'armor' | 'potions') => void; onOpenGuild?: () => void; onOpenBank?: () => void }) => {
 
   return (
     <group>
@@ -354,50 +354,9 @@ export const HubBuildings = ({ onOpenShop, onOpenGuild, onOpenBank }: { onOpenSh
           <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={0.3} />
         </mesh>
         {/* Waffen-NPC */}
-        <NPCWithBuilding name="Waffenhändler Erik" color="#CD853F" position={[0, 0, 3]} icon="⚔️" onClick={() => onOpenShop?.('items')} />
-      </group>
-
-      {/* Rüstungsladen - Osten */}
-      <group position={[20, 0, 20]}>
-        <mesh position={[0, 1.5, 0]} castShadow>
-          <boxGeometry args={[4, 3, 4]} />
-          <meshStandardMaterial color="#696969" roughness={0.7} />
-        </mesh>
-        <mesh position={[0, 3.2, 0]} castShadow>
-          <boxGeometry args={[4.5, 0.4, 4.5]} />
-          <meshStandardMaterial color="#808080" roughness={0.6} />
-        </mesh>
-        <mesh position={[0, 3.5, 0]} castShadow>
-          <boxGeometry args={[3, 0.6, 3]} />
-          <meshStandardMaterial color="#A9A9A9" roughness={0.7} />
-        </mesh>
-        <mesh position={[0, 2.5, 2.1]} castShadow>
-          <boxGeometry args={[1.5, 1, 0.1]} />
-          <meshStandardMaterial color="#4169E1" roughness={0.5} />
-        </mesh>
-        <mesh position={[0, 2.5, 2.15]}>
-          <boxGeometry args={[1.2, 0.7, 0.05]} />
-          <meshStandardMaterial color="#C0C0C0" metalness={0.8} roughness={0.3} />
-        </mesh>
-        <NPCWithBuilding name="Rüstungsmeisterin Greta" color="#808080" position={[0, 0, 3]} icon="🛡️" onClick={() => onOpenShop?.('items')} />
-      </group>
-
-      {/* Apotheke - Westen Nord */}
-      <group position={[-20, 0, -20]}>
-        <mesh position={[0, 1.2, 0]} castShadow>
-          <cylinderGeometry args={[2.5, 2.8, 2.4, 8]} />
-          <meshStandardMaterial color="#D2B48C" roughness={0.6} />
-        </mesh>
-        <mesh position={[0, 2.6, 0]} castShadow>
-          <coneGeometry args={[2.5, 1, 8]} />
-          <meshStandardMaterial color="#8B4513" roughness={0.7} />
-        </mesh>
-        <mesh position={[0, 2.8, 0]} castShadow>
-          <sphereGeometry args={[0.5, 8, 8]} />
-          <meshStandardMaterial color="#FF6347" emissive="#FF4500" emissiveIntensity={0.5} />
-        </mesh>
-        <pointLight position={[0, 2.8, 0]} color="#FF6347" intensity={1} distance={5} />
-        <NPCWithBuilding name="Apothekerin Flora" color="#D2B48C" position={[0, 0, 3]} icon="🧪" onClick={() => onOpenShop?.('items')} />
+<NPCWithBuilding name="Waffenhändler Erik" color="#CD853F" position={[0, 0, 3]} icon="⚔️" onClick={() => onOpenShop?.('items', 'weapons')} />
+        <NPCWithBuilding name="Rüstungsmeisterin Greta" color="#808080" position={[0, 0, 3]} icon="🛡️" onClick={() => onOpenShop?.('items', 'armor')} />
+        <NPCWithBuilding name="Apothekerin Flora" color="#D2B48C" position={[0, 0, 3]} icon="🧪" onClick={() => onOpenShop?.('items', 'potions')} />
       </group>
 
       {/* Bank/Lager - Osten Nord */}

@@ -43,7 +43,7 @@ export interface Pet {
 export interface ShopItem {
   id: string;
   name: string;
-  type: 'weapon' | 'armor';
+  type: 'weapon' | 'armor' | 'potion';
   stat: string;
   value: number;
   price: number;
@@ -260,6 +260,11 @@ const INITIAL_SHOP_ITEMS: ShopItem[] = [
   { id: 'arm-7', name: 'Schattenrüstung', type: 'armor', stat: '+50 DEF', value: 50, price: 1000, owned: false },
   { id: 'arm-8', name: 'Voidrüstung', type: 'armor', stat: '+70 DEF', value: 70, price: 1500, owned: false },
   { id: 'arm-9', name: 'Legendäre Rüstung', type: 'armor', stat: '+100 DEF', value: 100, price: 2500, owned: false },
+  { id: 'pot-1', name: 'Kleiner HP-Trank', type: 'potion', stat: '+30 HP', value: 30, price: 25, owned: false },
+  { id: 'pot-2', name: 'Mittlerer HP-Trank', type: 'potion', stat: '+80 HP', value: 80, price: 60, owned: false },
+  { id: 'pot-3', name: 'Großer HP-Trank', type: 'potion', stat: '+150 HP', value: 150, price: 120, owned: false },
+  { id: 'pot-4', name: 'Kleiner MP-Trank', type: 'potion', stat: '+20 MP', value: 20, price: 30, owned: false },
+  { id: 'pot-5', name: 'Mittlerer MP-Trank', type: 'potion', stat: '+50 MP', value: 50, price: 75, owned: false },
 ];
 
 const INITIAL_PETS: Pet[] = [
