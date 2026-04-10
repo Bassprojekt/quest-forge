@@ -10,6 +10,7 @@ import { TeleportNPC } from './TeleportNPC';
 import { TeleportDialog } from './TeleportDialog';
 import { LaserBeam } from './LaserBeam';
 import { HUD } from './HUD';
+import { RainParticles } from './RainParticles';
 import { DamageNumbers } from './DamageNumbers';
 import { HitParticles, LevelUpEffect } from './HitParticles';
 import { ClassSelect } from './ClassSelect';
@@ -56,9 +57,14 @@ export const GameScene = () => {
   const zoneEnemies = enemies.filter(e => e.zone === currentZone);
   const playerClass = useGameStore(s => s.playerClass);
   const weather = useGameStore(s => s.weather);
+  const timeOfDay = useGameStore(s => s.timeOfDay);
   const baseSkyColor = ZONE_SKY[currentZone] || '#87CEEB';
   const skyColor = weather === 'rainy' ? '#4A5568' : weather === 'foggy' ? '#9CA3AF' : baseSkyColor;
   const fogColor = WEATHER_FOG[weather] || '#000000';
+  
+  // Day/Night lighting adjustment
+  const isNight = timeOfDay < 0.25 || timeOfDay > 0.75;
+  const nightIntensity = isNight ? 0.3 : 1;
   const [showTeleportDialog, setShowTeleportDialog] = useState(false);
   const [shopTab, setShopTab] = useState<'items' | 'pets'>('items');
   const [showShop, setShowShop] = useState(false);
@@ -189,11 +195,11 @@ export const GameScene = () => {
         style={{ background: skyColor }}
         gl={{ antialias: false, toneMapping: 3, toneMappingExposure: 1.4 }}
       >
-        <ambientLight intensity={0.5} color="#FFF8E7" />
+        <ambientLight intensity={0.5 * nightIntensity} color={isNight ? '#1a1a3a' : '#FFF8E7'} />
         <directionalLight
           position={[30, 50, 20]}
-          intensity={1.5}
-          color="#FFF5D4"
+          intensity={1.5 * nightIntensity}
+          color={isNight ? '#6666aa' : '#FFF5D4'}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
@@ -208,6 +214,9 @@ export const GameScene = () => {
         <hemisphereLight color="#87CEEB" groundColor="#6B8E6B" intensity={0.6} />
         <pointLight position={[0, 10, 0]} intensity={0.3} color="#FFE4B5" distance={50} />
         <fog attach="fog" args={[fogColor, weather === 'sunny' ? 80 : weather === 'rainy' ? 40 : 30, weather === 'sunny' ? 120 : weather === 'rainy' ? 60 : 50]} />
+
+        {/* Rain particles when rainy */}
+        {weather === 'rainy' && <RainParticles />}
 
         <ThirdPersonCamera />
         <Player />
