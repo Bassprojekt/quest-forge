@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    --background: 210 40% 96%;
+    --foreground: 220 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 15%;
+
+    --primary: 210 80% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 320 70% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 20% 90%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 145 70% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 20% 82%;
+    --input: 210 20% 82%;
+    --ring: 210 80% 55%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 25% 15%;
+    --sidebar-primary: 210 80% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 92%;
+    --sidebar-accent-foreground: 220 25% 15%;
+    --sidebar-border: 210 20% 85%;
+    --sidebar-ring: 210 80% 55%;
+
+    /* Game specific tokens */
+    --health: 0 75% 55%;
+    --health-bg: 0 30% 85%;
+    --xp: 45 90% 55%;
+    --xp-bg: 45 40% 85%;
+    --energy: 145 70% 45%;
+    --glow-primary: 210 80% 55%;
+    --glow-accent: 320 70% 55%;
+    --zone-starter: 120 50% 45%;
+    --zone-forest: 150 60% 35%;
+    --zone-desert: 35 80% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Nunito', sans-serif;
+  }
+}

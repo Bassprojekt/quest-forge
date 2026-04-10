@@ -1,0 +1,810 @@
+import * as THREE from 'three';
+import React, { useMemo } from 'react';
+import { useGameStore, ZoneType, ZONES } from '@/store/gameStore';
+
+interface WorldTheme {
+  groundColor: string;
+  groundColor2?: string;
+  skyColor: string;
+}
+
+const WORLD_THEMES: Record<string, WorldTheme> = {
+  grasslands: { groundColor: '#6DBE6D', skyColor: '#7EC8E3' },
+  mushroom_forest: { groundColor: '#4A6B4A', skyColor: '#6B4A8B' },
+  frozen_peaks: { groundColor: '#D8E8F0', skyColor: '#A8D8EA' },
+  lava_caverns: { groundColor: '#4A3030', skyColor: '#FF6B35' },
+  coral_reef: { groundColor: '#5BA8A0', skyColor: '#40C4FF' },
+  shadow_swamp: { groundColor: '#3A4A3A', skyColor: '#4A5A5A' },
+  crystal_highlands: { groundColor: '#B8D0E0', skyColor: '#E0F0FF' },
+  void_nexus: { groundColor: '#1A0A2A', skyColor: '#2A0A4A' },
+};
+
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed * 9999) * 10000;
+  return x - Math.floor(x);
+};
+
+const generatePositions = (count: number, range: number, seedBase: number): [number, number, number][] => {
+  const positions: [number, number, number][] = [];
+  for (let i = 0; i < count; i++) {
+    const seed = seedBase + i * 123.456;
+    positions.push([
+      (seededRandom(seed) - 0.5) * range,
+      0,
+      (seededRandom(seed + 789) - 0.5) * range,
+    ]);
+  }
+  return positions;
+};
+
+const generateScaledPositions = (count: number, range: number, seedBase: number): { pos: [number, number, number]; scale: number }[] => {
+  const results: { pos: [number, number, number]; scale: number }[] = [];
+  for (let i = 0; i < count; i++) {
+    const seed = seedBase + i * 456.789;
+    results.push({
+      pos: [
+        (seededRandom(seed) - 0.5) * range,
+        0,
+        (seededRandom(seed + 321) - 0.5) * range,
+      ],
+      scale: 0.5 + seededRandom(seed + 654) * 0.5,
+    });
+  }
+  return results;
+};
+
+const ReturnPortal = () => {
+  const setPlayerPosition = useGameStore(s => s.setPlayerPosition);
+  return (
+    <group position={[0, 0, -5]} onClick={() => setPlayerPosition([0, 0, 0])}>
+      <mesh position={[0, 0.15, 0]} castShadow>
+        <cylinderGeometry args={[2, 2.5, 0.3, 16]} />
+        <meshStandardMaterial color="#D2B48C" roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 2, 0]}>
+        <torusGeometry args={[1.5, 0.12, 12, 24]} />
+        <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={1.5} metalness={0.7} roughness={0.2} />
+      </mesh>
+      <mesh position={[0, 2, 0]}>
+        <circleGeometry args={[1.3, 24]} />
+        <meshStandardMaterial color="#FFD700" emissive="#FFE082" emissiveIntensity={0.5} transparent opacity={0.3} side={THREE.DoubleSide} />
+      </mesh>
+      <pointLight position={[0, 2, 0]} color="#FFD700" intensity={3} distance={8} />
+    </group>
+  );
+};
+
+const Flower = ({ position, color, scale = 1 }: { position: [number, number, number]; color: string; scale?: number }) => (
+  <group position={position} scale={scale}>
+    <mesh position={[0, 0.15, 0]} castShadow>
+      <cylinderGeometry args={[0.03, 0.04, 0.3, 6]} />
+      <meshStandardMaterial color="#2E7D32" roughness={0.8} />
+    </mesh>
+    <mesh position={[0, 0.32, 0]} castShadow>
+      <sphereGeometry args={[0.1, 8, 6]} />
+      <meshStandardMaterial color={color} roughness={0.5} />
+    </mesh>
+    <mesh position={[0, 0.32, 0]}>
+      <sphereGeometry args={[0.05, 6, 6]} />
+      <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={0.3} />
+    </mesh>
+  </group>
+);
+
+const Bush = ({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) => (
+  <group position={position} scale={scale}>
+    <mesh position={[0, 0.4, 0]} castShadow>
+      <sphereGeometry args={[0.6, 8, 6]} />
+      <meshStandardMaterial color="#228B22" roughness={0.9} />
+    </mesh>
+    <mesh position={[0.3, 0.5, 0.2]} castShadow>
+      <sphereGeometry args={[0.4, 6, 6]} />
+      <meshStandardMaterial color="#2E8B57" roughness={0.9} />
+    </mesh>
+    <mesh position={[-0.25, 0.35, -0.15]} castShadow>
+      <sphereGeometry args={[0.35, 6, 6]} />
+      <meshStandardMaterial color="#3CB371" roughness={0.9} />
+    </mesh>
+  </group>
+);
+
+const Rock = ({ position, scale = 1, color = '#696969' }: { position: [number, number, number]; scale?: number; color?: string }) => (
+  <group position={position} scale={scale}>
+    <mesh position={[0, 0.3, 0]} rotation={[0, Math.random() * 0.5, 0]} castShadow>
+      <boxGeometry args={[0.8, 0.6, 0.7]} />
+      <meshStandardMaterial color={color} roughness={0.95} />
+    </mesh>
+    <mesh position={[0.25, 0.55, 0.1]} rotation={[0.2, 0.3, 0.1]} castShadow>
+      <boxGeometry args={[0.4, 0.35, 0.35]} />
+      <meshStandardMaterial color={color} roughness={0.95} />
+    </mesh>
+  </group>
+);
+
+const MushroomTree = ({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) => (
+  <group position={position} scale={scale}>
+    <mesh position={[0, 1.5, 0]} castShadow>
+      <cylinderGeometry args={[0.3, 0.4, 3, 8]} />
+      <meshStandardMaterial color="#8B4513" roughness={0.9} />
+    </mesh>
+    <mesh position={[0, 3.5, 0]} castShadow>
+      <sphereGeometry args={[1.5, 10, 8]} />
+      <meshStandardMaterial color="#DEB887" roughness={0.7} />
+    </mesh>
+    <mesh position={[0.8, 3.8, 0.5]} castShadow>
+      <sphereGeometry args={[0.6, 8, 6]} />
+      <meshStandardMaterial color="#FF6347" roughness={0.6} />
+    </mesh>
+    <mesh position={[-0.7, 4, -0.4]} castShadow>
+      <sphereGeometry args={[0.5, 8, 6]} />
+      <meshStandardMaterial color="#FFA07A" roughness={0.6} />
+    </mesh>
+  </group>
+);
+
+const Crystal = ({ position }: { position: [number, number, number] }) => (
+  <group position={position}>
+    <mesh position={[0, 1, 0]} castShadow>
+      <coneGeometry args={[0.3, 2, 6]} />
+      <meshStandardMaterial color="#00BCD4" emissive="#00BCD4" emissiveIntensity={0.3} roughness={0.2} metalness={0.5} />
+    </mesh>
+    <pointLight position={[0, 1.5, 0]} color="#00E5FF" intensity={0.5} distance={3} />
+  </group>
+);
+
+const LavaRock = ({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) => (
+  <group position={position} scale={scale}>
+    <mesh position={[0, 0.4, 0]} castShadow>
+      <dodecahedronGeometry args={[0.8, 0]} />
+      <meshStandardMaterial color="#4A2020" roughness={0.9} />
+    </mesh>
+    <mesh position={[0.3, 0.6, 0.2]}>
+      <sphereGeometry args={[0.2, 8, 8]} />
+      <meshStandardMaterial color="#FF4500" emissive="#FF4500" emissiveIntensity={0.8} />
+    </mesh>
+  </group>
+);
+
+const Coral = ({ position, color }: { position: [number, number, number]; color: string }) => (
+  <group position={position}>
+    <mesh position={[0, 0.8, 0]} castShadow>
+      <cylinderGeometry args={[0.15, 0.3, 1.6, 8]} />
+      <meshStandardMaterial color={color} roughness={0.6} />
+    </mesh>
+    <mesh position={[0.2, 1.4, 0.1]} castShadow>
+      <cylinderGeometry args={[0.1, 0.2, 1, 6]} />
+      <meshStandardMaterial color={color} roughness={0.5} />
+    </mesh>
+  </group>
+);
+
+const Hill = ({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) => (
+  <group position={position} scale={scale}>
+    <mesh position={[0, 1.5, 0]} castShadow>
+      <sphereGeometry args={[3, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
+      <meshStandardMaterial color="#5D8A5D" roughness={0.9} />
+    </mesh>
+    <mesh position={[0, 2.5, 0]} castShadow>
+      <sphereGeometry args={[2, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2]} />
+      <meshStandardMaterial color="#6B8E6B" roughness={0.9} />
+    </mesh>
+  </group>
+);
+
+const Pond = ({ position }: { position: [number, number, number] }) => (
+  <group position={position}>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+      <circleGeometry args={[4, 24]} />
+      <meshStandardMaterial color="#4A90A4" roughness={0.2} metalness={0.3} />
+    </mesh>
+  </group>
+);
+
+const FrozenPeaksWorld = () => (
+  <group>
+    {/* Ground */}
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]} receiveShadow>
+      <planeGeometry args={[300, 300]} />
+      <meshStandardMaterial color="#D8E8F0" />
+    </mesh>
+    {/* Große schneebedeckte Berge */}
+    {[
+      [35, 0, 30], [-40, 0, 35], [45, 0, -25], [-45, 0, -30], [50, 0, 40],
+      [-50, 0, 20], [30, 0, -45], [-35, 0, -40], [55, 0, -10], [-55, 0, 10],
+    ].map(([x, , z], i) => (
+      <group key={`peak-${i}`} position={[x, 0, z]}>
+        <mesh position={[0, 5 + i * 0.8, 0]} castShadow>
+          <coneGeometry args={[5 + i * 0.6, 10 + i * 2.5, 8]} />
+          <meshStandardMaterial color="#E8F0F8" roughness={0.25} />
+        </mesh>
+        <mesh position={[0, 8 + i * 1.2, 0]} castShadow>
+          <coneGeometry args={[3 + i * 0.4, 5 + i * 1.2, 8]} />
+          <meshStandardMaterial color="#FFFFFF" metalness={0.1} roughness={0.15} />
+        </mesh>
+        <mesh position={[1.5, 3 + i * 0.5, 1]} castShadow>
+          <coneGeometry args={[1, 2, 5]} />
+          <meshStandardMaterial color="#B8C8D0" roughness={0.4} />
+        </mesh>
+      </group>
+    ))}
+    {/* Pinien-Wälder */}
+    {Array.from({ length: 35 }, (_, i) => (
+      <group key={`pinetree-${i}`} position={[(Math.random() - 0.5) * 80, 0, (Math.random() - 0.5) * 80]} scale={0.8 + Math.random() * 0.6}>
+        <mesh position={[0, 1.5, 0]} castShadow>
+          <cylinderGeometry args={[0.2, 0.25, 3, 6]} />
+          <meshStandardMaterial color="#5C4033" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 4, 0]} castShadow>
+          <coneGeometry args={[1.8, 3.5, 7]} />
+          <meshStandardMaterial color="#E8F4FF" roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 5.5, 0]} castShadow>
+          <coneGeometry args={[1.3, 2.5, 7]} />
+          <meshStandardMaterial color="#F0F8FF" roughness={0.6} />
+        </mesh>
+      </group>
+    ))}
+    {/* Eisformationen */}
+    {[
+      [20, 0, 15], [-25, 0, 20], [30, 0, -20], [-15, 0, -25],
+    ].map(([x, , z], i) => (
+      <group key={`ice-${i}`} position={[x, 0, z]}>
+        <mesh position={[0, 2, 0]} rotation={[0, i * 0.8, 0]} castShadow>
+          <boxGeometry args={[0.8, 4, 0.6]} />
+          <meshStandardMaterial color="#B0E0E6" transparent opacity={0.7} roughness={0.1} metalness={0.5} />
+        </mesh>
+        <pointLight position={[0, 3, 0]} color="#B0E0E6" intensity={1} distance={5} />
+      </group>
+    ))}
+    {/* Schneeverwehungen */}
+    {Array.from({ length: 20 }, (_, i) => (
+      <mesh key={`snow-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[(Math.random() - 0.5) * 70, 0.03, (Math.random() - 0.5) * 70]}>
+        <circleGeometry args={[2 + Math.random() * 2, 12]} />
+        <meshStandardMaterial color="#FFFAFA" roughness={0.9} />
+      </mesh>
+    ))}
+    <ReturnPortal />
+  </group>
+);
+
+const LavaCavernsWorld = () => (
+  <group>
+    {/* Lava-Flüsse */}
+    {[
+      [25, 0, 20], [-30, 0, 25], [35, 0, -15], [-25, 0, -30], [15, 0, -35],
+      [-40, 0, 10], [40, 0, -25], [-20, 0, 35],
+    ].map(([x, , z], i) => (
+      <mesh key={`lava-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.03, z]}>
+        <circleGeometry args={[4 + (i % 3), 20]} />
+        <meshStandardMaterial color="#FF4500" emissive="#FF4500" emissiveIntensity={1.2} transparent opacity={0.75} />
+      </mesh>
+    ))}
+    {/* Vulkane */}
+    {[
+      [50, 0, 40], [-55, 0, 45], [60, 0, -35], [-60, 0, -40],
+    ].map(([x, , z], i) => (
+      <group key={`volcano-${i}`} position={[x, 0, z]}>
+        <mesh position={[0, 4, 0]} castShadow>
+          <coneGeometry args={[5, 8, 8]} />
+          <meshStandardMaterial color="#2A2020" roughness={0.95} />
+        </mesh>
+        <mesh position={[0, 8.5, 0]} castShadow>
+          <coneGeometry args={[2.5, 3, 8]} />
+          <meshStandardMaterial color="#FF4500" emissive="#FF4500" emissiveIntensity={1.5} />
+        </mesh>
+        <pointLight position={[0, 9, 0]} color="#FF4500" intensity={3} distance={15} />
+      </group>
+    ))}
+    {/* Felsformationen */}
+    {Array.from({ length: 40 }, (_, i) => (
+      <group key={`rock-${i}`} position={[(Math.random() - 0.5) * 90, 0, (Math.random() - 0.5) * 90]}>
+        <mesh position={[0, 1 + Math.random() * 2, 0]} castShadow>
+          <coneGeometry args={[1 + Math.random(), 2 + Math.random() * 3, 5 + Math.floor(Math.random() * 3)]} />
+          <meshStandardMaterial color={['#3A2020', '#2F1F1F', '#4A3030', '#352525'][i % 4]} roughness={0.95} />
+        </mesh>
+      </group>
+    ))}
+    {/* Lava-Lichter */}
+    {Array.from({ length: 25 }, (_, i) => (
+      <pointLight key={`fl-${i}`} position={[(Math.random() - 0.5) * 60, 0.5, (Math.random() - 0.5) * 60]} color="#FF4500" intensity={2} distance={10} />
+    ))}
+    {/* Glutseen */}
+    {[
+      [-45, 0, 30], [45, 0, -30],
+    ].map(([x, , z], i) => (
+      <mesh key={`glowpool-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.05, z]}>
+        <circleGeometry args={[6, 24]} />
+        <meshStandardMaterial color="#FF6347" emissive="#FF4500" emissiveIntensity={0.8} transparent opacity={0.6} />
+      </mesh>
+    ))}
+    <ReturnPortal />
+  </group>
+);
+
+const CoralReefWorld = () => (
+  <group>
+    {/* Riff-Strukturen */}
+    {Array.from({ length: 25 }, (_, i) => (
+      <group key={`coral-${i}`} position={[(Math.random() - 0.5) * 80, 0, (Math.random() - 0.5) * 80]}>
+        <mesh position={[0, 1 + Math.random() * 0.5, 0]} castShadow>
+          <cylinderGeometry args={[0.15, 0.35, 2 + Math.random(), 8]} />
+          <meshStandardMaterial color={['#FF69B4', '#FF6347', '#E91E63', '#FF4081', '#00BCD4', '#FF9800'][i % 6]} roughness={0.6} />
+        </mesh>
+        <mesh position={[0.3 * Math.random(), 1.8 + Math.random() * 0.5, 0.2 * Math.random()]} castShadow>
+          <cylinderGeometry args={[0.1, 0.25, 1.5, 6]} />
+          <meshStandardMaterial color={['#FFB6C1', '#FFA07A', '#FF80AB', '#4DD0E1'][i % 4]} roughness={0.5} />
+        </mesh>
+      </group>
+    ))}
+    {/* Korallenbäume */}
+    {[
+      [30, 0, 25], [-35, 0, 30], [40, 0, -20], [-40, 0, -25], [25, 0, -35],
+      [-30, 0, 35], [45, 0, 35], [-45, 0, 15],
+    ].map(([x, , z], i) => (
+      <group key={`bigcoral-${i}`} position={[x, 0, z]}>
+        <mesh position={[0, 2, 0]} castShadow>
+          <cylinderGeometry args={[0.3, 0.5, 4, 10]} />
+          <meshStandardMaterial color={['#FF69B4', '#E91E63', '#FF4081', '#9C27B0'][i % 4]} roughness={0.5} />
+        </mesh>
+        <mesh position={[0.5, 3.5, 0.3]} castShadow>
+          <sphereGeometry args={[0.8, 10, 10]} />
+          <meshStandardMaterial color={['#FFB6C1', '#F8BBD0', '#F48FB1'][i % 3]} roughness={0.4} />
+        </mesh>
+        <mesh position={[-0.4, 3, -0.2]} castShadow>
+          <sphereGeometry args={[0.6, 8, 8]} />
+          <meshStandardMaterial color={['#FF69B4', '#E91E63', '#FF4081'][i % 3]} roughness={0.4} />
+        </mesh>
+      </group>
+    ))}
+    {/* Unterwasser-Sanddünen */}
+    {Array.from({ length: 15 }, (_, i) => (
+      <mesh key={`dune-${i}`} rotation={[-Math.PI / 2, 0, Math.random() * 0.5]} position={[(Math.random() - 0.5) * 70, 0.02, (Math.random() - 0.5) * 70]}>
+        <circleGeometry args={[3 + Math.random() * 3, 16]} />
+        <meshStandardMaterial color="#C2B280" roughness={0.8} />
+      </mesh>
+    ))}
+    {/* Luftblasen (statisch) */}
+    {Array.from({ length: 20 }, (_, i) => (
+      <mesh key={`bubble-${i}`} position={[(Math.random() - 0.5) * 60, 1 + Math.random() * 4, (Math.random() - 0.5) * 60]}>
+        <sphereGeometry args={[0.2 + Math.random() * 0.15, 10, 10]} />
+        <meshStandardMaterial color="#FFFFFF" transparent opacity={0.35} roughness={0.1} />
+      </mesh>
+    ))}
+    {/* Leuchtquallen */}
+    {Array.from({ length: 10 }, (_, i) => (
+      <group key={`jelly-${i}`} position={[(Math.random() - 0.5) * 70, 1 + Math.random() * 2, (Math.random() - 0.5) * 70]}>
+        <mesh position={[0, 0, 0]} castShadow>
+          <sphereGeometry args={[0.5, 12, 12]} />
+          <meshStandardMaterial color={['#FF69B4', '#00BCD4', '#E91E63', '#9C27B0'][i % 4]} transparent opacity={0.6} roughness={0.3} />
+        </mesh>
+        <mesh position={[0, -0.4, 0]}>
+          <cylinderGeometry args={[0.15, 0.05, 0.8, 8]} />
+          <meshStandardMaterial color="#FFFFFF" transparent opacity={0.4} />
+        </mesh>
+        <pointLight position={[0, 0, 0]} color={['#FF69B4', '#00BCD4', '#E91E63', '#9C27B0'][i % 4]} intensity={0.8} distance={5} />
+      </group>
+    ))}
+    <ReturnPortal />
+  </group>
+);
+
+const ShadowSwampWorld = () => (
+  <group>
+    {/* Sumpflöcher */}
+    {Array.from({ length: 25 }, (_, i) => (
+      <mesh key={`swamp-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[(Math.random() - 0.5) * 80, 0.02, (Math.random() - 0.5) * 80]}>
+        <circleGeometry args={[2.5 + Math.random() * 4, 16]} />
+        <meshStandardMaterial color="#2A3A2A" transparent opacity={0.75} roughness={0.3} />
+      </mesh>
+    ))}
+    {/* Zombie-Bäume */}
+    {[
+      [40, 0, 35], [-45, 0, 40], [50, 0, -30], [-50, 0, -35], [35, 0, -45],
+      [-40, 0, 30], [55, 0, 20], [-55, 0, -20], [45, 0, 45], [-35, 0, -50],
+    ].map(([x, , z], i) => (
+      <group key={`dtree-${i}`} position={[x, 0, z]}>
+        <mesh position={[0, 3, 0]} castShadow>
+          <cylinderGeometry args={[0.4, 0.5, 6, 8]} />
+          <meshStandardMaterial color="#2A2A2A" roughness={0.95} />
+        </mesh>
+        <mesh position={[0, 6.5, 0]} castShadow>
+          <sphereGeometry args={[2.2, 10, 10]} />
+          <meshStandardMaterial color="#1A1A1A" roughness={0.95} />
+        </mesh>
+        <mesh position={[0.5, 5, 0.3]} rotation={[0, 0, -0.4]} castShadow>
+          <cylinderGeometry args={[0.15, 0.2, 2, 6]} />
+          <meshStandardMaterial color="#1A1A1A" roughness={0.9} />
+        </mesh>
+      </group>
+    ))}
+    {/* Pilze im Sumpf */}
+    {Array.from({ length: 30 }, (_, i) => (
+      <group key={`swampmush-${i}`} position={[(Math.random() - 0.5) * 70, 0, (Math.random() - 0.5) * 70]}>
+        <mesh position={[0, 0.5, 0]} castShadow>
+          <cylinderGeometry args={[0.08, 0.12, 1, 6]} />
+          <meshStandardMaterial color="#4A3728" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 1.1, 0]}>
+          <sphereGeometry args={[0.2, 8, 8]} />
+          <meshStandardMaterial color={['#556B2F', '#6B8E23', '#8FBC8F'][i % 3]} emissive={['#556B2F', '#6B8E23', '#8FBC8F'][i % 3]} emissiveIntensity={0.2} />
+        </mesh>
+      </group>
+    ))}
+    {/* Nebel-Lichter */}
+    {Array.from({ length: 15 }, (_, i) => (
+      <pointLight key={`fog-${i}`} position={[(Math.random() - 0.5) * 60, 0.5, (Math.random() - 0.5) * 60]} color="#4AFF4A" intensity={1.2} distance={8} />
+    ))}
+    {/* Schatten-Steine */}
+    {Array.from({ length: 20 }, (_, i) => (
+      <Rock key={`shadowrock-${i}`} position={[(Math.random() - 0.5) * 70, 0, (Math.random() - 0.5) * 70]} scale={0.6 + Math.random() * 0.8} color="#2F2F2F" />
+    ))}
+    <ReturnPortal />
+  </group>
+);
+
+const CrystalHighlandsWorld = () => {
+  const crystalPositions = useMemo(() => generateScaledPositions(20, 60, 6000), []);
+  
+  return (
+    <group>
+      {/* Einzelne große Kristalle */}
+      {[
+        [25, 0, 20], [-30, 0, 25], [35, 0, -15], [-35, 0, -20], [20, 0, -30],
+        [-25, 0, 30], [40, 0, 25], [-40, 0, -25], [30, 0, 35], [-30, 0, -35],
+      ].map(([x, , z], i) => (
+        <group key={`crystal-${i}`} position={[x, 0, z]} rotation={[0, i * 0.6, 0.1 + (i % 3) * 0.05]}>
+          <mesh position={[0, 2 + i * 0.3, 0]} castShadow>
+            <octahedronGeometry args={[1.2 + (i % 4) * 0.3, 1]} />
+            <meshStandardMaterial
+              color={['#00E5FF', '#E040FB', '#00BFA5', '#448AFF', '#FFD700'][i % 5]}
+              emissive={['#00E5FF', '#E040FB', '#00BFA5', '#448AFF', '#FFD700'][i % 5]}
+              emissiveIntensity={0.6}
+              metalness={0.85}
+              roughness={0.08}
+              transparent
+              opacity={0.85}
+            />
+          </mesh>
+          <mesh position={[0.3, 1 + i * 0.2, 0.2]} castShadow>
+            <octahedronGeometry args={[0.6, 0]} />
+            <meshStandardMaterial
+              color={['#00E5FF', '#E040FB', '#00BFA5'][i % 3]}
+              emissive={['#00E5FF', '#E040FB', '#00BFA5'][i % 3]}
+              emissiveIntensity={0.4}
+              metalness={0.9}
+              roughness={0.1}
+            />
+          </mesh>
+          <pointLight position={[0, 2.5, 0]} color={['#00E5FF', '#E040FB', '#00BFA5', '#448AFF'][i % 4]} intensity={1.5} distance={8} />
+        </group>
+      ))}
+      {/* Kristall-Säulen */}
+      {[
+        [50, 0, 40], [-55, 0, 45], [55, 0, -35], [-50, 0, -40],
+      ].map(([x, , z], i) => (
+        <group key={`bigcrystal-${i}`} position={[x, 0, z]}>
+          <mesh position={[0, 4, 0]} castShadow>
+            <cylinderGeometry args={[0.5, 0.8, 8, 8]} />
+            <meshStandardMaterial color="#B8D8E8" metalness={0.7} roughness={0.2} />
+          </mesh>
+          <mesh position={[0, 8.5, 0]} castShadow>
+            <octahedronGeometry args={[1, 0]} />
+            <meshStandardMaterial color="#FFFFFF" emissive="#E0F7FA" emissiveIntensity={0.3} metalness={0.9} roughness={0.1} />
+          </mesh>
+        </group>
+      ))}
+      {/* Zufällige kleine Kristalle */}
+      {crystalPositions.map((item, i) => (
+        <Crystal key={`crystal-random-${i}`} position={item.pos} />
+      ))}
+      {/* Funkelnde Partikel am Boden */}
+      {Array.from({ length: 30 }, (_, i) => (
+        <mesh key={`sparkle-${i}`} position={[(Math.random() - 0.5) * 80, 0.1, (Math.random() - 0.5) * 80]}>
+          <sphereGeometry args={[0.08, 6, 6]} />
+          <meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={1.5} transparent opacity={0.7} />
+      </mesh>
+    ))}
+    <ReturnPortal />
+  </group>
+);
+
+const VoidNexusWorld = () => {
+  return (
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
+        <planeGeometry args={[200, 200]} />
+        <meshStandardMaterial color="#1A0A2A" />
+      </mesh>
+      {/* Void-Portale */}
+      {[
+        [40, 0, 35], [-45, 0, 40], [50, 0, -30], [-50, 0, -35], [35, 0, -45],
+        [-40, 0, 30], [55, 0, 20], [-55, 0, -20],
+      ].map(([x, , z], i) => (
+        <group key={`obelisk-${i}`} position={[x, 0, z]}>
+        <mesh position={[0, 4, 0]} castShadow>
+          <boxGeometry args={[0.6, 8, 0.6]} />
+          <meshStandardMaterial color="#2A1A3A" emissive="#4A148C" emissiveIntensity={0.6} metalness={0.5} roughness={0.3} />
+        </mesh>
+        <mesh position={[0, 8.5, 0]} castShadow>
+          <torusGeometry args={[0.8, 0.15, 8, 16]} />
+          <meshStandardMaterial color="#7B1FA2" emissive="#7B1FA2" emissiveIntensity={1.5} metalness={0.8} roughness={0.2} />
+        </mesh>
+        <mesh position={[0, 8.5, 0]}>
+          <circleGeometry args={[0.6, 16]} />
+          <meshStandardMaterial color="#4A148C" emissive="#7B1FA2" emissiveIntensity={1} transparent opacity={0.5} side={THREE.DoubleSide} />
+        </mesh>
+        <pointLight position={[0, 8, 0]} color="#7B1FA2" intensity={3} distance={12} />
+      </group>
+    ))}
+    {/* Schwebende Void-Kugeln */}
+    {Array.from({ length: 30 }, (_, i) => (
+      <mesh key={`void-${i}`} position={[(Math.random() - 0.5) * 90, 2 + Math.random() * 10, (Math.random() - 0.5) * 90]}>
+        <sphereGeometry args={[0.4 + Math.random() * 0.5, 10, 10]} />
+        <meshStandardMaterial
+          color="#7B1FA2"
+          emissive="#7B1FA2"
+          emissiveIntensity={2.5}
+          transparent
+          opacity={0.45}
+        />
+      </mesh>
+    ))}
+    {/* Void-Blumen (unheimlich) */}
+    {[
+      [20, 0, 15], [-25, 0, 20], [30, 0, -20], [-15, 0, -25], [25, 0, 25], [-30, 0, 10],
+    ].map(([x, , z], i) => (
+      <group key={`voidflower-${i}`} position={[x, 0, z]}>
+        <mesh position={[0, 0.8, 0]} castShadow>
+          <cylinderGeometry args={[0.05, 0.08, 1.6, 6]} />
+          <meshStandardMaterial color="#1A1A2A" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 1.7, 0]}>
+          <sphereGeometry args={[0.2, 10, 8]} />
+          <meshStandardMaterial color={['#7B1FA2', '#4A148C', '#9C27B0', '#E040FB'][i % 4]} emissive={['#7B1FA2', '#4A148C', '#9C27B0', '#E040FB'][i % 4]} emissiveIntensity={0.8} transparent opacity={0.7} />
+        </mesh>
+        <pointLight position={[0, 1.7, 0]} color={['#7B1FA2', '#4A148C', '#9C27B0', '#E040FB'][i % 4]} intensity={0.5} distance={4} />
+      </group>
+    ))}
+    {/* Risse im Boden */}
+    {Array.from({ length: 15 }, (_, i) => (
+      <mesh key={`crack-${i}`} rotation={[-Math.PI / 2, 0, Math.random() * Math.PI]} position={[(Math.random() - 0.5) * 70, 0.01, (Math.random() - 0.5) * 70]}>
+        <planeGeometry args={[2 + Math.random() * 3, 0.3]} />
+        <meshStandardMaterial color="#0A0010" transparent opacity={0.8} />
+      </mesh>
+    ))}
+    <ReturnPortal />
+  </group>
+);
+
+const MushroomForestWorld = () => {
+  const bushPositions = useMemo(() => generateScaledPositions(30, 60, 1000), []);
+  const rockPositions = useMemo(() => generateScaledPositions(20, 50, 2000), []);
+  const flowerPositions = useMemo(() => generateScaledPositions(40, 60, 3000), []);
+  const treePositions = useMemo(() => generateScaledPositions(10, 50, 4000), []);
+  const mushroomTreePositions = useMemo(() => generateScaledPositions(15, 60, 5000), []);
+  
+  return (
+    <group>
+      {/* Pilz-Bäume (einzigartig für Pilzwald) */}
+      {mushroomTreePositions.map((item, i) => (
+        <MushroomTree key={`mushroom-tree-${i}`} position={item.pos} scale={item.scale} />
+      ))}
+      {/* Hügel im Hintergrund */}
+      {[
+        [60, 0, 40], [-70, 0, 60], [80, 0, -30], [-60, 0, -50], [40, 0, 80], [-40, 0, -80],
+      ].map(([x, , z], i) => (
+        <Hill key={`hill-${i}`} position={[x, 0, z]} scale={1.5 + (i % 3) * 0.5} />
+      ))}
+      {/* Große Bäume */}
+      {[
+        [25, 0, 25], [-20, 0, 18], [30, 0, -15], [-28, 0, -25], [15, 0, -30],
+        [-35, 0, 8], [40, 0, 5], [-12, 0, 35], [35, 0, 28], [-30, 0, -12],
+        [50, 0, -20], [-45, 0, 25], [20, 0, 45], [-55, 0, -15], [45, 0, 35],
+      ].map(([x, , z], i) => (
+        <group key={`tree-${i}`} position={[x, 0, z]}>
+          <mesh position={[0, 2, 0]} castShadow>
+            <cylinderGeometry args={[0.4, 0.5, 4, 10]} />
+            <meshStandardMaterial color="#8B6914" roughness={0.9} />
+          </mesh>
+          <mesh position={[0, 4.5, 0]} castShadow>
+            <sphereGeometry args={[2, 12, 12]} />
+            <meshStandardMaterial color="#228B22" roughness={0.8} />
+          </mesh>
+        </group>
+      ))}
+      {/* Büsche */}
+      {bushPositions.map((item, i) => (
+        <Bush key={`bush-${i}`} position={item.pos} scale={item.scale} />
+      ))}
+      {/* Felsen */}
+      {rockPositions.map((item, i) => (
+        <Rock key={`rock-${i}`} position={item.pos} scale={item.scale} />
+      ))}
+      {/* Teiche */}
+      {[
+        [35, 0, -35], [-40, 0, 30], [50, 0, 50], [-55, 0, -40],
+      ].map(([x, , z], i) => (
+        <Pond key={`pond-${i}`} position={[x, 0, z]} />
+      ))}
+      {/* Blumenwiesen */}
+      {flowerPositions.map((item, i) => (
+        <Flower key={`flower-${i}`} position={item.pos} color={['#FF69B4', '#FFD700', '#FF6347', '#FF1493', '#DA70D6', '#FFA500'][i % 6]} scale={0.6 + (i % 4) * 0.1} />
+      ))}
+      {/* Wegweiser-Laternen */}
+      {[
+        [15, 0, 0], [-15, 0, 0], [0, 0, 15], [0, 0, -15],
+      ].map(([x, , z], i) => (
+        <group key={`lamp-${i}`} position={[x, 0, z]}>
+          <mesh position={[0, 1.5, 0]} castShadow>
+            <cylinderGeometry args={[0.08, 0.1, 3, 8]} />
+            <meshStandardMaterial color="#4A4A4A" metalness={0.6} roughness={0.4} />
+          </mesh>
+          <mesh position={[0, 3.2, 0]}>
+            <sphereGeometry args={[0.25, 12, 12]} />
+            <meshStandardMaterial color="#FFFACD" emissive="#FFD700" emissiveIntensity={0.8} transparent opacity={0.9} />
+          </mesh>
+          <pointLight position={[0, 3.2, 0]} color="#FFD700" intensity={1} distance={8} />
+        </group>
+      ))}
+      {/* Zufällige Bäume */}
+      {treePositions.map((item, i) => (
+        <group key={`random-tree-${i}`} position={[item.pos[0], item.pos[1], item.pos[2]]}>
+          <mesh position={[0, 1.5 * item.scale, 0]} castShadow>
+            <cylinderGeometry args={[0.2 * item.scale, 0.3 * item.scale, 3 * item.scale, 8]} />
+            <meshStandardMaterial color="#8B6914" roughness={0.9} />
+          </mesh>
+          <mesh position={[0, 3 * item.scale, 0]} castShadow>
+            <sphereGeometry args={[1.2 * item.scale, 12, 12]} />
+            <meshStandardMaterial color={['#228B22', '#32CD32', '#3CB371', '#2E8B57'][i % 4]} />
+          </mesh>
+        </group>
+      ))}
+      <ReturnPortal />
+    </group>
+  );
+};
+
+const GrasslandsWorld = () => {
+  const bushPositions = useMemo(() => generateScaledPositions(30, 60, 1000), []);
+  const rockPositions = useMemo(() => generateScaledPositions(20, 50, 2000), []);
+  const flowerPositions = useMemo(() => generateScaledPositions(40, 60, 3000), []);
+  const treePositions = useMemo(() => generateScaledPositions(10, 50, 4000), []);
+  
+  return (
+    <group>
+      {/* Ground */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]} receiveShadow>
+        <planeGeometry args={[200, 200]} />
+        <meshStandardMaterial color="#6DBE6D" />
+      </mesh>
+      {/* Rest of world */}
+      {/* Hügel im Hintergrund */}
+      {[
+        [60, 0, 40], [-70, 0, 60], [80, 0, -30], [-60, 0, -50], [40, 0, 80], [-40, 0, -80],
+      ].map(([x, , z], i) => (
+        <Hill key={`hill-${i}`} position={[x, 0, z]} scale={1.5 + (i % 3) * 0.5} />
+      ))}
+      {/* Große Bäume */}
+      {[
+        [25, 0, 25], [-20, 0, 18], [30, 0, -15], [-28, 0, -25], [15, 0, -30],
+        [-35, 0, 8], [40, 0, 5], [-12, 0, 35], [35, 0, 28], [-30, 0, -12],
+        [50, 0, -20], [-45, 0, 25], [20, 0, 45], [-55, 0, -15], [45, 0, 35],
+      ].map(([x, , z], i) => (
+        <group key={`tree-${i}`} position={[x, 0, z]}>
+          <mesh position={[0, 2, 0]} castShadow>
+            <cylinderGeometry args={[0.4, 0.5, 4, 10]} />
+            <meshStandardMaterial color="#8B6914" roughness={0.9} />
+          </mesh>
+          <mesh position={[0, 4.5, 0]} castShadow>
+            <sphereGeometry args={[2, 12, 12]} />
+            <meshStandardMaterial color="#228B22" roughness={0.8} />
+          </mesh>
+        </group>
+      ))}
+      {/* Büsche */}
+      {bushPositions.map((item, i) => (
+        <Bush key={`bush-${i}`} position={item.pos} scale={item.scale} />
+      ))}
+      {/* Felsen */}
+      {rockPositions.map((item, i) => (
+        <Rock key={`rock-${i}`} position={item.pos} scale={item.scale} />
+      ))}
+      {/* Teiche */}
+      {[
+        [35, 0, -35], [-40, 0, 30], [50, 0, 50], [-55, 0, -40],
+      ].map(([x, , z], i) => (
+        <Pond key={`pond-${i}`} position={[x, 0, z]} />
+      ))}
+      {/* Blumenwiesen */}
+      {flowerPositions.map((item, i) => (
+        <Flower key={`flower-${i}`} position={item.pos} color={['#FF69B4', '#FFD700', '#FF6347', '#FF1493', '#DA70D6', '#FFA500'][i % 6]} scale={0.6 + (i % 4) * 0.1} />
+      ))}
+      {/* Wegweiser-Laternen */}
+      {[
+        [15, 0, 0], [-15, 0, 0], [0, 0, 15], [0, 0, -15],
+      ].map(([x, , z], i) => (
+        <group key={`lamp-${i}`} position={[x, 0, z]}>
+          <mesh position={[0, 1.5, 0]} castShadow>
+            <cylinderGeometry args={[0.08, 0.1, 3, 8]} />
+            <meshStandardMaterial color="#4A4A4A" metalness={0.6} roughness={0.4} />
+          </mesh>
+          <mesh position={[0, 3.2, 0]}>
+            <sphereGeometry args={[0.25, 12, 12]} />
+            <meshStandardMaterial color="#FFFACD" emissive="#FFD700" emissiveIntensity={0.8} transparent opacity={0.9} />
+          </mesh>
+          <pointLight position={[0, 3.2, 0]} color="#FFD700" intensity={1} distance={8} />
+        </group>
+      ))}
+      {/* Zufällige Bäume */}
+      {treePositions.map((item, i) => (
+        <group key={`random-tree-${i}`} position={[item.pos[0], item.pos[1], item.pos[2]]}>
+          <mesh position={[0, 1.5 * item.scale, 0]} castShadow>
+            <cylinderGeometry args={[0.2 * item.scale, 0.3 * item.scale, 3 * item.scale, 8]} />
+            <meshStandardMaterial color="#8B6914" roughness={0.9} />
+          </mesh>
+          <mesh position={[0, 3 * item.scale, 0]} castShadow>
+            <sphereGeometry args={[1.2 * item.scale, 12, 12]} />
+            <meshStandardMaterial color={['#228B22', '#32CD32', '#3CB371', '#2E8B57'][i % 4]} />
+          </mesh>
+        </group>
+      ))}
+      <ReturnPortal />
+    </group>
+  );
+};
+
+const WORLD_COMPONENTS: Record<string, () => JSX.Element> = {
+  grasslands: GrasslandsWorld,
+  mushroom_forest: MushroomForestWorld,
+  frozen_peaks: FrozenPeaksWorld,
+  lava_caverns: LavaCavernsWorld,
+  coral_reef: CoralReefWorld,
+  shadow_swamp: ShadowSwampWorld,
+  crystal_highlands: CrystalHighlandsWorld,
+  void_nexus: VoidNexusWorld,
+};
+
+export const GameWorld = () => {
+  const currentZone = useGameStore(s => s.currentZone);
+  if (currentZone === 'hub') return null;
+  const WorldComponent = WORLD_COMPONENTS[currentZone];
+  return WorldComponent ? <WorldComponent /> : null;
+};
+
+const ZoneWorld = ({ zone }: { zone: typeof ZONES[number] }) => {
+  const WorldComponent = WORLD_COMPONENTS[zone.id];
+  if (!WorldComponent) return null;
+  
+  return (
+    <group position={[zone.center[0], 0, zone.center[1]]}>
+      <WorldComponent />
+    </group>
+  );
+};
+
+const PlayerAwareZoneWorld = ({ zone }: { zone: typeof ZONES[number] }) => {
+  const currentZone = useGameStore(s => s.currentZone);
+  
+  if (currentZone !== zone.id) return null;
+  
+  const WorldComponent = WORLD_COMPONENTS[zone.id];
+  if (!WorldComponent) return null;
+  
+  return (
+    <group position={[zone.center[0], 0, zone.center[1]]}>
+      <WorldComponent />
+    </group>
+  );
+};
+
+export const AllZonesWorld = () => {
+  return (
+    <>
+      {ZONES.map(zone => (
+        <ZoneWorld key={zone.id} zone={zone} />
+      ))}
+    </>
+  );
+};
+
+export { WORLD_THEMES };
