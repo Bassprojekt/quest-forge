@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { useChatStore, type ChatMessage } from '@/store/chatStore';
+import { useChatStore } from '@/store/chatStore';
 import { useAccountStore } from '@/store/accountStore';
 import { useGuildStore } from '@/store/guildStore';
+
+type ChatType = 'general' | 'guild' | 'private';
 
 interface Props {
   onClose: () => void;
 }
 
 export const ChatUI = ({ onClose }: Props) => {
-  const [chatType, setChatType] = useState<ChatMessage['type']('general');
+  const [chatType, setChatType] = useState<ChatType>('general');
   const [message, setMessage] = useState('');
   const [privateTo, setPrivateTo] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -86,7 +88,7 @@ export const ChatUI = ({ onClose }: Props) => {
               chatType === 'private' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
             }`}
           >
-            �私信
+            💜
           </button>
         </div>
 
