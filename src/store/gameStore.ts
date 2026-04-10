@@ -217,6 +217,7 @@ export interface GameState {
   setCurrentZone: (zone: ZoneType) => void;
   advanceToNextZone: () => void;
   respawnPlayer: () => void;
+  resetPosition: () => void;
   resetGame: () => void;
   buyItem: (itemId: string) => boolean;
   buyPet: (petId: string) => boolean;
@@ -345,6 +346,15 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   setPlayerPosition: (pos) => {
+    const state = get();
+    const currentPos = state.playerPosition;
+    const dx = pos[0] - currentPos[0];
+    const dz = pos[2] - currentPos[2];
+    const dist = Math.sqrt(dx * dx + dz * dz);
+    if (dist > 100) {
+      console.warn('Blocked teleport - too far:', dist, 'from', currentPos, 'to', pos);
+      return;
+    }
     set({ playerPosition: pos });
   },
 
@@ -590,10 +600,20 @@ export const useGameStore = create<GameState>((set, get) => ({
   respawnPlayer: () => {
     const state = get();
     const healAmount = Math.floor(state.playerMaxHp * 0.5);
+    const zoneInfo = ZONES.find(z => z.id === state.currentZone);
+    const spawnX = zoneInfo?.center[0] ?? 0;
+    const spawnZ = zoneInfo?.center[1] ?? 0;
     set({ 
       playerHp: healAmount, 
-      currentZone: 'hub', 
-      playerPosition: [0, 0, 0] 
+      playerPosition: [spawnX, 0, spawnZ] 
+    });
+  },
+
+  resetPosition: () => {
+    const zoneInfo = ZONES.find(z => z.id === 'hub');
+    set({ 
+      playerPosition: [zoneInfo?.center[0] ?? 0, 0, zoneInfo?.center[1] ?? 0],
+      currentZone: 'hub' 
     });
   },
 
