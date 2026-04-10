@@ -107,11 +107,13 @@ export const Player = () => {
   const leftArmRef = useRef<THREE.Group>(null);
   const keys = useKeyboard();
   const setPlayerPosition = useGameStore(s => s.setPlayerPosition);
-  const useSkill = useGameStore(s => s.useSkill);
+  const activateSkill = useGameStore(s => s.useSkill);
   const skills = useGameStore(s => s.skills);
   const setShieldActive = useGameStore(s => s.setShieldActive);
   const setDashActive = useGameStore(s => s.setDashActive);
   const setLaserTarget = useGameStore(s => s.setLaserTarget);
+  const playerMana = useGameStore(s => s.playerMana);
+  const setPlayerMana = useGameStore(s => s.setPlayerMana);
   const enemies = useGameStore(s => s.enemies);
   const attackEnemy = useGameStore(s => s.attackEnemy);
   const targetEnemyId = useGameStore(s => s.targetEnemyId);
@@ -170,8 +172,9 @@ export const Player = () => {
     // Skills
     if (keys.current.q && !lastSkillCheck.current.q) {
       const skill = skills[0];
-      if (skill && now - skill.lastUsed >= skill.cooldown) {
-        useSkill(skill.id);
+      if (skill && now - skill.lastUsed >= skill.cooldown && playerMana >= skill.manaCost) {
+        activateSkill(skill.id);
+        setPlayerMana(playerMana - skill.manaCost);
         const target = enemies.find(e => e.id === targetEnemyId && e.alive);
         if (target) {
           setLaserTarget(target.position);
@@ -184,8 +187,9 @@ export const Player = () => {
 
     if (keys.current.e && !lastSkillCheck.current.e) {
       const skill = skills[1];
-      if (skill && now - skill.lastUsed >= skill.cooldown) {
-        useSkill(skill.id);
+      if (skill && now - skill.lastUsed >= skill.cooldown && playerMana >= skill.manaCost) {
+        activateSkill(skill.id);
+        setPlayerMana(playerMana - skill.manaCost);
         setShieldActive(true);
         shieldTimer.current = 3;
       }
@@ -193,8 +197,9 @@ export const Player = () => {
 
     if (keys.current.shift && !lastSkillCheck.current.shift) {
       const skill = skills[2];
-      if (skill && now - skill.lastUsed >= skill.cooldown) {
-        useSkill(skill.id);
+      if (skill && now - skill.lastUsed >= skill.cooldown && playerMana >= skill.manaCost) {
+        activateSkill(skill.id);
+        setPlayerMana(playerMana - skill.manaCost);
         setDashActive(true);
         dashTimer.current = 0.25;
         const cameraDir = new THREE.Vector3();

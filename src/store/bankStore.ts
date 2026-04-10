@@ -3,12 +3,12 @@ import { create } from 'zustand';
 export interface BankItem {
   id: string;
   name: string;
-  type: string;
+  type: 'weapon' | 'armor' | 'potion';
   icon: string;
   stat: string;
   value: number;
   quantity: number;
-  rarity: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
 }
 
 interface BankState {

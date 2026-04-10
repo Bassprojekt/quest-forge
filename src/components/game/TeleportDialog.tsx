@@ -25,7 +25,7 @@ export const TeleportDialog = ({ open, onOpenChange }: TeleportDialogProps) => {
       const zone = ZONES.find(z => z.id === zoneId);
       if (zone) {
         addGold(-TELEPORT_COST);
-        setCurrentZone(zoneId as any);
+        setCurrentZone(zoneId as 'hub' | 'grasslands' | 'mushroom_forest' | 'frozen_peaks' | 'lava_caverns' | 'coral_reef' | 'shadow_swamp' | 'crystal_highlands' | 'void_nexus');
         setPlayerPosition([zone.center[0], 0, zone.center[1]]);
         onOpenChange(false);
       }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useBankStore, BankItem } from '@/store/bankStore';
-import { useGameStore } from '@/store/gameStore';
+import { useGameStore, InventoryItem } from '@/store/gameStore';
 import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
 
 interface Props {
@@ -87,7 +87,7 @@ export const BankUI = ({ onClose }: Props) => {
     }
   };
 
-  const handleDepositItem = (item: any) => {
+  const handleDepositItem = (item: InventoryItem) => {
     depositItem({
       id: item.id,
       name: item.name,

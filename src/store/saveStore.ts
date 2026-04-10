@@ -1,9 +1,10 @@
-import { useGameStore } from './gameStore';
+import { useGameStore, ZoneType, PlayerClass } from './gameStore';
 import { useSkillTreeStore } from './skillTreeStore';
 import { useCompanionStore } from './companionStore';
 import { useQuestStore } from './questStore';
 import { useGuildStore } from './guildStore';
-import { useBankStore } from './bankStore';
+import { useBankStore, BankItem } from './bankStore';
+import { InventoryItem, Pet, ShopItem } from './gameStore';
 
 const SAVE_KEY = 'mmorpg-save-data';
 
@@ -23,28 +24,28 @@ interface SaveData {
     playerGold: number;
     playerDefense: number;
     playerSpeed: number;
-    currentZone: string;
-    inventory: any[];
-    shopItems: any[];
-    pets: any[];
+    currentZone: ZoneType;
+    inventory: InventoryItem[];
+    shopItems: ShopItem[];
+    pets: Pet[];
   };
   skillTree: {
     skillPoints: number;
-    nodes: any[];
+    nodes: unknown[];
   };
   companions: {
-    companions: any[];
+    companions: unknown[];
   };
   quests: {
-    quests: any[];
+    quests: unknown[];
   };
   guild: {
-    guild: any | null;
+    guild: unknown | null;
     hasGuild: boolean;
   } | null;
   bank: {
     bankGold: number;
-    bankItems: any[];
+    bankItems: BankItem[];
     pin: string | null;
     isPinSet: boolean;
   } | null;
@@ -106,7 +107,7 @@ function restoreFromData(data: SaveData): boolean {
   if (!data.game) return false;
 
   const gs = useGameStore.getState();
-  gs.setPlayerClass(data.game.playerClass as any);
+  gs.setPlayerClass(data.game.playerClass as 'warrior' | 'mage' | 'archer' | null);
   useGameStore.setState({
     playerHp: data.game.playerHp,
     playerMaxHp: data.game.playerMaxHp,
@@ -119,7 +120,7 @@ function restoreFromData(data: SaveData): boolean {
     playerGold: data.game.playerGold,
     playerDefense: data.game.playerDefense,
     playerSpeed: data.game.playerSpeed,
-    currentZone: data.game.currentZone as any,
+    currentZone: data.game.currentZone as ZoneType,
     inventory: data.game.inventory,
     shopItems: data.game.shopItems,
     pets: data.game.pets,

@@ -1,5 +1,5 @@
 import { useRef, useMemo, useState, Suspense } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Html, useGLTF } from '@react-three/drei';
 import { useGameStore, ZONES } from '@/store/gameStore';
@@ -8,6 +8,21 @@ import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
 const seededRandom = (seed: number) => {
   const x = Math.sin(seed * 9999) * 10000;
   return x - Math.floor(x);
+};
+
+const generateFlowerData = () => {
+  const colors = ['#FF69B4', '#FFD700', '#FF6347', '#DA70D6', '#87CEEB', '#FFA07A', '#ADFF2F'];
+  const flowers: { pos: [number, number, number]; color: string }[] = [];
+  for (let i = 0; i < 15; i++) {
+    const seed = i * 789.123;
+    const angle = seededRandom(seed) * Math.PI * 2;
+    const r = 10 + seededRandom(seed + 456) * 30;
+    flowers.push({
+      pos: [Math.cos(angle) * r, 0, Math.sin(angle) * r],
+      color: colors[i % colors.length],
+    });
+  }
+  return flowers;
 };
 
 const HubFlower = ({ position, color }: { position: [number, number, number]; color: string }) => (
@@ -49,7 +64,7 @@ const NPCWithBuilding = ({ name, color, position, icon, onClick }: {
     meshRef.current.rotation.y = Math.atan2(dx, dz);
   });
 
-  const handleClick = (e: any) => {
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
     if (onClick) {
@@ -488,26 +503,9 @@ export const HubBuildings = ({ onOpenShop, onOpenGuild, onOpenBank }: { onOpenSh
       </mesh>
 
       {/* Flower patches */}
-      {(() => {
-        const flowerData = useMemo(() => {
-          const colors = ['#FF69B4', '#FFD700', '#FF6347', '#DA70D6', '#87CEEB', '#FFA07A', '#ADFF2F'];
-          const flowers: { pos: [number, number, number]; color: string }[] = [];
-          for (let i = 0; i < 15; i++) {
-            const seed = i * 789.123;
-            const angle = seededRandom(seed) * Math.PI * 2;
-            const r = 10 + seededRandom(seed + 456) * 30;
-            flowers.push({
-              pos: [Math.cos(angle) * r, 0, Math.sin(angle) * r],
-              color: colors[i % colors.length],
-            });
-          }
-          return flowers;
-        }, []);
-
-        return flowerData.map((f, i) => (
-          <HubFlower key={`flower-${i}`} position={f.pos} color={f.color} />
-        ));
-      })()}
+      {generateFlowerData().map((f, i) => (
+        <HubFlower key={`flower-${i}`} position={f.pos} color={f.color} />
+      ))}
     </group>
   );
 };

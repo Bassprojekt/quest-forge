@@ -1,7 +1,14 @@
 // Procedural sound effects using Web Audio API
 import { useSettingsStore } from '@/store/settingsStore';
 
-const audioCtx = typeof window !== 'undefined' ? new (window.AudioContext || (window as any).webkitAudioContext)() : null;
+type AudioContextType = AudioContext | undefined;
+
+const getAudioContext = (): AudioContextType => {
+  if (typeof window === 'undefined') return undefined;
+  return window.AudioContext ? new window.AudioContext() : (window as { webkitAudioContext?: () => AudioContext }).webkitAudioContext?.() ?? undefined;
+};
+
+const audioCtx = getAudioContext();
 
 function ensureCtx() {
   if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
@@ -172,7 +179,7 @@ export function playHitSound() {
 }
 
 // Ambient zone music - simple looping pads
-let currentMusic: { osc: OscillatorNode; gain: GainNode } | null = null;
+let currentMusic: { osc: OscillatorNode; gain: GainNode; interval: ReturnType<typeof setInterval> } | null = null;
 
 const ZONE_MUSIC_NOTES: Record<string, number[]> = {
   hub: [261.63, 329.63, 392.00],
@@ -206,14 +213,13 @@ export function playZoneMusic(zone: string) {
     noteIdx = (noteIdx + 1) % notes.length;
     osc.frequency.exponentialRampToValueAtTime(notes[noteIdx], ctx.currentTime + 0.5);
   }, 2000);
-  currentMusic = { osc, gain };
-  (currentMusic as any)._interval = interval;
+  currentMusic = { osc, gain, interval };
 }
 
 export function stopZoneMusic() {
   if (currentMusic) {
-    clearInterval((currentMusic as any)._interval);
-    try { currentMusic.osc.stop(); } catch {}
+    clearInterval(currentMusic.interval);
+    try { currentMusic.osc.stop(); } catch { /* ignore if already stopped */ }
     currentMusic = null;
   }
 }

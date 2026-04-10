@@ -94,19 +94,19 @@ export const ZONES: ZoneInfo[] = [
 
 const CLASS_SKILLS: Record<string, Skill[]> = {
   warrior: [
-    { id: 'whirlwind', name: 'Wirbelschlag', key: 'Q', cooldown: 4, lastUsed: -999, manaCost: 0, description: 'AoE-Schwertangriff', icon: '🌪️' },
-    { id: 'shield', name: 'Eisenschild', key: 'E', cooldown: 10, lastUsed: -999, manaCost: 0, description: '3 Sek. Schutzschild', icon: '🛡️' },
-    { id: 'dash', name: 'Sturmangriff', key: 'SHIFT', cooldown: 5, lastUsed: -999, manaCost: 0, description: 'Schneller Vorstoß', icon: '⚔️' },
+    { id: 'whirlwind', name: 'Wirbelschlag', key: 'Q', cooldown: 4, lastUsed: -999, manaCost: 15, description: 'AoE-Schwertangriff', icon: '🌪️' },
+    { id: 'shield', name: 'Eisenschild', key: 'E', cooldown: 10, lastUsed: -999, manaCost: 20, description: '3 Sek. Schutzschild', icon: '🛡️' },
+    { id: 'dash', name: 'Sturmangriff', key: 'SHIFT', cooldown: 5, lastUsed: -999, manaCost: 10, description: 'Schneller Vorstoß', icon: '⚔️' },
   ],
   mage: [
-    { id: 'fireball', name: 'Feuerball', key: 'Q', cooldown: 2, lastUsed: -999, manaCost: 0, description: 'Fernkampf-Feuerball', icon: '🔥' },
-    { id: 'icewall', name: 'Eisschild', key: 'E', cooldown: 12, lastUsed: -999, manaCost: 0, description: '3 Sek. Frostbarriere', icon: '❄️' },
-    { id: 'blink', name: 'Teleport', key: 'SHIFT', cooldown: 6, lastUsed: -999, manaCost: 0, description: 'Kurze Teleportation', icon: '✨' },
+    { id: 'fireball', name: 'Feuerball', key: 'Q', cooldown: 2, lastUsed: -999, manaCost: 12, description: 'Fernkampf-Feuerball', icon: '🔥' },
+    { id: 'icewall', name: 'Eisschild', key: 'E', cooldown: 12, lastUsed: -999, manaCost: 25, description: '3 Sek. Frostbarriere', icon: '❄️' },
+    { id: 'blink', name: 'Teleport', key: 'SHIFT', cooldown: 6, lastUsed: -999, manaCost: 18, description: 'Kurze Teleportation', icon: '✨' },
   ],
   archer: [
-    { id: 'multishot', name: 'Mehrfachschuss', key: 'Q', cooldown: 3, lastUsed: -999, manaCost: 0, description: '3 Pfeile auf einmal', icon: '🏹' },
-    { id: 'dodge', name: 'Ausweichen', key: 'E', cooldown: 8, lastUsed: -999, manaCost: 0, description: '2 Sek. Unverwundbar', icon: '💨' },
-    { id: 'dash', name: 'Schnellschritt', key: 'SHIFT', cooldown: 4, lastUsed: -999, manaCost: 0, description: 'Schneller Rückzug', icon: '🦅' },
+    { id: 'multishot', name: 'Mehrfachschuss', key: 'Q', cooldown: 3, lastUsed: -999, manaCost: 10, description: '3 Pfeile auf einmal', icon: '🏹' },
+    { id: 'dodge', name: 'Ausweichen', key: 'E', cooldown: 8, lastUsed: -999, manaCost: 15, description: '2 Sek. Unverwundbar', icon: '💨' },
+    { id: 'dash', name: 'Schnellschritt', key: 'SHIFT', cooldown: 4, lastUsed: -999, manaCost: 8, description: 'Schneller Rückzug', icon: '🦅' },
   ],
 };
 
@@ -197,6 +197,7 @@ export interface GameState {
   attackEnemy: (id: string) => void;
   takeDamage: (amount: number) => void;
   setPlayerHp: (amount: number) => void;
+  setPlayerMana: (amount: number) => void;
   respawnEnemies: () => void;
   setTargetEnemy: (id: string | null) => void;
   setIsAttacking: (v: boolean) => void;
@@ -227,7 +228,6 @@ export interface GameState {
   setUIOpen: (v: boolean) => void;
   setShowSaveIndicator: (v: boolean) => void;
   setWeather: (weather: 'sunny' | 'rainy' | 'foggy') => void;
-  setShopOpen: (v: boolean, tab?: 'items' | 'pets') => void;
 }
 
 const INITIAL_SHOP_ITEMS: ShopItem[] = [
@@ -463,6 +463,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     set(s => ({ playerHp: Math.min(s.playerMaxHp, Math.max(0, amount)) }));
   },
 
+  setPlayerMana: (amount: number) => {
+    set(s => ({ playerMana: Math.min(s.playerMaxMana, Math.max(0, amount)) }));
+  },
+
   respawnEnemies: () => {
     const zone = get().currentZone;
     const zoneInfo = ZONES.find(z => z.id === zone);
@@ -550,11 +554,26 @@ export const useGameStore = create<GameState>((set, get) => ({
       playerPosition: [0, 0, 0],
       enemies: [],
       inventory: [],
-      equippedPetId: null,
       autoFight: false,
       autoRespawn: true,
     });
   },
+
+  advanceToNextZone: () => {
+    const state = get();
+    const currentIndex = ZONES.findIndex(z => z.id === state.currentZone);
+    if (currentIndex < ZONES.length - 1) {
+      const nextZone = ZONES[currentIndex + 1];
+      const freshEnemies = generateEnemies(nextZone.id, nextZone.requiredLevel);
+      set({ 
+        currentZone: nextZone.id, 
+        playerPosition: [0, 0, 0],
+        enemies: freshEnemies
+      });
+    }
+  },
+
+  setShopOpen: () => {},
 
   buyItem: (itemId) => {
     const state = get();
@@ -611,7 +630,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (!item || item.quantity <= 0) return;
     playPotionDrink();
 
-    let newInventory = state.inventory.map(i => {
+    const newInventory = state.inventory.map(i => {
       if (i.id !== itemId) return i;
       return { ...i, quantity: i.quantity - 1 };
     }).filter(i => i.type !== 'potion' || i.quantity > 0);
@@ -643,11 +662,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       playerMana: newPlayerMana,
       playerSpeed: newPlayerSpeed,
       inventory: newInventory,
-      damagePopups: [...state.damagePopups, {
+damagePopups: [...state.damagePopups, {
         id: `heal-${popupIdCounter++}`,
         position: state.playerPosition,
         amount: popupAmount,
-        type: popupType as const,
+        type: 'heal',
         timestamp: Date.now(),
       }],
     });

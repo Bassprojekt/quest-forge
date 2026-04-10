@@ -14,14 +14,19 @@ const RARITY_COLORS: Record<string, string> = {
 
 export const InventoryUI = ({ onClose }: Props) => {
   const inventory = useGameStore(s => s.inventory);
-  const equipItem = useGameStore(s => s.equipItem);
-  const usePotion = useGameStore(s => s.usePotion);
-  const recalcStats = useGameStore(s => s.recalcStats);
   const playerHp = useGameStore(s => s.playerHp);
   const playerMaxHp = useGameStore(s => s.playerMaxHp);
+  const equipItem = useGameStore(s => s.equipItem);
+  // Store functions renamed to avoid false positive lint warnings
+  const drinkPotion = useGameStore(s => s.usePotion);
+  const recalcStats = useGameStore(s => s.recalcStats);
   const [tab, setTab] = useState<'all' | 'weapon' | 'armor' | 'potion'>('all');
 
   const filtered = tab === 'all' ? inventory : inventory.filter(i => i.type === tab);
+
+  const handleUsePotion = (itemId: string) => {
+    drinkPotion(itemId);
+  };
 
   const handleEquip = (item: InventoryItem) => {
     equipItem(item.id);
@@ -82,7 +87,7 @@ export const InventoryUI = ({ onClose }: Props) => {
               </div>
               <div>
                 {item.type === 'potion' ? (
-                  <button onClick={() => usePotion(item.id)}
+                  <button onClick={() => handleUsePotion(item.id)}
                     disabled={playerHp >= playerMaxHp}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-bold ${
                       playerHp < playerMaxHp
