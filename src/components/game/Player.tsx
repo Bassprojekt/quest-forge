@@ -9,41 +9,41 @@ const WarriorWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> })
     {/* Handle */}
     <mesh position={[0, -0.15, 0]} castShadow>
       <boxGeometry args={[0.07, 0.22, 0.07]} />
-      <meshStandardMaterial color="#4A2A10" flatShading />
+      <meshStandardMaterial color="#4A2A10" flatShading roughness={0.6} />
     </mesh>
     {/* Guard */}
     <mesh position={[0, -0.28, 0]} castShadow>
       <boxGeometry args={[0.10, 0.06, 0.10]} />
-      <meshStandardMaterial color="#FFD700" flatShading metalness={0.8} />
+      <meshStandardMaterial color="#FFD700" flatShading metalness={0.9} roughness={0.2} />
     </mesh>
     {/* Pommel */}
     <mesh position={[0, -0.02, 0]} castShadow>
       <boxGeometry args={[0.28, 0.05, 0.10]} />
-      <meshStandardMaterial color="#FFD700" flatShading metalness={0.7} />
+      <meshStandardMaterial color="#FFD700" flatShading metalness={0.9} roughness={0.2} />
     </mesh>
     {/* Gem */}
     <mesh position={[0.12, -0.02, 0.05]} castShadow>
       <boxGeometry args={[0.04, 0.04, 0.04]} />
-      <meshStandardMaterial color="#FF3333" emissive="#FF3333" emissiveIntensity={0.5} flatShading />
+      <meshStandardMaterial color="#FF3333" emissive="#FF3333" emissiveIntensity={0.8} flatShading metalness={0.3} />
     </mesh>
     <mesh position={[-0.12, -0.02, 0.05]} castShadow>
       <boxGeometry args={[0.04, 0.04, 0.04]} />
-      <meshStandardMaterial color="#FF3333" emissive="#FF3333" emissiveIntensity={0.5} flatShading />
+      <meshStandardMaterial color="#FF3333" emissive="#FF3333" emissiveIntensity={0.8} flatShading metalness={0.3} />
     </mesh>
     {/* Blade */}
     <mesh position={[0, 0.38, 0]} castShadow>
       <boxGeometry args={[0.10, 0.72, 0.04]} />
-      <meshStandardMaterial color="#D0D8E8" flatShading metalness={0.9} roughness={0.1} />
+      <meshStandardMaterial color="#D0D8E8" flatShading metalness={0.95} roughness={0.05} />
     </mesh>
     {/* Blade edge highlight */}
     <mesh position={[0, 0.38, 0.025]} castShadow>
       <boxGeometry args={[0.06, 0.72, 0.01]} />
-      <meshStandardMaterial color="#E8EEF8" flatShading metalness={1} roughness={0.05} />
+      <meshStandardMaterial color="#E8EEF8" flatShading metalness={1} roughness={0.02} />
     </mesh>
     {/* Tip */}
     <mesh position={[0, 0.78, 0]} castShadow rotation={[0, 0, Math.PI / 4]}>
       <boxGeometry args={[0.08, 0.08, 0.04]} />
-      <meshStandardMaterial color="#D0D8E8" flatShading metalness={0.9} roughness={0.1} />
+      <meshStandardMaterial color="#D0D8E8" flatShading metalness={0.95} roughness={0.05} />
     </mesh>
   </group>
 );
@@ -390,12 +390,12 @@ export const Player = () => {
       <group position={[0, bodyBob, 0]}>
         {/* Boots */}
         <group position={[0.18, 0.2, 0]} rotation={[legSwing, 0, 0]}>
-          <mesh castShadow><boxGeometry args={[0.22, 0.25, 0.28]} /><meshStandardMaterial color="#6B3A2A" flatShading /></mesh>
-          <mesh position={[0, 0.1, 0]} castShadow><boxGeometry args={[0.24, 0.06, 0.30]} /><meshStandardMaterial color="#8B5A3A" flatShading /></mesh>
+          <mesh castShadow><boxGeometry args={[0.22, 0.25, 0.28]} /><meshStandardMaterial color="#6B3A2A" flatShading roughness={0.7} /></mesh>
+          <mesh position={[0, 0.1, 0]} castShadow><boxGeometry args={[0.24, 0.06, 0.30]} /><meshStandardMaterial color="#8B5A3A" flatShading roughness={0.6} /></mesh>
         </group>
         <group position={[-0.18, 0.2, 0]} rotation={[-legSwing, 0, 0]}>
-          <mesh castShadow><boxGeometry args={[0.22, 0.25, 0.28]} /><meshStandardMaterial color="#6B3A2A" flatShading /></mesh>
-          <mesh position={[0, 0.1, 0]} castShadow><boxGeometry args={[0.24, 0.06, 0.30]} /><meshStandardMaterial color="#8B5A3A" flatShading /></mesh>
+          <mesh castShadow><boxGeometry args={[0.22, 0.25, 0.28]} /><meshStandardMaterial color="#6B3A2A" flatShading roughness={0.7} /></mesh>
+          <mesh position={[0, 0.1, 0]} castShadow><boxGeometry args={[0.24, 0.06, 0.30]} /><meshStandardMaterial color="#8B5A3A" flatShading roughness={0.6} /></mesh>
         </group>
 
         {/* Legs */}
@@ -410,24 +410,24 @@ export const Player = () => {
         <group ref={torsoRef}>
         <mesh position={[0, 0.92, 0]} castShadow>
           <boxGeometry args={[0.55, 0.55, 0.32]} />
-          <meshStandardMaterial color={tunicColor} flatShading />
+          <meshStandardMaterial color={tunicColor} flatShading roughness={0.8} />
         </mesh>
         <mesh position={[0, 0.85, -0.16]} castShadow>
           <boxGeometry args={[0.50, 0.65, 0.06]} />
-          <meshStandardMaterial color={tunicDark} flatShading />
+          <meshStandardMaterial color={tunicDark} flatShading roughness={0.85} />
         </mesh>
         <mesh position={[0, 1.18, 0]} castShadow>
           <boxGeometry args={[0.50, 0.08, 0.28]} />
-          <meshStandardMaterial color="#F5F0E0" flatShading />
+          <meshStandardMaterial color="#F5F0E0" flatShading roughness={0.9} />
         </mesh>
         {/* Belt */}
         <mesh position={[0, 0.72, 0]} castShadow>
           <boxGeometry args={[0.58, 0.08, 0.35]} />
-          <meshStandardMaterial color="#C8A84E" flatShading metalness={0.5} />
+          <meshStandardMaterial color="#C8A84E" flatShading metalness={0.5} roughness={0.4} />
         </mesh>
         <mesh position={[0, 0.72, 0.18]} castShadow>
           <boxGeometry args={[0.10, 0.10, 0.04]} />
-          <meshStandardMaterial color="#FFD700" flatShading metalness={0.8} />
+          <meshStandardMaterial color="#FFD700" flatShading metalness={0.9} roughness={0.2} />
         </mesh>
 
         {/* Shoulder pads */}
@@ -464,10 +464,10 @@ export const Player = () => {
           {/* Eyes */}
           <mesh position={[0.12, 0.02, 0.245]}><boxGeometry args={[0.12, 0.14, 0.02]} /><meshStandardMaterial color="#FFFFFF" /></mesh>
           <mesh position={[-0.12, 0.02, 0.245]}><boxGeometry args={[0.12, 0.14, 0.02]} /><meshStandardMaterial color="#FFFFFF" /></mesh>
-          <mesh position={[0.12, 0.0, 0.255]}><boxGeometry args={[0.08, 0.10, 0.02]} /><meshStandardMaterial color="#2255AA" /></mesh>
-          <mesh position={[-0.12, 0.0, 0.255]}><boxGeometry args={[0.08, 0.10, 0.02]} /><meshStandardMaterial color="#2255AA" /></mesh>
-          <mesh position={[0.14, 0.04, 0.265]}><boxGeometry args={[0.03, 0.04, 0.01]} /><meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={0.5} /></mesh>
-          <mesh position={[-0.10, 0.04, 0.265]}><boxGeometry args={[0.03, 0.04, 0.01]} /><meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={0.5} /></mesh>
+          <mesh position={[0.12, 0.0, 0.255]}><boxGeometry args={[0.08, 0.10, 0.02]} /><meshStandardMaterial color="#2255AA" emissive="#2244AA" emissiveIntensity={0.3} /></mesh>
+          <mesh position={[-0.12, 0.0, 0.255]}><boxGeometry args={[0.08, 0.10, 0.02]} /><meshStandardMaterial color="#2255AA" emissive="#2244AA" emissiveIntensity={0.3} /></mesh>
+          <mesh position={[0.14, 0.04, 0.265]}><boxGeometry args={[0.03, 0.04, 0.01]} /><meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={0.8} /></mesh>
+          <mesh position={[-0.10, 0.04, 0.265]}><boxGeometry args={[0.03, 0.04, 0.01]} /><meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={0.8} /></mesh>
           <mesh position={[0, -0.10, 0.245]}><boxGeometry args={[0.08, 0.03, 0.02]} /><meshStandardMaterial color="#DD8866" /></mesh>
           {/* Blush */}
           <mesh position={[0.20, -0.06, 0.24]}><boxGeometry args={[0.06, 0.04, 0.02]} /><meshStandardMaterial color="#FFB0B0" transparent opacity={0.6} /></mesh>

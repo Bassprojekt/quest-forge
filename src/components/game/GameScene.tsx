@@ -294,6 +294,10 @@ export const GameScene = () => {
         <pointLight position={[20, 15, -20]} intensity={0.2} color="#ADD8E6" distance={80} />
         <fog attach="fog" args={[fogColor, weather === 'sunny' ? 80 : weather === 'rainy' ? 40 : 30, weather === 'sunny' ? 120 : weather === 'rainy' ? 60 : 50]} />
 
+        {/* Additional fill lights for better atmosphere */}
+        <pointLight position={[-30, 20, 30]} intensity={0.15} color="#FFA07A" distance={100} />
+        <pointLight position={[30, 20, -30]} intensity={0.15} color="#87CEEB" distance={100} />
+
         {/* Enhanced rain particles */}
         {weather === 'rainy' && <RainParticles />}
 
@@ -317,7 +321,7 @@ export const GameScene = () => {
         {currentZone === 'hub' && (
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]} receiveShadow>
             <planeGeometry args={[50, 50]} />
-            <meshStandardMaterial color="#4a7c4a" />
+            <meshStandardMaterial color="#4a7c4a" roughness={0.9} metalness={0.1} />
           </mesh>
         )}
 
@@ -326,15 +330,15 @@ export const GameScene = () => {
           <>
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]} receiveShadow>
               <planeGeometry args={[200, 200]} />
-              <meshStandardMaterial color="#3d5c3d" />
+              <meshStandardMaterial color="#3d5c3d" roughness={0.85} metalness={0.05} />
             </mesh>
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
               <circleGeometry args={[25, 32]} />
-              <meshStandardMaterial color="#7CCD7C" />
+              <meshStandardMaterial color="#7CCD7C" roughness={0.8} metalness={0.1} />
             </mesh>
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
               <circleGeometry args={[10, 32]} />
-              <meshStandardMaterial color="#D2B48C" />
+              <meshStandardMaterial color="#D2B48C" roughness={0.7} metalness={0.1} />
             </mesh>
             <HubBuildingsWithProps onOpenShop={handleOpenShop} onOpenGuild={handleOpenGuild} onOpenBank={handleOpenBank} onOpenPotionCraft={handleOpenPotionCraft} onOpenWeaponCraft={handleOpenWeaponCraft} onOpenPVPArena={handleOpenPVPArena} onOpenFriends={handleOpenFriends} onOpenEvents={handleOpenEvents} onOpenRaid={handleOpenRaid} />
             <NPCEntity name={blacksmithName} position={[-6, 0, 6]} color="#CD853F" />
