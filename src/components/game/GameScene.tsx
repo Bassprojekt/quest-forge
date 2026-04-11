@@ -18,6 +18,7 @@ import { ClassSelect } from './ClassSelect';
 import { ShopUI } from './ShopUI';
 import { CraftingUI } from './CraftingUI';
 import { WeaponCraftingUI } from './WeaponCraftingUI';
+import { AmbientParticles, FireflyParticles } from './AmbientParticles';
 import { PVPArena } from './PVPArena';
 import { FriendsUI } from './FriendsUI';
 import { EventsUI } from './EventsUI';
@@ -269,30 +270,39 @@ export const GameScene = () => {
         shadows
         camera={{ fov: 55, near: 0.1, far: 1200 }}
         style={{ background: skyColor }}
-        gl={{ antialias: false, toneMapping: 3, toneMappingExposure: 1.4 }}
+        gl={{ antialias: true, toneMapping: 3, toneMappingExposure: 1.3 }}
       >
-        <ambientLight intensity={0.5 * nightIntensity} color={isNight ? '#1a1a3a' : '#FFF8E7'} />
+        <ambientLight intensity={0.4 * nightIntensity} color={isNight ? '#1a1a3a' : '#FFF8E7'} />
         <directionalLight
           position={[30, 50, 20]}
-          intensity={1.5 * nightIntensity}
+          intensity={1.8 * nightIntensity}
           color={isNight ? '#6666aa' : '#FFF5D4'}
           castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-          shadow-camera-far={300}
-          shadow-camera-left={-100}
-          shadow-camera-right={100}
-          shadow-camera-top={100}
-          shadow-camera-bottom={-100}
+          shadow-mapSize-width={3072}
+          shadow-mapSize-height={3072}
+          shadow-camera-far={400}
+          shadow-camera-left={-120}
+          shadow-camera-right={120}
+          shadow-camera-top={120}
+          shadow-camera-bottom={-120}
           shadow-bias={-0.0001}
+          shadow-normalBias={0.02}
         />
-        <directionalLight position={[-20, 20, -30]} intensity={0.4} color="#B0E0FF" />
-        <hemisphereLight color="#87CEEB" groundColor="#6B8E6B" intensity={0.6} />
-        <pointLight position={[0, 10, 0]} intensity={0.3} color="#FFE4B5" distance={50} />
+        <directionalLight position={[-20, 20, -30]} intensity={0.5} color="#B0E0FF" />
+        <hemisphereLight color="#87CEEB" groundColor="#4A6741" intensity={0.8} />
+        <pointLight position={[0, 10, 0]} intensity={0.4} color="#FFE4B5" distance={60} />
+        <pointLight position={[20, 15, -20]} intensity={0.2} color="#ADD8E6" distance={80} />
         <fog attach="fog" args={[fogColor, weather === 'sunny' ? 80 : weather === 'rainy' ? 40 : 30, weather === 'sunny' ? 120 : weather === 'rainy' ? 60 : 50]} />
 
-        {/* Rain particles when rainy */}
+        {/* Enhanced rain particles */}
         {weather === 'rainy' && <RainParticles />}
+
+        {/* Ambient particles for atmosphere */}
+        {currentZone === 'hub' && !isNight && <AmbientParticles count={40} color="#FFFACD" area={50} height={20} />}
+        {currentZone === 'hub' && isNight && <FireflyParticles count={25} />}
+
+        {/* Forest dust particles */}
+        {currentZone.includes('forest') && <AmbientParticles count={30} color="#90EE90" area={30} height={8} />}
 
         <ThirdPersonCamera />
         <Player />
