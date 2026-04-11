@@ -127,6 +127,8 @@ export const Player = () => {
   const respawnEnemies = useGameStore(s => s.respawnEnemies);
   const currentZone = useGameStore(s => s.currentZone);
   const playerPosition = useGameStore(s => s.playerPosition);
+  const playerHp = useGameStore(s => s.playerHp);
+  const setAutoFight = useGameStore(s => s.setAutoFight);
   const velocity = useRef(new THREE.Vector3());
   const shieldTimer = useRef(0);
   const dashTimer = useRef(0);
@@ -148,6 +150,14 @@ export const Player = () => {
 
   useFrame((state, delta) => {
     if (!meshRef.current) return;
+    if (playerHp <= 0) {
+      if (autoFight) setAutoFight(false);
+      if (velocity.current.length() > 0) {
+        velocity.current.set(0, 0, 0);
+      }
+      meshRef.current.position.y = 0;
+      return;
+    }
     const now = performance.now() / 1000;
 
     // Weapon swing animation - swing FORWARD (along Z axis)
