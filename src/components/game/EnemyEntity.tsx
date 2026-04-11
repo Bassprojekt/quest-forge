@@ -43,58 +43,66 @@ const MOB_CONFIGS: Record<string, { type: MobType; bodyColor: string; accentColo
   'Nihilschlund': { type: 'dragon', bodyColor: '#1A237E', accentColor: '#3949AB', hasWings: true, size: 1.3 },
 };
 
+const getMobColors = (baseColor: string) => {
+  return {
+    base: baseColor,
+    dark: baseColor.replace(/./g, c => {
+      const n = parseInt(c, 16);
+      return isNaN(n) ? c : Math.max(0, n - 40).toString(16);
+    }) + '80',
+    accent: baseColor.replace(/./g, c => {
+      const n = parseInt(c, 16);
+      return isNaN(n) ? c : Math.min(255, n + 60).toString(16);
+    }),
+  };
+};
+
 const SlimeMob = ({ config, isTarget }: { config: ReturnType<typeof MOB_CONFIGS[string]>; isTarget: boolean }) => {
   const scale = config.size;
-  const [bouncePhase] = useState(() => Math.random() * Math.PI * 2);
+  const colors = getMobColors(config.bodyColor);
   return (
     <group>
-      <mesh position={[0, scale * 0.55, 0]} castShadow>
-        <sphereGeometry args={[scale * 0.85, 20, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshStandardMaterial 
-          color={config.bodyColor} 
-          roughness={0.15} 
-          metalness={0.3}
-          transparent 
-          opacity={0.88}
-          envMapIntensity={0.8}
-        />
+      {/* Base blob - more organic shape */}
+      <mesh position={[0, scale * 0.4, 0]} castShadow>
+        <sphereGeometry args={[scale * 0.9, 16, 12]} />
+        <meshStandardMaterial color={colors.base} roughness={0.3} metalness={0.2} />
       </mesh>
+      {/* Top highlight */}
+      <mesh position={[0, scale * 0.9, 0]} castShadow>
+        <sphereGeometry args={[scale * 0.5, 12, 8]} />
+        <meshStandardMaterial color={colors.accent} roughness={0.2} metalness={0.3} />
+      </mesh>
+      {/* Inner glow */}
       <mesh position={[0, scale * 0.3, 0]} castShadow>
-        <sphereGeometry args={[scale * 0.95, 20, 12]} />
-        <meshStandardMaterial 
-          color={config.bodyColor} 
-          roughness={0.1} 
-          transparent 
-          opacity={0.5}
-        />
+        <sphereGeometry args={[scale * 0.7, 12, 8]} />
+        <meshStandardMaterial color={colors.accent} roughness={0.1} transparent opacity={0.6} />
       </mesh>
-      <mesh position={[scale * 0.2, scale * 1.0, scale * 0.55]} castShadow>
-        <sphereGeometry args={[scale * 0.15, 10, 10]} />
+      {/* Eyes */}
+      <mesh position={[scale * 0.25, scale * 0.5, scale * 0.6]} castShadow>
+        <boxGeometry args={[scale * 0.25, scale * 0.2, scale * 0.1]} />
         <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
       </mesh>
-      <mesh position={[-scale * 0.2, scale * 1.0, scale * 0.55]}>
-        <sphereGeometry args={[scale * 0.15, 10, 10]} />
+      <mesh position={[-scale * 0.25, scale * 0.5, scale * 0.6]} castShadow>
+        <boxGeometry args={[scale * 0.25, scale * 0.2, scale * 0.1]} />
         <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
       </mesh>
-      <mesh position={[scale * 0.2, scale * 1.0, scale * 0.68]}>
-        <sphereGeometry args={[scale * 0.08, 8, 8]} />
-        <meshStandardMaterial color="#1a1a2e" />
+      {/* Pupils */}
+      <mesh position={[scale * 0.25, scale * 0.48, scale * 0.66]}>
+        <boxGeometry args={[scale * 0.12, scale * 0.12, scale * 0.05]} />
+        <meshStandardMaterial color="#1a1a2e" roughness={0.2} />
       </mesh>
-      <mesh position={[-scale * 0.2, scale * 1.0, scale * 0.68]}>
-        <sphereGeometry args={[scale * 0.08, 8, 8]} />
-        <meshStandardMaterial color="#1a1a2e" />
+      <mesh position={[-scale * 0.25, scale * 0.48, scale * 0.66]}>
+        <boxGeometry args={[scale * 0.12, scale * 0.12, scale * 0.05]} />
+        <meshStandardMaterial color="#1a1a2e" roughness={0.2} />
       </mesh>
-      <mesh position={[scale * 0.22, scale * 1.02, scale * 0.72]} scale={0.6}>
-        <sphereGeometry args={[scale * 0.03, 6, 6]} />
+      {/* Eye shine */}
+      <mesh position={[scale * 0.28, scale * 0.52, scale * 0.68]}>
+        <boxGeometry args={[scale * 0.04, scale * 0.04, scale * 0.02]} />
         <meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={0.8} />
       </mesh>
-      <mesh position={[-scale * 0.18, scale * 1.02, scale * 0.72]} scale={0.6}>
-        <sphereGeometry args={[scale * 0.03, 6, 6]} />
+      <mesh position={[-scale * 0.22, scale * 0.52, scale * 0.68]}>
+        <boxGeometry args={[scale * 0.04, scale * 0.04, scale * 0.02]} />
         <meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={0.8} />
-      </mesh>
-      <mesh position={[0, scale * 0.7, scale * 0.75]} rotation={[-0.3, 0, 0]} castShadow>
-        <sphereGeometry args={[scale * 0.06, 8, 6]} />
-        <meshStandardMaterial color={config.accentColor} roughness={0.4} />
       </mesh>
       {isTarget && (
         <mesh position={[0, scale * 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
