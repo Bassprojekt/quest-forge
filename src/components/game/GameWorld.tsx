@@ -47,7 +47,7 @@ const Tree = ({ position, scale = 1 }: { position: [number, number, number]; sca
       {/* Secondary foliage */}
       <mesh position={[-0.5, 4, -0.3]} castShadow scale={0.7}>
         <sphereGeometry args={[1.5, 8, 6]} />
-        <meshStandardMaterial color={greens[(Math.floor(position[0] * 7) + 1) % greens.length]} roughness={0.7} />
+        <meshStandardMaterial color={greens[Math.floor((position[0] * 7) + 1) % greens.length]} roughness={0.7} />
       </mesh>
     </group>
   );
