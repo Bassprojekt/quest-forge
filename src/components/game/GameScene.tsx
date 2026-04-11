@@ -337,10 +337,10 @@ export const GameScene = () => {
               <meshStandardMaterial color="#D2B48C" roughness={0.7} />
             </mesh>
             <HubBuildingsWithProps onOpenShop={handleOpenShop} onOpenGuild={handleOpenGuild} onOpenBank={handleOpenBank} onOpenPotionCraft={handleOpenPotionCraft} onOpenWeaponCraft={handleOpenWeaponCraft} onOpenPVPArena={handleOpenPVPArena} onOpenFriends={handleOpenFriends} onOpenEvents={handleOpenEvents} onOpenRaid={handleOpenRaid} />
-            <NPCEntity name={blacksmithName} position={[-6, 0, 6]} color="#CD853F" />
-            <NPCEntity name={merchantName} position={[6, 0, 6]} color="#4169E1" />
-            <NPCEntity name={petMasterName} position={[-6, 0, -6]} color="#FF69B4" onClick={handleOpenPets} />
-            <NPCEntity name={rebirthAltarName} position={[6, 0, -6]} color="#FFD700" />
+            <NPCEntity name={blacksmithName} position={[-5, 0, 6]} color="#CD853F" />
+            <NPCEntity name={merchantName} position={[5, 0, 6]} color="#4169E1" />
+            <NPCEntity name={petMasterName} position={[-5, 0, -6]} color="#FF69B4" onClick={handleOpenPets} />
+            <NPCEntity name={rebirthAltarName} position={[5, 0, -6]} color="#FFD700" />
           </>
         )}
 

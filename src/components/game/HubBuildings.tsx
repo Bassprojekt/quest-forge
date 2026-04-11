@@ -633,8 +633,8 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
 
 {/* ==================== NEUE GEBÄUDE & NPCs ==================== */}
 
-      {/* Waffenladen - Westen - improved */}
-      <group position={[-20, 0, 20]}>
+      {/* Waffenladen - Westen - rotated to face center */}
+      <group position={[-20, 0, 20]} rotation={[0, Math.PI, 0]}>
         {/* Main walls - 2 tones */}
         <mesh position={[0, 1.5, 0]} castShadow>
           <boxGeometry args={[4.2, 3, 4.2]} />
@@ -689,13 +689,13 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={0.3} />
         </mesh>
         
-        {/* Waffen-NPC */}
-        <NPCWithBuilding name="Alchemist Anton" color="#9C27B0" position={[0, 0, 3]} icon="⚗️" onClick={() => onOpenPotionCraft?.()} />
-        <NPCWithBuilding name="Handwerker Hagen" color="#FF9800" position={[2.5, 0, 3]} icon="🔨" onClick={() => onOpenWeaponCraft?.()} />
+        {/* Waffen-NPC - vorne */}
+        <NPCWithBuilding name="Alchemist Anton" color="#9C27B0" position={[0, 0, -3]} icon="⚗️" onClick={() => onOpenPotionCraft?.()} />
+        <NPCWithBuilding name="Handwerker Hagen" color="#FF9800" position={[2.5, 0, -3]} icon="🔨" onClick={() => onOpenWeaponCraft?.()} />
       </group>
 
-      {/* Bank/Lager - Osten Nord */}
-      <group position={[20, 0, -20]}>
+      {/* Bank/Lager - Osten Nord - rotated */}
+      <group position={[20, 0, -20]} rotation={[0, Math.PI, 0]}>
         <mesh position={[0, 2, 0]} castShadow>
           <boxGeometry args={[5, 4, 4]} />
           <meshStandardMaterial color="#4A4A4A" roughness={0.8} />
@@ -711,11 +711,11 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
             <meshStandardMaterial color="#D2B48C" roughness={0.6} />
           </mesh>
         ))}
-        <NPCWithBuilding name="Bankier Boris" color="#4A4A4A" position={[0, 0, 3]} icon="🏦" onClick={() => onOpenBank?.()} />
+        <NPCWithBuilding name="Bankier Boris" color="#4A4A4A" position={[0, 0, -3]} icon="🏦" onClick={() => onOpenBank?.()} />
       </group>
 
-      {/* Hausierer (Traveling Merchant) - Südwesten */}
-      <group position={[-30, 0, 5]}>
+      {/* Händler - Südwesten - rotated */}
+      <group position={[-30, 0, 5]} rotation={[0, Math.PI, 0]}>
         <mesh position={[0, 0.8, 0]} castShadow>
           <cylinderGeometry args={[1.5, 2, 1.6, 8]} />
           <meshStandardMaterial color="#DEB887" roughness={0.7} />
@@ -733,11 +733,11 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <boxGeometry args={[1, 0.4, 0.6]} />
           <meshStandardMaterial color="#D2B48C" roughness={0.6} />
         </mesh>
-        <NPCWithBuilding name="Händler Hans" color="#DEB887" position={[0, 0, 1.5]} icon="🛒" />
+        <NPCWithBuilding name="Händler Hans" color="#DEB887" position={[0, 0, -1.5]} icon="🛒" />
       </group>
 
-      {/* Taverne - Südosten */}
-      <group position={[30, 0, 5]}>
+      {/* Taverne - Südosten - rotated */}
+      <group position={[30, 0, 5]} rotation={[0, Math.PI, 0]}>
         <mesh position={[0, 1.5, 0]} castShadow>
           <boxGeometry args={[5, 3, 4]} />
           <meshStandardMaterial color="#CD853F" roughness={0.7} />
@@ -760,11 +760,11 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <boxGeometry args={[1.2, 1.6, 0.1]} />
           <meshStandardMaterial color="#4A3728" roughness={0.9} />
         </mesh>
-        <NPCWithBuilding name="Wirt Willi" color="#CD853F" position={[0, 0, 3]} icon="🍺" onClick={() => onOpenShop?.('items')} />
+        <NPCWithBuilding name="Wirt Willi" color="#CD853F" position={[0, 0, -3]} icon="🍺" onClick={() => onOpenShop?.('items')} />
       </group>
 
-      {/* Gildenhaus - Zentrum Nord */}
-      <group position={[0, 0, 30]}>
+      {/* Gildenhaus - Zentrum Nord - rotated */}
+      <group position={[0, 0, 30]} rotation={[0, Math.PI, 0]}>
         <mesh position={[0, 2.5, 0]} castShadow>
           <boxGeometry args={[6, 5, 5]} />
           <meshStandardMaterial color="#4169E1" roughness={0.5} metalness={0.3} />
@@ -783,13 +783,14 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <boxGeometry args={[1.5, 2.4, 0.1]} />
           <meshStandardMaterial color="#4A3728" roughness={0.9} />
         </mesh>
-        <NPCWithBuilding name="Gildenmeisterin Gabi" color="#4169E1" position={[0, 0, 4]} icon="🏛️" onClick={() => onOpenGuild?.()} />
-        <NPCWithBuilding name="Arena-Leiter Max" color="#FF0000" position={[3, 0, 4]} icon="⚔️" onClick={() => onOpenPVPArena?.()} />
-        <NPCWithBuilding name="Freunde-Finder Finn" color="#9C27B0" position={[-3, 0, 4]} icon="👥" onClick={() => onOpenFriends?.()} />
+        {/* Gilden NPCs - vorne */}
+        <NPCWithBuilding name="Gildenmeisterin Gabi" color="#4169E1" position={[0, 0, -4]} icon="🏛️" onClick={() => onOpenGuild?.()} />
+        <NPCWithBuilding name="Arena-Leiter Max" color="#FF0000" position={[3, 0, -4]} icon="⚔️" onClick={() => onOpenPVPArena?.()} />
+        <NPCWithBuilding name="Freunde-Finder Finn" color="#9C27B0" position={[-3, 0, -4]} icon="👥" onClick={() => onOpenFriends?.()} />
       </group>
 
-      {/* Event & Raid building - separate location */}
-      <group position={[30, 0, -10]}>
+      {/* Event & Raid building - rotated */}
+      <group position={[30, 0, -10]} rotation={[0, Math.PI, 0]}>
         <mesh position={[0, 1.5, 0]} castShadow>
           <boxGeometry args={[4, 3, 4]} />
           <meshStandardMaterial color="#4A3728" roughness={0.9} />
@@ -798,8 +799,9 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <coneGeometry args={[2.2, 1.2, 4]} />
           <meshStandardMaterial color="#8B0000" roughness={0.8} />
         </mesh>
-        <NPCWithBuilding name="Event-Verkünder Evi" color="#FF9800" position={[0, 0, 4]} icon="🎉" onClick={() => onOpenEvents?.()} />
-        <NPCWithBuilding name="Raid-Leiter Roy" color="#9C27B0" position={[3, 0, 4]} icon="👹" onClick={() => onOpenRaid?.()} />
+        {/* Event/Raid NPCs - vorne */}
+        <NPCWithBuilding name="Event-Verkünder Evi" color="#FF9800" position={[0, 0, -4]} icon="🎉" onClick={() => onOpenEvents?.()} />
+        <NPCWithBuilding name="Raid-Leiter Roy" color="#9C27B0" position={[3, 0, -4]} icon="👹" onClick={() => onOpenRaid?.()} />
       </group>
 
       {/* Stone path - small ring only */}
