@@ -317,28 +317,24 @@ export const GameScene = () => {
         <HitParticles />
         <LevelUpEffect />
 
-        {/* Ground - only shown in hub, zones have their own ground */}
-        {currentZone === 'hub' && (
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]} receiveShadow>
-            <planeGeometry args={[50, 50]} />
-            <meshStandardMaterial color="#4a7c4a" roughness={0.9} metalness={0.1} />
-          </mesh>
-        )}
-
-        {/* Hub with buildings and NPCs */}
+        {/* Hub ground - no overlaps */}
         {currentZone === 'hub' && (
           <>
-            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]} receiveShadow>
-              <planeGeometry args={[200, 200]} />
-              <meshStandardMaterial color="#3d5c3d" roughness={0.85} metalness={0.05} />
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]} receiveShadow>
+              <planeGeometry args={[80, 80]} />
+              <meshStandardMaterial color="#3d5c3d" roughness={0.9} />
             </mesh>
-            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
-              <circleGeometry args={[25, 32]} />
-              <meshStandardMaterial color="#7CCD7C" roughness={0.8} metalness={0.1} />
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
+              <circleGeometry args={[20, 24]} />
+              <meshStandardMaterial color="#5a8a5a" roughness={0.8} />
             </mesh>
-            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
-              <circleGeometry args={[10, 32]} />
-              <meshStandardMaterial color="#D2B48C" roughness={0.7} metalness={0.1} />
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
+              <circleGeometry args={[8, 16]} />
+              <meshStandardMaterial color="#7CCD7C" roughness={0.7} />
+            </mesh>
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+              <circleGeometry args={[3, 12]} />
+              <meshStandardMaterial color="#D2B48C" roughness={0.7} />
             </mesh>
             <HubBuildingsWithProps onOpenShop={handleOpenShop} onOpenGuild={handleOpenGuild} onOpenBank={handleOpenBank} onOpenPotionCraft={handleOpenPotionCraft} onOpenWeaponCraft={handleOpenWeaponCraft} onOpenPVPArena={handleOpenPVPArena} onOpenFriends={handleOpenFriends} onOpenEvents={handleOpenEvents} onOpenRaid={handleOpenRaid} />
             <NPCEntity name={blacksmithName} position={[-6, 0, 6]} color="#CD853F" />
