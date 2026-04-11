@@ -284,26 +284,93 @@ const GLBFountain = () => {
 
 export const HubBuildings = ({ onOpenShop, onOpenGuild, onOpenBank }: { onOpenShop?: (tab: 'items' | 'pets', shopType?: 'general' | 'weapons' | 'armor' | 'potions') => void; onOpenGuild?: () => void; onOpenBank?: () => void }) => {
 
+  // Detailed Tree Component
+const DetailedTree = ({ position, variant }: { position: [number, number, number]; variant: number }) => {
+  const ref = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (ref.current) {
+      ref.current.rotation.z = Math.sin(clock.elapsedTime * 0.5 + position[0]) * 0.02;
+    }
+  });
+  
+  const trunkColor = '#5D4037';
+  const leafColors = ['#2E7D32', '#1B5E20', '#388E3C', '#43A047'];
+  const leafColor = leafColors[variant % leafColors.length];
+  
+  return (
+    <group ref={ref} position={position}>
+      <mesh position={[0, 1.5, 0]} castShadow>
+        <cylinderGeometry args={[0.15, 0.25, 3, 12]} />
+        <meshStandardMaterial color={trunkColor} roughness={0.9} />
+      </mesh>
+      {/* Main foliage */}
+      <mesh position={[0, 3.5, 0]} castShadow>
+        <coneGeometry args={[1.5, 3, 16]} />
+        <meshStandardMaterial color={leafColor} roughness={0.7} metalness={0.1} />
+      </mesh>
+      {/* Second layer */}
+      <mesh position={[0, 4.8, 0]} castShadow>
+        <coneGeometry args={[1.2, 2.5, 16]} />
+        <meshStandardMaterial color={leafColor} roughness={0.7} metalness={0.1} />
+      </mesh>
+      {/* Top */}
+      <mesh position={[0, 5.8, 0]} castShadow>
+        <coneGeometry args={[0.8, 2, 16]} />
+        <meshStandardMaterial color={leafColor} roughness={0.6} metalness={0.1} />
+      </mesh>
+    </group>
+  );
+};
+
+// Animated Torch
+const AnimatedTorch = ({ position }: { position: [number, number, number] }) => {
+  const lightRef = useRef<THREE.PointLight>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame(({ clock }) => {
+    if (meshRef.current && lightRef.current) {
+      const flicker = 0.8 + Math.sin(clock.elapsedTime * 10) * 0.2 + Math.random() * 0.1;
+      meshRef.current.scale.setScalar(flicker);
+      if (lightRef.current) lightRef.current.intensity = 2 * flicker;
+    }
+  });
+  
+  return (
+    <group position={position}>
+      <mesh position={[0, 1.5, 0]} castShadow>
+        <cylinderGeometry args={[0.05, 0.08, 3, 8]} />
+        <meshStandardMaterial color="#3E2723" roughness={0.9} />
+      </mesh>
+      {/* Flame mesh */}
+      <mesh ref={meshRef} position={[0, 3.2, 0]}>
+        <coneGeometry args={[0.15, 0.5, 8]} />
+        <meshStandardMaterial color="#FF6D00" emissive="#FF6D00" emissiveIntensity={3} />
+      </mesh>
+      <pointLight ref={lightRef} position={[0, 3.2, 0]} color="#FF9800" intensity={2} distance={10} />
+    </group>
+  );
+};
+
   return (
     <group>
-      {/* Decorative cherry blossom trees */}
+      {/* Detailed cherry blossom trees */}
       {[
         [-15, 0, 15], [15, 0, 15], [-15, 0, -15], [15, 0, -15],
         [-25, 0, 0], [25, 0, 0], [0, 0, 25], [0, 0, -25],
         [-8, 0, 8], [8, 0, 8], [-8, 0, -8], [8, 0, -8],
       ].map(([x, , z], i) => (
         <group key={`hub-tree-${i}`} position={[x, 0, z]}>
-          <mesh position={[0, 2, 0]} castShadow>
-            <cylinderGeometry args={[0.2, 0.3, 4, 8]} />
-            <meshStandardMaterial color="#8B6914" roughness={0.9} />
+          <mesh position={[0, 2, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[0.2, 0.35, 4, 16]} />
+            <meshStandardMaterial color="#5D4037" roughness={0.85} />
           </mesh>
-          <mesh position={[0, 4.5, 0]} castShadow>
-            <sphereGeometry args={[2, 12, 12]} />
-            <meshStandardMaterial color={i % 3 === 0 ? '#FF69B4' : i % 3 === 1 ? '#FFB6C1' : '#3CB371'} />
+          <mesh position={[0, 4.5, 0]} castShadow receiveShadow>
+            <sphereGeometry args={[2.2, 24, 24]} />
+            <meshStandardMaterial color={i % 3 === 0 ? '#FF69B4' : i % 3 === 1 ? '#FFB6C1' : '#3CB371'} roughness={0.6} />
           </mesh>
-          <mesh position={[0.6, 5.2, 0.4]} castShadow>
-            <sphereGeometry args={[1.2, 10, 10]} />
-            <meshStandardMaterial color={i % 2 === 0 ? '#FF91A4' : '#2E8B57'} />
+          <mesh position={[0.7, 5.3, 0.5]} castShadow receiveShadow>
+            <sphereGeometry args={[1.4, 16, 16]} />
+            <meshStandardMaterial color={i % 2 === 0 ? '#FF91A4' : '#2E8B57'} roughness={0.5} />
           </mesh>
         </group>
       ))}
