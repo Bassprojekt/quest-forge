@@ -801,14 +801,10 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
         <NPCWithBuilding name="Raid-Leiter Roy" color="#9C27B0" position={[3, 0, 4]} icon="👹" onClick={() => onOpenRaid?.()} />
       </group>
 
-      {/* Stone path rings */}
+      {/* Stone path - small ring only */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
-        <ringGeometry args={[6, 8, 64]} />
+        <ringGeometry args={[6, 7.5, 32]} />
         <meshStandardMaterial color="#C4A777" roughness={0.8} />
-      </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
-        <ringGeometry args={[35, 45, 64]} />
-        <meshStandardMaterial color="#C4A777" roughness={0.8} transparent opacity={0.5} />
       </mesh>
 
       {/* Flower patches */}
