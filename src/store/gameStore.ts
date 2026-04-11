@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { playSwordSlash, playMagicCast, playArrowShoot, playLevelUp, playHitSound, playPotionDrink } from '@/hooks/useSound';
 import { useSkillTreeStore } from './skillTreeStore';
 
-export type ZoneType = 'hub' | 'grasslands' | 'mushroom_forest' | 'frozen_peaks' | 'lava_caverns' | 'coral_reef' | 'shadow_swamp' | 'crystal_highlands' | 'void_nexus';
+export type ZoneType = 'hub' | 'grasslands' | 'mushroom_forest' | 'frozen_peaks' | 'lava_caverns' | 'coral_reef' | 'shadow_swamp' | 'crystal_highlands' | 'void_nexus' | 'dragon_lair' | 'enchanted_forest' | 'floating_islands';
 export type PlayerClass = 'warrior' | 'mage' | 'archer' | null;
 
 export interface Enemy {
@@ -92,6 +92,9 @@ export const ZONES: ZoneInfo[] = [
   { id: 'shadow_swamp', name: 'Schattensumpf', requiredLevel: 50, color: '#607D8B', center: [1150, 150], radius: 160, skyColor: '#4A5568', groundColor: '#2D3436' },
   { id: 'crystal_highlands', name: 'Kristallhochland', requiredLevel: 60, color: '#00E5FF', center: [1400, 0], radius: 180, skyColor: '#E0FFFF', groundColor: '#B0C4DE' },
   { id: 'void_nexus', name: 'Void Nexus', requiredLevel: 70, color: '#7B1FA2', center: [1700, 200], radius: 200, skyColor: '#1A0A2E', groundColor: '#0D0221' },
+  { id: 'dragon_lair', name: 'Drachenhöhle', requiredLevel: 80, color: '#D32F2F', center: [2000, 100], radius: 220, skyColor: '#8B0000', groundColor: '#1A0A0A' },
+  { id: 'enchanted_forest', name: 'Verzauberter Wald', requiredLevel: 90, color: '#388E3C', center: [2300, 0], radius: 240, skyColor: '#228B22', groundColor: '#0D3D0D' },
+  { id: 'floating_islands', name: 'Schwebende Inseln', requiredLevel: 100, color: '#7B1FA2', center: [2600, 150], radius: 260, skyColor: '#4A148C', groundColor: '#1A0A2E' },
 ];
 
 const CLASS_SKILLS: Record<string, Skill[]> = {
@@ -116,15 +119,18 @@ function generateEnemies(zone: ZoneType, baseLv: number): Enemy[] {
   const zoneInfo = ZONES.find(z => z.id === zone);
   if (!zoneInfo) return [];
   
-  const zoneEnemyDefs: Record<string, { names: string[]; hpMult: number[] }> = {
-    grasslands: { names: ['Zombie', 'Pilzling', 'Blauer Schleim', 'Riesenbiene', 'Haustier Schnecke'], hpMult: [0.8, 1, 1.6, 2.4, 0.5] },
-    mushroom_forest: { names: ['Sporenpilz', 'Giftwurm', 'Pilzgolem'], hpMult: [1, 1.5, 2.5] },
-    frozen_peaks: { names: ['Eiskobold', 'Frostwolf', 'Eisriese'], hpMult: [1, 1.5, 3] },
-    lava_caverns: { names: ['Magmaschleimer', 'Feuerdämon', 'Lavawurm'], hpMult: [1, 1.8, 3] },
-    coral_reef: { names: ['Quallenfisch', 'Krabbenkrieger', 'Tiefseeschlange'], hpMult: [1, 1.6, 2.8] },
-    shadow_swamp: { names: ['Zombie', 'Skelett', 'Creeper', 'Enderman', 'Sumpfkröte', 'Nebelwandler'], hpMult: [0.7, 0.8, 0.9, 1.0, 1.5, 3] },
-    crystal_highlands: { names: ['Kristallgolem', 'Prismadrache', 'Edelsteinkäfer'], hpMult: [1, 2, 3.5] },
-    void_nexus: { names: ['Voidwalker', 'Chaosphantom', 'Nihilschlund'], hpMult: [1.5, 2.5, 4] },
+  const zoneEnemyDefs: Record<string, { names: string[]; hpMult: number[]; bosses: string[] }> = {
+    grasslands: { names: ['Zombie', 'Pilzling', 'Blauer Schleim', 'Riesenbiene', 'Haustier Schnecke'], hpMult: [0.8, 1, 1.6, 2.4, 0.5], bosses: ['König der Wiesen'] },
+    mushroom_forest: { names: ['Sporenpilz', 'Giftwurm', 'Pilzgolem'], hpMult: [1, 1.5, 2.5], bosses: ['Pilzkönig'] },
+    frozen_peaks: { names: ['Eiskobold', 'Frostwolf', 'Eisriese'], hpMult: [1, 1.5, 3], bosses: ['Kältefürst'] },
+    lava_caverns: { names: ['Magmaschleimer', 'Feuerdämon', 'Lavawurm'], hpMult: [1, 1.8, 3], bosses: ['Feuerfürst'] },
+    coral_reef: { names: ['Quallenfisch', 'Krabbenkrieger', 'Tiefseeschlange'], hpMult: [1, 1.6, 2.8], bosses: ['Meereskönig'] },
+    shadow_swamp: { names: ['Zombie', 'Skelett', 'Creeper', 'Enderman', 'Sumpfkröte', 'Nebelwandler'], hpMult: [0.7, 0.8, 0.9, 1.0, 1.5, 3], bosses: ['Schattenfürst'] },
+    crystal_highlands: { names: ['Kristallgolem', 'Prismadrache', 'Edelsteinkäfer'], hpMult: [1, 2, 3.5], bosses: ['Kristallkönig'] },
+    void_nexus: { names: ['Voidwalker', 'Chaosphantom', 'Nihilschlund'], hpMult: [1.5, 2.5, 4], bosses: ['Voidlord'] },
+    dragon_lair: { names: ['Drachenjäger', 'Feuerdrache', 'Aschekrieger'], hpMult: [2, 3, 4], bosses: ['Drachenfürst'] },
+    enchanted_forest: { names: ['Waldgeist', 'Einhorn', 'Feenpriester'], hpMult: [2.5, 3.5, 4.5], bosses: ['Waldkönigin'] },
+    floating_islands: { names: ['Luftgeist', 'Wolkenriese', 'Sturmrufer'], hpMult: [3, 4, 5], bosses: ['Himmelskönig'] },
   };
   const def = zoneEnemyDefs[zone];
   if (!def) return [];
@@ -152,6 +158,26 @@ function generateEnemies(zone: ZoneType, baseLv: number): Enemy[] {
       });
     }
   });
+  
+  // Generate boss for this zone
+  if (def.bosses && def.bosses.length > 0) {
+    const bossName = def.bosses[Math.floor(Math.random() * def.bosses.length)];
+    const bossAngle = Math.random() * Math.PI * 2;
+    const bossRadius = 15 + Math.random() * 5;
+    enemies.push({
+      id: `boss-${zone}-${Date.now()}`,
+      position: [Math.cos(bossAngle) * bossRadius, 0.5, Math.sin(bossAngle) * bossRadius],
+      hp: Math.floor(baseHp * 5),
+      maxHp: Math.floor(baseHp * 5),
+      alive: true,
+      name: bossName,
+      xpReward: Math.floor(baseXp * 10),
+      goldReward: Math.floor(baseGold * 10),
+      zone,
+      isBoss: true,
+    });
+  }
+  
   return enemies;
 }
 
