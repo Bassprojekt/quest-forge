@@ -82,10 +82,10 @@ export const NPCEntity = ({ name, position, color, onClick }: Props) => {
     floatPhase.current += 0.015;
     meshRef.current.position.y = position[1] + Math.sin(floatPhase.current) * 0.03;
     
-    // NPCs face the center of the hub (0, 0) instead of looking at player
-    const toCenterX = 0 - position[0];
-    const toCenterZ = 0 - position[2];
-    meshRef.current.rotation.y = Math.atan2(toCenterX, toCenterZ);
+    // NPCs look at player - back to center is wrong
+    const toPlayerX = playerPos[0] - position[0];
+    const toPlayerZ = playerPos[2] - position[2];
+    meshRef.current.rotation.y = Math.atan2(toPlayerX, toPlayerZ);
   });
   
   const handleClick = () => {
