@@ -13,7 +13,7 @@ export const ChatUI = ({ onClose }: Props) => {
   const [chatType, setChatType] = useState<ChatType>('general');
   const [message, setMessage] = useState('');
   const [privateTo, setPrivateTo] = useState('');
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const allMessages = useChatStore(s => s.messages);

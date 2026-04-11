@@ -50,14 +50,12 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
         </div>
 
         <div className="flex gap-2 mb-4">
-          {!showOnlyPets && tab === 'items' && (
-            <button onClick={() => setTab('items')}
-              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
-                tab === 'items' ? 'bg-[#4169E1] text-white' : 'bg-[#F0F0F0] text-[#888] hover:text-[#333]'
-              }`}>
-              ITEMS
-            </button>
-          )}
+          <button onClick={() => setTab('items')}
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+              tab === 'items' ? 'bg-[#4169E1] text-white' : 'bg-[#F0F0F0] text-[#888] hover:text-[#333]'
+            }`}>
+            🧪 TRÄNKE
+          </button>
           <button onClick={() => setTab('pets')}
             className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
               tab === 'pets' ? 'bg-[#FF69B4] text-white' : 'bg-[#F0F0F0] text-[#888] hover:text-[#333]'
@@ -68,10 +66,7 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
 
         <div className="space-y-2 max-h-64 overflow-y-auto">
           {tab === 'items' && shopItems.filter(item => {
-            if (shopType === 'weapons') return item.type === 'weapon';
-            if (shopType === 'armor') return item.type === 'armor';
-            if (shopType === 'potions') return item.type === 'potion';
-            return true;
+            return item.type === 'potion';
           }).map(item => (
             <div key={item.id} className="bg-[#F8F6F0] rounded-xl p-3 border border-[#E0D5C0] flex items-center justify-between">
               <div>

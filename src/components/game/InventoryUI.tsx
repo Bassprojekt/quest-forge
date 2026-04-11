@@ -17,10 +17,11 @@ export const InventoryUI = ({ onClose }: Props) => {
   const playerHp = useGameStore(s => s.playerHp);
   const playerMaxHp = useGameStore(s => s.playerMaxHp);
   const equipItem = useGameStore(s => s.equipItem);
-  // Store functions renamed to avoid false positive lint warnings
   const drinkPotion = useGameStore(s => s.usePotion);
+  const sellItem = useGameStore(s => s.sellItem);
   const recalcStats = useGameStore(s => s.recalcStats);
-  const [tab, setTab] = useState<'all' | 'weapon' | 'armor' | 'potion'>('all');
+  const [tab, setTab] = useState<'all' | 'weapon' | 'armor' | 'potion' | 'material'>('all');
+  const [sellMode, setSellMode] = useState(false);
 
   const filtered = tab === 'all' ? inventory : inventory.filter(i => i.type === tab);
 
@@ -42,16 +43,24 @@ export const InventoryUI = ({ onClose }: Props) => {
         style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[#4169E1] font-bold text-lg">🎒 Inventar</h2>
-          <button onClick={onClose} className="text-[#AAA] hover:text-[#333] text-xl">✕</button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setSellMode(!sellMode)}
+              className={`px-3 py-1 rounded-lg text-xs font-bold ${
+                sellMode ? 'bg-[#FF5722] text-white' : 'bg-[#FF5722]/20 text-[#FF5722] hover:bg-[#FF5722]/30'
+              }`}>
+              {sellMode ? '✕ VERKAUFEN' : '💰 VERKAUFEN'}
+            </button>
+            <button onClick={onClose} className="text-[#AAA] hover:text-[#333] text-xl">✕</button>
+          </div>
         </div>
 
         <div className="flex gap-2 mb-4">
-          {(['all', 'weapon', 'armor', 'potion'] as const).map(t => (
+          {(['all', 'weapon', 'armor', 'potion', 'material'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
                 tab === t ? 'bg-[#4169E1] text-white' : 'bg-[#F0F0F0] text-[#888] hover:text-[#333]'
               }`}>
-              {t === 'all' ? '📦 ALLE' : t === 'weapon' ? '⚔️ WAFFEN' : t === 'armor' ? '🛡️ RÜSTUNG' : '🧪 TRÄNKE'}
+              {t === 'all' ? '📦 ALLE' : t === 'weapon' ? '⚔️ WAFFEN' : t === 'armor' ? '🛡️ RÜSTUNG' : t === 'potion' ? '🧪 TRÄNKE' : '🪨 MATERIAL'}
             </button>
           ))}
         </div>
@@ -85,28 +94,39 @@ export const InventoryUI = ({ onClose }: Props) => {
                   </div>
                 </div>
               </div>
-              <div>
-                {item.type === 'potion' ? (
-                  <button onClick={() => handleUsePotion(item.id)}
-                    disabled={playerHp >= playerMaxHp}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold ${
-                      playerHp < playerMaxHp
-                        ? 'bg-[#4CAF50] text-white hover:bg-[#43A047]'
-                        : 'bg-[#E0E0E0] text-[#999] cursor-not-allowed'
-                    }`}>
-                    BENUTZEN
-                  </button>
-                ) : (
-                  <button onClick={() => handleEquip(item)}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold ${
-                      item.equipped
-                        ? 'bg-[#FF9800] text-white hover:bg-[#F57C00]'
-                        : 'bg-[#4169E1] text-white hover:bg-[#3558C0]'
-                    }`}>
-                    {item.equipped ? 'ABLEGEN' : 'ANLEGEN'}
-                  </button>
-                )}
-              </div>
+<div>
+                  {sellMode ? (
+                    item.equipped ? (
+                      <span className="text-[#999] text-[10px]">Ausgerüstet</span>
+                    ) : (
+                      <button onClick={() => sellItem(item.id)}
+                        className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-[#FF5722] text-white hover:bg-[#E64A19]">
+                        +{Math.floor(item.value * 0.5)} 💰
+                      </button>
+                    )
+                  ) : item.type === 'potion' ? (
+                    <button onClick={() => handleUsePotion(item.id)}
+                      disabled={playerHp >= playerMaxHp}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold ${
+                        playerHp < playerMaxHp
+                          ? 'bg-[#4CAF50] text-white hover:bg-[#43A047]'
+                          : 'bg-[#E0E0E0] text-[#999] cursor-not-allowed'
+                      }`}>
+                      BENUTZEN
+                    </button>
+                  ) : item.type === 'material' ? (
+                    <span className="text-[#999] text-[10px]">Material</span>
+                  ) : (
+                    <button onClick={() => handleEquip(item)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold ${
+                        item.equipped
+                          ? 'bg-[#FF9800] text-white hover:bg-[#F57C00]'
+                          : 'bg-[#4169E1] text-white hover:bg-[#3558C0]'
+                      }`}>
+                      {item.equipped ? 'ABLEGEN' : 'ANLEGEN'}
+                    </button>
+                  )}
+                </div>
             </div>
           ))}
         </div>

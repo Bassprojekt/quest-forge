@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
-import { Settings, Volume2, VolumeX, Globe, ChevronDown, RotateCcw } from 'lucide-react';
+import { Settings, Volume2, VolumeX, Globe, ChevronDown, RotateCcw, HelpCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { useGameStore } from '@/store/gameStore';
@@ -8,9 +8,10 @@ import { useGameStore } from '@/store/gameStore';
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onOpenHelp?: () => void;
 }
 
-export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
+export const SettingsDialog = ({ open, onOpenChange, onOpenHelp }: SettingsDialogProps) => {
   const { volume, language, setVolume, setLanguage } = useSettingsStore();
   const [localVolume, setLocalVolume] = useState(volume);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
@@ -116,6 +117,14 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
           >
             <RotateCcw className="h-4 w-4" />
             Spiel zurücksetzen
+          </button>
+
+          <button
+            onClick={() => onOpenHelp?.()}
+            className="w-full mt-3 flex items-center justify-center gap-2 py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium"
+          >
+            <HelpCircle className="h-4 w-4" />
+            Hilfe & Steuerung
           </button>
         </div>
       </DialogContent>

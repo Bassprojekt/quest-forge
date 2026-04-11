@@ -12,9 +12,16 @@ import { LaserBeam } from './LaserBeam';
 import { HUD } from './HUD';
 import { RainParticles } from './RainParticles';
 import { DamageNumbers } from './DamageNumbers';
+import { GroundItems } from './GroundItems';
 import { HitParticles, LevelUpEffect } from './HitParticles';
 import { ClassSelect } from './ClassSelect';
 import { ShopUI } from './ShopUI';
+import { CraftingUI } from './CraftingUI';
+import { WeaponCraftingUI } from './WeaponCraftingUI';
+import { PVPArena } from './PVPArena';
+import { FriendsUI } from './FriendsUI';
+import { EventsUI } from './EventsUI';
+import { RaidUI } from './RaidUI';
 import { GuildUI } from './GuildUI';
 import { BankUI } from './BankUI';
 import { PetCompanion } from './PetCompanion';
@@ -51,10 +58,16 @@ interface HubBuildingsProps {
   onOpenShop: (tab: 'items' | 'pets') => void;
   onOpenGuild: () => void;
   onOpenBank: () => void;
+  onOpenPotionCraft: () => void;
+  onOpenWeaponCraft: () => void;
+  onOpenPVPArena: () => void;
+  onOpenFriends: () => void;
+  onOpenEvents: () => void;
+  onOpenRaid: () => void;
 }
 
-const HubBuildingsWithProps = ({ onOpenShop, onOpenGuild, onOpenBank }: HubBuildingsProps) => {
-  return <HubBuildings onOpenShop={onOpenShop} onOpenGuild={onOpenGuild} onOpenBank={onOpenBank} />;
+const HubBuildingsWithProps = ({ onOpenShop, onOpenGuild, onOpenBank, onOpenPotionCraft, onOpenWeaponCraft, onOpenPVPArena, onOpenFriends, onOpenEvents, onOpenRaid }: HubBuildingsProps) => {
+  return <HubBuildings onOpenShop={onOpenShop} onOpenGuild={onOpenGuild} onOpenBank={onOpenBank} onOpenPotionCraft={onOpenPotionCraft} onOpenWeaponCraft={onOpenWeaponCraft} onOpenPVPArena={onOpenPVPArena} onOpenFriends={onOpenFriends} onOpenEvents={onOpenEvents} onOpenRaid={onOpenRaid} />;
 };
 
 export const GameScene = () => {
@@ -76,6 +89,10 @@ export const GameScene = () => {
   const [showShop, setShowShop] = useState(false);
   const [showGuild, setShowGuild] = useState(false);
   const [showBank, setShowBank] = useState(false);
+  const [showPotionCraft, setShowPotionCraft] = useState(false);
+  const [showWeaponCraft, setShowWeaponCraft] = useState(false);
+  const [showPVPArena, setShowPVPArena] = useState(false);
+  const [showFriends, setShowFriends] = useState(false);
   const language = useSettingsStore(s => s.language);
   
   const t = (key: keyof typeof TRANSLATIONS.de): string => {
@@ -104,6 +121,33 @@ export const GameScene = () => {
   const handleOpenBank = useCallback(() => {
     setShowBank(true);
   }, []);
+
+  const handleOpenPotionCraft = useCallback(() => {
+    setShowPotionCraft(true);
+  }, []);
+
+  const handleOpenWeaponCraft = useCallback(() => {
+    setShowWeaponCraft(true);
+  }, []);
+
+  const handleOpenPVPArena = useCallback(() => {
+    setShowPVPArena(true);
+  }, []);
+
+  const handleOpenFriends = useCallback(() => {
+    setShowFriends(true);
+  }, []);
+
+  const handleOpenEvents = useCallback(() => {
+    setShowEvents(true);
+  }, []);
+
+  const handleOpenRaid = useCallback(() => {
+    setShowRaid(true);
+  }, []);
+
+  const [showEvents, setShowEvents] = useState(false);
+  const [showRaid, setShowRaid] = useState(false);
 
   const blacksmithName = 'Schmied Vulkan';
   const merchantName = 'Händler Mika';
@@ -212,6 +256,12 @@ export const GameScene = () => {
       {showShop && <ShopUI onClose={() => setShowShop(false)} initialTab={shopTab} shopType={shopType} />}
       {showGuild && <GuildUI onClose={() => setShowGuild(false)} />}
       {showBank && <BankUI onClose={() => setShowBank(false)} />}
+      {showPotionCraft && <CraftingUI onClose={() => setShowPotionCraft(false)} />}
+      {showWeaponCraft && <WeaponCraftingUI onClose={() => setShowWeaponCraft(false)} />}
+      {showPVPArena && <PVPArena onClose={() => setShowPVPArena(false)} />}
+      {showFriends && <FriendsUI onClose={() => setShowFriends(false)} />}
+      {showEvents && <EventsUI onClose={() => setShowEvents(false)} />}
+      {showRaid && <RaidUI onClose={() => setShowRaid(false)} />}
       <ChatUI onClose={() => {}} />
       <MobileControls />
       <HUD />
@@ -249,6 +299,7 @@ export const GameScene = () => {
         <PetCompanion />
         <LaserBeam />
         <DamageNumbers />
+        <GroundItems />
         <HitParticles />
         <LevelUpEffect />
 
@@ -275,7 +326,7 @@ export const GameScene = () => {
               <circleGeometry args={[10, 32]} />
               <meshStandardMaterial color="#D2B48C" />
             </mesh>
-            <HubBuildingsWithProps onOpenShop={handleOpenShop} onOpenGuild={handleOpenGuild} onOpenBank={handleOpenBank} />
+            <HubBuildingsWithProps onOpenShop={handleOpenShop} onOpenGuild={handleOpenGuild} onOpenBank={handleOpenBank} onOpenPotionCraft={handleOpenPotionCraft} onOpenWeaponCraft={handleOpenWeaponCraft} onOpenPVPArena={handleOpenPVPArena} onOpenFriends={handleOpenFriends} onOpenEvents={handleOpenEvents} onOpenRaid={handleOpenRaid} />
             <NPCEntity name={blacksmithName} position={[-6, 0, 6]} color="#CD853F" />
             <NPCEntity name={merchantName} position={[6, 0, 6]} color="#4169E1" />
             <NPCEntity name={petMasterName} position={[-6, 0, -6]} color="#FF69B4" onClick={handleOpenPets} />

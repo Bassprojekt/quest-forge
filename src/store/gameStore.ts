@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { playSwordSlash, playMagicCast, playArrowShoot, playLevelUp, playHitSound, playPotionDrink } from '@/hooks/useSound';
 import { useSkillTreeStore } from './skillTreeStore';
 
-export type ZoneType = 'hub' | 'grasslands' | 'mushroom_forest' | 'frozen_peaks' | 'lava_caverns' | 'coral_reef' | 'shadow_swamp' | 'crystal_highlands' | 'void_nexus' | 'dragon_lair' | 'enchanted_forest' | 'floating_islands';
+export type ZoneType = 'hub' | 'grasslands' | 'mushroom_forest' | 'frozen_peaks' | 'lava_caverns' | 'coral_reef' | 'shadow_swamp' | 'crystal_highlands' | 'void_nexus' | 'dragon_lair' | 'enchanted_forest' | 'floating_islands' | 'abyss' | 'celestial_plains' | 'shadow_realm' | 'pvp_arena' | 'raid_dungeon' | 'arena_colosseum';
 export type PlayerClass = 'warrior' | 'mage' | 'archer' | null;
 
 export interface Enemy {
@@ -55,13 +55,36 @@ export interface ShopItem {
 export interface InventoryItem {
   id: string;
   name: string;
-  type: 'weapon' | 'armor' | 'potion';
+  type: 'weapon' | 'armor' | 'potion' | 'material';
   icon: string;
   stat: string;
   value: number;
   equipped: boolean;
   quantity: number;
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
+}
+
+export interface GroundItem {
+  id: string;
+  name: string;
+  type: 'potion' | 'material';
+  icon: string;
+  value: number;
+  quantity: number;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  position: [number, number, number];
+  timestamp: number;
+}
+
+export interface CraftingRecipe {
+  id: string;
+  name: string;
+  type: 'weapon' | 'armor' | 'potion';
+  icon: string;
+  stat: string;
+  value: number;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  ingredients: { name: string; quantity: number }[];
 }
 
 export interface DamagePopup {
@@ -95,6 +118,12 @@ export const ZONES: ZoneInfo[] = [
   { id: 'dragon_lair', name: 'Drachenhöhle', requiredLevel: 80, color: '#D32F2F', center: [2000, 100], radius: 220, skyColor: '#8B0000', groundColor: '#1A0A0A' },
   { id: 'enchanted_forest', name: 'Verzauberter Wald', requiredLevel: 90, color: '#388E3C', center: [2300, 0], radius: 240, skyColor: '#228B22', groundColor: '#0D3D0D' },
   { id: 'floating_islands', name: 'Schwebende Inseln', requiredLevel: 100, color: '#7B1FA2', center: [2600, 150], radius: 260, skyColor: '#4A148C', groundColor: '#1A0A2E' },
+  { id: 'abyss', name: 'Die Abgründe', requiredLevel: 110, color: '#212121', center: [2900, 100], radius: 280, skyColor: '#0A0A0A', groundColor: '#1A1A1A' },
+  { id: 'celestial_plains', name: 'Himmelsfelder', requiredLevel: 120, color: '#FFD700', center: [3100, 50], radius: 300, skyColor: '#FFE4B5', groundColor: '#FFF8DC' },
+  { id: 'shadow_realm', name: 'Schattenreich', requiredLevel: 130, color: '#4A0080', center: [3400, 150], radius: 320, skyColor: '#1A0030', groundColor: '#0D001A' },
+  { id: 'pvp_arena', name: 'PvP Arena', requiredLevel: 1, color: '#FF0000', center: [0, 0], radius: 50, skyColor: '#330000', groundColor: '#4A0000' },
+  { id: 'raid_dungeon', name: 'Raid Dungeon', requiredLevel: 50, color: '#9C27B0', center: [3200, 0], radius: 150, skyColor: '#1A0000', groundColor: '#2A0A2A' },
+  { id: 'arena_colosseum', name: 'Arena Kolosseum', requiredLevel: 30, color: '#FF0000', center: [3100, 100], radius: 100, skyColor: '#330000', groundColor: '#4A0000' },
 ];
 
 const CLASS_SKILLS: Record<string, Skill[]> = {
@@ -131,6 +160,12 @@ function generateEnemies(zone: ZoneType, baseLv: number): Enemy[] {
     dragon_lair: { names: ['Drachenjäger', 'Feuerdrache', 'Aschekrieger'], hpMult: [2, 3, 4], bosses: ['Drachenfürst'] },
     enchanted_forest: { names: ['Waldgeist', 'Einhorn', 'Feenpriester'], hpMult: [2.5, 3.5, 4.5], bosses: ['Waldkönigin'] },
     floating_islands: { names: ['Luftgeist', 'Wolkenriese', 'Sturmrufer'], hpMult: [3, 4, 5], bosses: ['Himmelskönig'] },
+    abyss: { names: ['Schattendämon', 'Seelenesser', 'Finsternisklinge'], hpMult: [3.5, 4.5, 5.5], bosses: ['Abgrundsherr'] },
+    celestial_plains: { names: ['Lichtengel', 'Sternschnuppe', 'Sonnenritter'], hpMult: [4, 5, 6], bosses: ['Sonnenfürst'] },
+    shadow_realm: { names: ['Schattenbestie', 'Nachtklinge', 'Dunkelmagier'], hpMult: [4.5, 5.5, 6.5], bosses: ['Schattenkönig'] },
+    pvp_arena: { names: ['Arena-Krieger', 'Gladiator', 'Champion'], hpMult: [1, 1.5, 2], bosses: ['Arena-Meister'] },
+    raid_dungeon: { names: [' Dunkelwolf', 'Frostriese', 'Feuerdrache', 'Schattenfürst', 'Dämonenlord'], hpMult: [1, 1.5, 2, 2.5, 3], bosses: ['Dunkelwolf', 'Frostriese', 'Feuerdrache', 'Schattenfürst', 'Dämonenlord'] },
+    arena_colosseum: { names: ['Gladiator', 'Schwertkämpfer', 'Bogenschütze', 'Spass'], hpMult: [1.2, 1.8, 2.2, 3], bosses: ['Champion', 'Arena-Meister'] },
   };
   const def = zoneEnemyDefs[zone];
   if (!def) return [];
@@ -210,12 +245,14 @@ export interface GameState {
   currentZone: ZoneType;
   autoFight: boolean;
   autoRespawn: boolean;
+  autoLoot: boolean;
   isUIOpen: boolean;
   showSaveIndicator: boolean;
   weather: 'sunny' | 'rainy' | 'foggy';
   shopItems: ShopItem[];
   pets: Pet[];
   inventory: InventoryItem[];
+  groundItems: GroundItem[];
   damagePopups: DamagePopup[];
   levelUpEffect: boolean;
   hitEffectPos: [number, number, number] | null;
@@ -253,14 +290,19 @@ export interface GameState {
   addGold: (amount: number) => void;
   equipItem: (itemId: string) => void;
   usePotion: (itemId: string) => void;
+  sellItem: (itemId: string) => void;
+  craftItem: (recipeId: string) => void;
   addToInventory: (item: Omit<InventoryItem, 'equipped'>) => void;
   removeFromInventory: (itemId: string, quantity: number) => void;
+  spawnGroundItem: (item: Omit<GroundItem, 'id' | 'timestamp'>) => void;
+  pickupGroundItem: (itemId: string) => void;
   removeDamagePopup: (id: string) => void;
   addDamagePopup: (popup: Omit<DamagePopup, 'timestamp'>) => void;
   clearHitEffect: () => void;
   recalcStats: () => void;
   setAutoFight: (v: boolean) => void;
   setAutoRespawn: (v: boolean) => void;
+  setAutoLoot: (v: boolean) => void;
   setUIOpen: (v: boolean) => void;
   setShowSaveIndicator: (v: boolean) => void;
   setWeather: (weather: 'sunny' | 'rainy' | 'foggy') => void;
@@ -280,6 +322,8 @@ const INITIAL_SHOP_ITEMS: ShopItem[] = [
   { id: 'wpn-9', name: 'Schattenklinge', type: 'weapon', stat: '+70 ATK', value: 70, price: 1200, owned: false },
   { id: 'wpn-10', name: 'Drachenklinge', type: 'weapon', stat: '+85 ATK', value: 85, price: 1500, owned: false },
   { id: 'wpn-11', name: 'Voidklinge', type: 'weapon', stat: '+100 ATK', value: 100, price: 2000, owned: false },
+  { id: 'wpn-12', name: 'Abgrundklinge', type: 'weapon', stat: '+130 ATK', value: 130, price: 3500, owned: false },
+  { id: 'wpn-13', name: 'Ewige Klinge', type: 'weapon', stat: '+160 ATK', value: 160, price: 5000, owned: false },
   { id: 'arm-1', name: 'Lederrüstung', type: 'armor', stat: '+5 DEF', value: 5, price: 40, owned: false },
   { id: 'arm-2', name: 'Kettenhemd', type: 'armor', stat: '+10 DEF', value: 10, price: 80, owned: false },
   { id: 'arm-3', name: 'Plattenrüstung', type: 'armor', stat: '+15 DEF', value: 15, price: 150, owned: false },
@@ -289,11 +333,31 @@ const INITIAL_SHOP_ITEMS: ShopItem[] = [
   { id: 'arm-7', name: 'Schattenrüstung', type: 'armor', stat: '+50 DEF', value: 50, price: 1000, owned: false },
   { id: 'arm-8', name: 'Voidrüstung', type: 'armor', stat: '+70 DEF', value: 70, price: 1500, owned: false },
   { id: 'arm-9', name: 'Legendäre Rüstung', type: 'armor', stat: '+100 DEF', value: 100, price: 2500, owned: false },
+  { id: 'arm-10', name: 'Abgrundrüstung', type: 'armor', stat: '+130 DEF', value: 130, price: 3500, owned: false },
+  { id: 'arm-11', name: 'Ewige Rüstung', type: 'armor', stat: '+160 DEF', value: 160, price: 5000, owned: false },
   { id: 'pot-1', name: 'Kleiner HP-Trank', type: 'potion', stat: '+30 HP', value: 30, price: 25, owned: false },
   { id: 'pot-2', name: 'Mittlerer HP-Trank', type: 'potion', stat: '+80 HP', value: 80, price: 60, owned: false },
   { id: 'pot-3', name: 'Großer HP-Trank', type: 'potion', stat: '+150 HP', value: 150, price: 120, owned: false },
   { id: 'pot-4', name: 'Kleiner MP-Trank', type: 'potion', stat: '+20 MP', value: 20, price: 30, owned: false },
   { id: 'pot-5', name: 'Mittlerer MP-Trank', type: 'potion', stat: '+50 MP', value: 50, price: 75, owned: false },
+  { id: 'pot-6', name: 'Großer MP-Trank', type: 'potion', stat: '+100 MP', value: 100, price: 150, owned: false },
+  { id: 'pot-7', name: 'Epischer HP-Trank', type: 'potion', stat: '+300 HP', value: 300, price: 300, owned: false },
+  { id: 'pot-8', name: 'Legendärer HP-Trank', type: 'potion', stat: '+500 HP', value: 500, price: 600, owned: false },
+];
+
+export const CRAFTING_RECIPES: CraftingRecipe[] = [
+  { id: 'craft-iron-sword', name: 'Eisenschwert', type: 'weapon', icon: '⚔️', stat: '+10 ATK', value: 10, rarity: 'common', ingredients: [{ name: 'Eisenerz', quantity: 3 }] },
+  { id: 'craft-steel-sword', name: 'Stahlschwert', type: 'weapon', icon: '⚔️', stat: '+20 ATK', value: 20, rarity: 'rare', ingredients: [{ name: 'Stahlbarren', quantity: 2 }, { name: 'Eisenerz', quantity: 5 }] },
+  { id: 'craft-mithril-sword', name: 'Mithrilschwert', type: 'weapon', icon: '⚔️', stat: '+40 ATK', value: 40, rarity: 'epic', ingredients: [{ name: 'Mithrilbarren', quantity: 3 }, { name: 'Edelstein', quantity: 2 }] },
+  { id: 'craft-abyss-sword', name: 'Abgrundsklinge', type: 'weapon', icon: '⚔️', stat: '+60 ATK', value: 60, rarity: 'legendary', ingredients: [{ name: 'Mithrilbarren', quantity: 5 }, { name: 'Edelstein', quantity: 5 }] },
+  { id: 'craft-iron-armor', name: 'Eisenrüstung', type: 'armor', icon: '🛡️', stat: '+10 DEF', value: 10, rarity: 'common', ingredients: [{ name: 'Eisenerz', quantity: 5 }] },
+  { id: 'craft-steel-armor', name: 'Stahlrüstung', type: 'armor', icon: '🛡️', stat: '+20 DEF', value: 20, rarity: 'rare', ingredients: [{ name: 'Stahlbarren', quantity: 3 }, { name: 'Eisenerz', quantity: 8 }] },
+  { id: 'craft-mithril-armor', name: 'Mithrilrüstung', type: 'armor', icon: '🛡️', stat: '+40 DEF', value: 40, rarity: 'epic', ingredients: [{ name: 'Mithrilbarren', quantity: 3 }, { name: 'Edelstein', quantity: 3 }] },
+  { id: 'craft-abyss-armor', name: 'Abgrundsrüstung', type: 'armor', icon: '🛡️', stat: '+60 DEF', value: 60, rarity: 'legendary', ingredients: [{ name: 'Mithrilbarren', quantity: 5 }, { name: 'Edelstein', quantity: 5 }] },
+  { id: 'craft-health-potion', name: 'Großer HP Trank', type: 'potion', icon: '🧪', stat: '+150 HP', value: 150, rarity: 'common', ingredients: [{ name: 'Heilkräuter', quantity: 3 }] },
+  { id: 'craft-mana-potion', name: 'Großer MP Trank', type: 'potion', icon: '🧪', stat: '+100 MP', value: 100, rarity: 'common', ingredients: [{ name: 'Manablüte', quantity: 3 }] },
+  { id: 'craft-super-health', name: 'Epischer HP-Trank', type: 'potion', icon: '🧪', stat: '+300 HP', value: 300, rarity: 'epic', ingredients: [{ name: 'Heilkräuter', quantity: 5 }, { name: 'Edelstein', quantity: 1 }] },
+  { id: 'craft-legendary-pot', name: 'Legendärer Trank', type: 'potion', icon: '🧪', stat: '+500 HP', value: 500, rarity: 'legendary', ingredients: [{ name: 'Heilkräuter', quantity: 10 }, { name: 'Edelstein', quantity: 3 }] },
 ];
 
 const INITIAL_PETS: Pet[] = [
@@ -309,6 +373,10 @@ const INITIAL_PETS: Pet[] = [
   { id: 'pet-ghost', name: 'Geist Gigi', bonus: '+25% Speed', bonusValue: 0.25, bonusType: 'speed', price: 600, rarity: 'rare', owned: false, equipped: false },
   { id: 'pet-treant', name: 'Treant Torin', bonus: '+35% Defense', bonusValue: 0.35, bonusType: 'defense', price: 2500, rarity: 'legendary', owned: false, equipped: false },
   { id: 'pet-elemental', name: 'Elementar Emil', bonus: '+50% Schaden', bonusValue: 0.5, bonusType: 'damage', price: 5000, rarity: 'legendary', owned: false, equipped: false },
+  { id: 'pet-shadow', name: 'Schatten Uri', bonus: '+60% Schaden', bonusValue: 0.6, bonusType: 'damage', price: 7000, rarity: 'legendary', owned: false, equipped: false },
+  { id: 'pet-abyss', name: 'Abgrund Bestie', bonus: '+70% Schaden', bonusValue: 0.7, bonusType: 'damage', price: 10000, rarity: 'legendary', owned: false, equipped: false },
+  { id: 'pet-celestial', name: 'Himmelsfee', bonus: '+25% Heilung', bonusValue: 0.25, bonusType: 'heal', price: 5000, rarity: 'epic', owned: false, equipped: false },
+  { id: 'pet-dragon', name: 'Mini Drache', bonus: '+80% Schaden', bonusValue: 0.8, bonusType: 'damage', price: 15000, rarity: 'legendary', owned: false, equipped: false },
 ];
 
 const INITIAL_INVENTORY: InventoryItem[] = [
@@ -351,13 +419,15 @@ export const useGameStore = create<GameState>((set, get) => ({
   currentZone: 'hub',
   shopItems: INITIAL_SHOP_ITEMS.map(i => ({ ...i })),
   pets: INITIAL_PETS.map(p => ({ ...p })),
-  inventory: INITIAL_INVENTORY.map(i => ({ ...i })),
-  damagePopups: [],
+inventory: INITIAL_INVENTORY.map(i => ({ ...i })),
+      groundItems: [],
+      damagePopups: [],
   levelUpEffect: false,
   hitEffectPos: null,
-  autoFight: false,
-  autoRespawn: true,
-  isUIOpen: false,
+autoFight: false,
+      autoRespawn: true,
+      autoLoot: true,
+      isUIOpen: false,
   showSaveIndicator: false,
   weather: 'sunny',
   comboCount: 0,
@@ -482,18 +552,22 @@ export const useGameStore = create<GameState>((set, get) => ({
         type: 'gold',
         timestamp: Date.now() + 400,
       });
-      if (Math.random() < 0.25) {
-        const dropTable: InventoryItem[] = [
-          { id: `drop-${popupIdCounter++}`, name: 'Kleiner HP Trank', type: 'potion', icon: '🧪', stat: '+30 HP', value: 30, equipped: false, quantity: 1, rarity: 'common' },
-          { id: `drop-${popupIdCounter++}`, name: 'Mittlerer HP Trank', type: 'potion', icon: '🧪', stat: '+80 HP', value: 80, equipped: false, quantity: 1, rarity: 'rare' },
+      if (Math.random() < 0.35) {
+        const isBoss = killed.name.includes('Fürst') || killed.name.includes('König') || killed.name.includes('Herr') || killed.name.includes('Meister') || killed.name.includes('Lord');
+        const dropTable = [
+          { name: 'Kleiner HP Trank', type: 'potion' as const, icon: '🧪', value: 30, quantity: 1, rarity: 'common' as const },
+          { name: 'Mittlerer HP Trank', type: 'potion' as const, icon: '🧪', value: 80, quantity: 1, rarity: 'rare' as const },
+          { name: 'Großer HP Trank', type: 'potion' as const, icon: '🧪', value: 150, quantity: 1, rarity: 'epic' as const },
+          { name: 'Eisenerz', type: 'material' as const, icon: '🪨', value: 5, quantity: isBoss ? 3 : 1, rarity: 'common' as const },
+          { name: 'Heilkräuter', type: 'material' as const, icon: '🌿', value: 3, quantity: isBoss ? 3 : 1, rarity: 'common' as const },
+          { name: 'Manablüte', type: 'material' as const, icon: '🌸', value: 3, quantity: isBoss ? 3 : 1, rarity: 'common' as const },
+          { name: 'Stahlbarren', type: 'material' as const, icon: '🔩', value: 15, quantity: isBoss ? 2 : 1, rarity: 'rare' as const },
+          { name: 'Edelstein', type: 'material' as const, icon: '💎', value: 50, quantity: isBoss ? 2 : 1, rarity: 'epic' as const },
+          { name: 'Mithrilbarren', type: 'material' as const, icon: '⭐', value: 100, quantity: isBoss ? 2 : 1, rarity: 'legendary' as const },
         ];
         const drop = dropTable[Math.floor(Math.random() * dropTable.length)];
-        const existing = state.inventory.find(i => i.name === drop.name && i.type === 'potion');
-        if (existing) {
-          set(s => ({ inventory: s.inventory.map(i => i.id === existing.id ? { ...i, quantity: i.quantity + 1 } : i) }));
-        } else {
-          set(s => ({ inventory: [...s.inventory, drop] }));
-        }
+        const dropPos: [number, number, number] = [killed.position[0], 0.3, killed.position[2]];
+        get().spawnGroundItem({ ...drop, position: dropPos });
       }
     }
 
@@ -628,12 +702,16 @@ export const useGameStore = create<GameState>((set, get) => ({
   respawnPlayer: () => {
     const state = get();
     const healAmount = Math.floor(state.playerMaxHp * 0.5);
-    const zoneInfo = ZONES.find(z => z.id === state.currentZone);
+    const zoneInfo = ZONES.find(z => z.id === 'hub');
     const spawnX = zoneInfo?.center[0] ?? 0;
     const spawnZ = zoneInfo?.center[1] ?? 0;
     set({ 
       playerHp: healAmount, 
-      playerPosition: [spawnX, 0, spawnZ] 
+      playerPosition: [spawnX, 0, spawnZ],
+      currentZone: 'hub',
+      enemies: [],
+      groundItems: [],
+      playerMana: state.playerMaxMana,
     });
   },
 
@@ -779,6 +857,57 @@ damagePopups: [...state.damagePopups, {
     });
   },
 
+  sellItem: (itemId) => {
+    const state = get();
+    const item = state.inventory.find(i => i.id === itemId);
+    if (!item || item.equipped) return;
+    
+    const sellPrice = Math.floor(item.value * 0.5);
+    const newInventory = state.inventory.filter(i => i.id !== itemId);
+    
+    set({
+      inventory: newInventory,
+      playerGold: state.playerGold + sellPrice,
+    });
+  },
+
+  craftItem: (recipeId) => {
+    const state = get();
+    const recipe = CRAFTING_RECIPES.find(r => r.id === recipeId);
+    if (!recipe) return;
+    
+    for (const ing of recipe.ingredients) {
+      const hasEnough = state.inventory.some(i => i.name === ing.name && i.quantity >= ing.quantity);
+      if (!hasEnough) return;
+    }
+    
+    let newInventory = [...state.inventory];
+    for (const ing of recipe.ingredients) {
+      const idx = newInventory.findIndex(i => i.name === ing.name && i.quantity >= ing.quantity);
+      if (idx !== -1) {
+        if (newInventory[idx].quantity > ing.quantity) {
+          newInventory[idx] = { ...newInventory[idx], quantity: newInventory[idx].quantity - ing.quantity };
+        } else {
+          newInventory = newInventory.filter((_, i) => i !== idx);
+        }
+      }
+    }
+    
+    const newItem: InventoryItem = {
+      id: `crafted-${recipeId}-${Date.now()}`,
+      name: recipe.name,
+      type: recipe.type,
+      icon: recipe.icon,
+      stat: recipe.stat,
+      value: recipe.value,
+      equipped: false,
+      quantity: 1,
+      rarity: recipe.rarity,
+    };
+    
+    set({ inventory: [...newInventory, newItem] });
+  },
+
   addToInventory: (item) => {
     const state = get();
     if (item.type === 'potion') {
@@ -800,6 +929,38 @@ damagePopups: [...state.damagePopups, {
       set({ inventory: state.inventory.filter(i => i.id !== itemId) });
     } else {
       set({ inventory: state.inventory.map(i => i.id === itemId ? { ...i, quantity: i.quantity - quantity } : i) });
+    }
+  },
+
+  spawnGroundItem: (item) => {
+    const state = get();
+    const newItem: GroundItem = { ...item, id: `ground-${Date.now()}`, timestamp: Date.now() };
+    set({ groundItems: [...state.groundItems, newItem] });
+  },
+
+  pickupGroundItem: (itemId) => {
+    const state = get();
+    const item = state.groundItems.find(i => i.id === itemId);
+    if (!item) return;
+    set({ groundItems: state.groundItems.filter(i => i.id !== itemId) });
+    
+    const invItem: InventoryItem = {
+      id: `inv-${item.id}`,
+      name: item.name,
+      type: item.type as 'weapon' | 'armor' | 'potion' | 'material',
+      icon: item.icon,
+      stat: item.type === 'potion' ? `+${item.value} HP` : 'Material',
+      value: item.value,
+      equipped: false,
+      quantity: item.quantity,
+      rarity: item.rarity
+    };
+    
+    const existing = state.inventory.find(i => i.name === item.name && i.type === item.type);
+    if (existing) {
+      set(s => ({ inventory: s.inventory.map(i => i.id === existing.id ? { ...i, quantity: i.quantity + item.quantity } : i) }));
+    } else {
+      set(s => ({ inventory: [...s.inventory, invItem] }));
     }
   },
 
@@ -825,6 +986,7 @@ damagePopups: [...state.damagePopups, {
 
   setAutoFight: (v) => set({ autoFight: v }),
   setAutoRespawn: (v) => set({ autoRespawn: v }),
+  setAutoLoot: (v) => set({ autoLoot: v }),
   setUIOpen: (v) => set({ isUIOpen: v }),
   setShowSaveIndicator: (v) => set({ showSaveIndicator: v }),
   setWeather: (weather) => set({ weather }),

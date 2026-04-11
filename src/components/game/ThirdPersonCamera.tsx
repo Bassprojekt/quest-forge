@@ -30,13 +30,21 @@ export const ThirdPersonCamera = () => {
       }
     };
 
+    const isAnyUIOpen = () => document.querySelector('[data-shop-open="true"]') !== null || 
+                       document.querySelector('[data-inventory-open="true"]') !== null ||
+                       document.querySelector('[data-quest-open="true"]') !== null ||
+                       document.querySelector('[data-crafting-open="true"]') !== null ||
+                       document.querySelector('[data-guild-open="true"]') !== null ||
+                       document.querySelector('[data-bank-open="true"]') !== null ||
+                       document.querySelector('[data-pvp-open="true"]') !== null ||
+                       document.querySelector('[data-raid-open="true"]') !== null ||
+                       document.querySelector('[data-events-open="true"]') !== null ||
+                       document.querySelector('[data-friends-open="true"]') !== null;
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!isRightMouseDown.current) return;
       
-      const isUIOpen = document.querySelector('[data-shop-open="true"]') !== null || 
-                       document.querySelector('[data-inventory-open="true"]') !== null ||
-                       document.querySelector('[data-quest-open="true"]') !== null;
-      if (isUIOpen) return;
+      if (isAnyUIOpen()) return;
       
       const dx = e.clientX - lastMouse.current.x;
       const dy = e.clientY - lastMouse.current.y;
@@ -50,10 +58,7 @@ export const ThirdPersonCamera = () => {
     };
 
     const handleWheel = (e: WheelEvent) => {
-      const isUIOpen = document.querySelector('[data-shop-open="true"]') !== null || 
-                       document.querySelector('[data-inventory-open="true"]') !== null ||
-                       document.querySelector('[data-quest-open="true"]') !== null;
-      if (isUIOpen) return;
+      if (isAnyUIOpen()) return;
       e.preventDefault();
       distRef.current = THREE.MathUtils.clamp(
         distRef.current + e.deltaY * 0.02, 

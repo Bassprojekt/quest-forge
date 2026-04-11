@@ -282,7 +282,7 @@ const GLBFountain = () => {
   );
 };
 
-export const HubBuildings = ({ onOpenShop, onOpenGuild, onOpenBank }: { onOpenShop?: (tab: 'items' | 'pets', shopType?: 'general' | 'weapons' | 'armor' | 'potions') => void; onOpenGuild?: () => void; onOpenBank?: () => void }) => {
+export const HubBuildings = ({ onOpenShop, onOpenGuild, onOpenBank, onOpenPotionCraft, onOpenWeaponCraft, onOpenPVPArena, onOpenFriends, onOpenEvents, onOpenRaid }: { onOpenShop?: (tab: 'items' | 'pets', shopType?: 'general' | 'weapons' | 'armor' | 'potions') => void; onOpenGuild?: () => void; onOpenBank?: () => void; onOpenPotionCraft?: () => void; onOpenWeaponCraft?: () => void; onOpenPVPArena?: () => void; onOpenFriends?: () => void; onOpenEvents?: () => void; onOpenRaid?: () => void }) => {
 
   // Detailed Tree Component
 const DetailedTree = ({ position, variant }: { position: [number, number, number]; variant: number }) => {
@@ -344,9 +344,9 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
       {/* Flame mesh */}
       <mesh ref={meshRef} position={[0, 3.2, 0]}>
         <coneGeometry args={[0.15, 0.5, 8]} />
-        <meshStandardMaterial color="#FF6D00" emissive="#FF6D00" emissiveIntensity={3} />
+        <meshStandardMaterial color="#FF6D00" emissive="#FF6D00" emissiveIntensity={5} />
       </mesh>
-      <pointLight ref={lightRef} position={[0, 3.2, 0]} color="#FF9800" intensity={2} distance={10} />
+      <pointLight ref={lightRef} position={[0, 3.2, 0]} color="#FF9800" intensity={3} distance={15} />
     </group>
   );
 };
@@ -431,9 +431,8 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={0.3} />
         </mesh>
         {/* Waffen-NPC */}
-<NPCWithBuilding name="Waffenhändler Erik" color="#CD853F" position={[0, 0, 3]} icon="⚔️" onClick={() => onOpenShop?.('items', 'weapons')} />
-        <NPCWithBuilding name="Rüstungsmeisterin Greta" color="#808080" position={[0, 0, 3]} icon="🛡️" onClick={() => onOpenShop?.('items', 'armor')} />
-        <NPCWithBuilding name="Apothekerin Flora" color="#D2B48C" position={[0, 0, 3]} icon="🧪" onClick={() => onOpenShop?.('items', 'potions')} />
+<NPCWithBuilding name="Alchemist Anton" color="#9C27B0" position={[0, 0, 3]} icon="⚗️" onClick={() => onOpenPotionCraft?.()} />
+        <NPCWithBuilding name="Handwerker Hagen" color="#FF9800" position={[2.5, 0, 3]} icon="🔨" onClick={() => onOpenWeaponCraft?.()} />
       </group>
 
       {/* Bank/Lager - Osten Nord */}
@@ -526,6 +525,22 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <meshStandardMaterial color="#4A3728" roughness={0.9} />
         </mesh>
         <NPCWithBuilding name="Gildenmeisterin Gabi" color="#4169E1" position={[0, 0, 4]} icon="🏛️" onClick={() => onOpenGuild?.()} />
+        <NPCWithBuilding name="Arena-Leiter Max" color="#FF0000" position={[3, 0, 4]} icon="⚔️" onClick={() => onOpenPVPArena?.()} />
+        <NPCWithBuilding name="Freunde-Finder Finn" color="#9C27B0" position={[-3, 0, 4]} icon="👥" onClick={() => onOpenFriends?.()} />
+      </group>
+
+      {/* Event & Raid building - separate location */}
+      <group position={[30, 0, -10]}>
+        <mesh position={[0, 1.5, 0]} castShadow>
+          <boxGeometry args={[4, 3, 4]} />
+          <meshStandardMaterial color="#4A3728" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 3.2, 0]} castShadow>
+          <coneGeometry args={[2.2, 1.2, 4]} />
+          <meshStandardMaterial color="#8B0000" roughness={0.8} />
+        </mesh>
+        <NPCWithBuilding name="Event-Verkünder Evi" color="#FF9800" position={[0, 0, 4]} icon="🎉" onClick={() => onOpenEvents?.()} />
+        <NPCWithBuilding name="Raid-Leiter Roy" color="#9C27B0" position={[3, 0, 4]} icon="👹" onClick={() => onOpenRaid?.()} />
       </group>
 
       {/* Stone path rings */}

@@ -64,13 +64,21 @@ const DamageNumber = ({ popup }: DamageNumberProps) => {
       <Html center>
         <div ref={ref} style={{
           color: COLORS[popup.type],
-          fontSize: popup.type === 'crit' ? 22 : 16,
+          fontSize: popup.type === 'crit' ? 26 : 18,
           fontWeight: 900,
           fontFamily: "'Fredoka', sans-serif",
-          textShadow: `0 0 6px ${COLORS[popup.type]}80, 0 2px 4px rgba(0,0,0,0.5)`,
+          textShadow: `
+            0 0 10px ${COLORS[popup.type]},
+            0 0 20px ${COLORS[popup.type]}80,
+            0 0 30px ${COLORS[popup.type]}40,
+            0 2px 4px rgba(0,0,0,0.8)
+          `,
           whiteSpace: 'nowrap',
           pointerEvents: 'none',
           userSelect: 'none',
+          padding: '2px 6px',
+          borderRadius: '4px',
+          background: 'rgba(0,0,0,0.5)',
         }}>
           {PREFIXES[popup.type]}{popup.amount}{SUFFIXES[popup.type]}
         </div>

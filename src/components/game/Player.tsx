@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
@@ -126,6 +126,7 @@ export const Player = () => {
   const autoRespawn = useGameStore(s => s.autoRespawn);
   const respawnEnemies = useGameStore(s => s.respawnEnemies);
   const currentZone = useGameStore(s => s.currentZone);
+  const playerPosition = useGameStore(s => s.playerPosition);
   const velocity = useRef(new THREE.Vector3());
   const shieldTimer = useRef(0);
   const dashTimer = useRef(0);
@@ -138,6 +139,12 @@ export const Player = () => {
 
   const attackSpeed = playerClass === 'archer' ? 0.4 : playerClass === 'mage' ? 0.5 : 0.5;
   const attackRange = playerClass === 'archer' ? 8 : playerClass === 'mage' ? 6 : 2.5;
+
+  useEffect(() => {
+    if (meshRef.current && playerPosition) {
+      meshRef.current.position.set(playerPosition[0], playerPosition[1], playerPosition[2]);
+    }
+  }, [playerPosition]);
 
   useFrame((state, delta) => {
     if (!meshRef.current) return;

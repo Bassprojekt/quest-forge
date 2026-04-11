@@ -8,6 +8,7 @@ import { ShopUI } from './ShopUI';
 import { InventoryUI } from './InventoryUI';
 import { SkillTreeUI } from './SkillTreeUI';
 import { SettingsDialog } from './SettingsDialog';
+import { HelpUI } from './HelpUI';
 import { exportSaveToFile } from '@/store/saveStore';
 
 export const HUD = () => {
@@ -40,9 +41,11 @@ export const HUD = () => {
   const levelUpEffect = useGameStore(s => s.levelUpEffect);
   const skillPoints = useSkillTreeStore(s => s.skillPoints);
   const autoFight = useGameStore(s => s.autoFight);
-  const autoRespawn = useGameStore(s => s.autoRespawn);
   const setAutoFight = useGameStore(s => s.setAutoFight);
+  const autoRespawn = useGameStore(s => s.autoRespawn);
+  const autoLoot = useGameStore(s => s.autoLoot);
   const setAutoRespawn = useGameStore(s => s.setAutoRespawn);
+  const setAutoLoot = useGameStore(s => s.setAutoLoot);
   const setPlayerPosition = useGameStore(s => s.setPlayerPosition);
   const playerLevel = useGameStore(s => s.playerLevel);
   const comboCount = useGameStore(s => s.comboCount);
@@ -57,6 +60,7 @@ export const HUD = () => {
   const [showSkillTree, setShowSkillTree] = useState(false);
   const [showParty, setShowParty] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
@@ -112,7 +116,8 @@ export const HUD = () => {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50" style={{ fontFamily: "'Fredoka', sans-serif" }}>
-      {showSettings && <SettingsDialog open={showSettings} onOpenChange={setShowSettings} />}
+      {showSettings && <SettingsDialog open={showSettings} onOpenChange={setShowSettings} onOpenHelp={() => { setShowSettings(false); setShowHelp(true); }} />}
+      {showHelp && <HelpUI onClose={() => setShowHelp(false)} />}
       {/* {showShop && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-auto">
           <div className="text-red-500 text-2xl font-bold">SHOP SHOULD SHOW HERE - showShop={String(showShop)} shopTab={shopTab}</div>
@@ -324,6 +329,13 @@ export const HUD = () => {
             className={`px-3 py-2 rounded-xl text-xs font-bold border-2 ${autoRespawn ? 'bg-green-500 text-white border-green-500' : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200'}`}
           >
             🔄 {autoRespawn ? t('autoOn') : t('autoOff')}
+          </button>
+
+          <button 
+            onClick={() => setAutoLoot(!autoLoot)} 
+            className={`px-3 py-2 rounded-xl text-xs font-bold border-2 ${autoLoot ? 'bg-green-500 text-white border-green-500' : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200'}`}
+          >
+            📦 {autoLoot ? t('autoOn') : t('autoOff')}
           </button>
 
           {zoneFromPos !== 'hub' && (

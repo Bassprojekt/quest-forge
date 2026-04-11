@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useGameStore } from './gameStore';
 
 export interface GuildMember {
   name: string;
@@ -124,9 +125,12 @@ export const useGuildStore = create<GuildState>((set, get) => ({
   },
 
   addBankGold: (amount) => {
-    const { guild, withdrawBankGold } = get();
-    const playerGold = 0;
-    if (guild && playerGold >= amount) {
+    const { guild } = get();
+    if (!guild) return false;
+    
+    const currentGold = useGameStore.getState().playerGold;
+    if (currentGold >= amount) {
+      useGameStore.getState().addGold(-amount);
       set({
         guild: {
           ...guild,
@@ -140,7 +144,10 @@ export const useGuildStore = create<GuildState>((set, get) => ({
 
   withdrawBankGold: (amount) => {
     const { guild } = get();
-    if (guild && guild.bankGold >= amount) {
+    if (!guild) return false;
+    
+    if (guild.bankGold >= amount) {
+      useGameStore.getState().addGold(amount);
       set({
         guild: {
           ...guild,

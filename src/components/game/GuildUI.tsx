@@ -106,7 +106,8 @@ export const GuildUI = ({ onClose }: Props) => {
   if (!hasGuild) {
     return (
       <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-auto"
-        style={{ fontFamily: "'Fredoka', sans-serif" }}>
+        style={{ fontFamily: "'Fredoka', sans-serif" }}
+        data-guild-open="true">
         <div className="absolute inset-0 bg-black/40" onClick={onClose} />
         <div className="relative bg-white/95 backdrop-blur-md border-2 border-[#4169E1] rounded-2xl p-6 max-w-md w-full mx-4"
           style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }}>
