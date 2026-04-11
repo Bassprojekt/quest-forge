@@ -21,9 +21,19 @@ export const InventoryUI = ({ onClose }: Props) => {
   const sellItem = useGameStore(s => s.sellItem);
   const recalcStats = useGameStore(s => s.recalcStats);
   const [tab, setTab] = useState<'all' | 'weapon' | 'armor' | 'potion' | 'material'>('all');
+  const [sortBy, setSortBy] = useState<'rarity' | 'name' | 'type'>('rarity');
   const [sellMode, setSellMode] = useState(false);
 
   const filtered = tab === 'all' ? inventory : inventory.filter(i => i.type === tab);
+  
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === 'rarity') {
+      const rarityOrder = { legendary: 0, epic: 1, rare: 2, common: 3 };
+      return rarityOrder[a.rarity] - rarityOrder[b.rarity];
+    }
+    if (sortBy === 'name') return a.name.localeCompare(b.name);
+    return a.type.localeCompare(b.type);
+  });
 
   const handleUsePotion = (itemId: string) => {
     drinkPotion(itemId);
@@ -54,7 +64,7 @@ export const InventoryUI = ({ onClose }: Props) => {
           </div>
         </div>
 
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-3">
           {(['all', 'weapon', 'armor', 'potion', 'material'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
@@ -64,12 +74,24 @@ export const InventoryUI = ({ onClose }: Props) => {
             </button>
           ))}
         </div>
+        
+        <div className="flex gap-2 mb-3">
+          <span className="text-[10px] text-[#888] self-center">Sortieren:</span>
+          {(['rarity', 'name', 'type'] as const).map(s => (
+            <button key={s} onClick={() => setSortBy(s)}
+              className={`px-2 py-1 rounded text-[10px] font-bold ${
+                sortBy === s ? 'bg-[#FF9800] text-white' : 'bg-[#F0F0F0] text-[#888]'
+              }`}>
+              {s === 'rarity' ? '💎 Rarität' : s === 'name' ? '🔤 Name' : '📦 Typ'}
+            </button>
+          ))}
+        </div>
 
         <div className="space-y-2 max-h-64 overflow-y-auto">
-          {filtered.length === 0 && (
+          {sorted.length === 0 && (
             <div className="text-center text-[#AAA] text-sm py-8">Keine Items vorhanden</div>
           )}
-          {filtered.map(item => (
+          {sorted.map(item => (
             <div key={item.id}
               className={`bg-[#F8F6F0] rounded-xl p-3 border-2 flex items-center justify-between transition-colors ${
                 item.equipped ? 'border-[#4CAF50]/50 bg-[#E8F5E9]/50' : 'border-[#E0D5C0]'
