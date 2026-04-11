@@ -42,6 +42,83 @@ const HubFlower = ({ position, color }: { position: [number, number, number]; co
   </group>
 );
 
+const getBuildingNPCColors = (color: string) => {
+  const colorMap: Record<string, { shirt: [string, string, string]; pants: [string, string, string]; shoes: [string, string, string]; hair: string; skin: string; skinDark: string; hat: string }> = {
+    '#9C27B0': { // Alchemist - purple
+      shirt: ['#7B1FA2', '#5A1577', '#9C27C0'],
+      pants: ['#4A146A', '#3A0A50', '#5A187A'],
+      shoes: ['#2A0A3A', '#1A0520', '#3A0A4A'],
+      hair: '#3A2040',
+      skin: '#E8C8A0',
+      skinDark: '#C8A880',
+      hat: '#9C27B0'
+    },
+    '#FF9800': { // Handwerker Hagen - orange
+      shirt: ['#E65100', '#BF4000', '#FF9800'],
+      pants: ['#5A3A00', '#4A2800', '#6A4400'],
+      shoes: ['#3A2000', '#2A1000', '#4A2800'],
+      hair: '#4A3020',
+      skin: '#D4A574',
+      skinDark: '#B4956A',
+      hat: '#FF9800'
+    },
+    '#4A4A4A': { // Bankier - gray
+      shirt: ['#2E2E2E', '#1E1E1E', '#3E3E3E'],
+      pants: ['#1A1A1A', '#0D0D0D', '#2A2A2A'],
+      shoes: ['#1A1A1A', '#0D0D0D', '#2A2A2A'],
+      hair: '#2A2A2A',
+      skin: '#D4A574',
+      skinDark: '#B4956A',
+      hat: '#4A4A4A'
+    },
+    '#DEB887': { // Händler - tan
+      shirt: ['#C4956A', '#A07850', '#D4A880'],
+      pants: ['#6A5040', '#5A4030', '#7A6050'],
+      shoes: ['#4A3520', '#3A2510', '#5A4530'],
+      hair: '#4A3520',
+      skin: '#D4A574',
+      skinDark: '#B4956A',
+      hat: '#8B4513'
+    },
+    '#CD853F': { // Wirt - brown
+      shirt: ['#8B4513', '#6B3510', '#A05523'],
+      pants: ['#4A3020', '#3A2010', '#5A4030'],
+      shoes: ['#3A2010', '#2A1008', '#4A3020'],
+      hair: '#5A4030',
+      skin: '#E8B8A0',
+      skinDark: '#C8A080',
+      hat: '#8B4513'
+    },
+    '#4169E1': { // Gildenmeisterin - blue
+      shirt: ['#1565C0', '#0D47A1', '#1976D2'],
+      pants: ['#0D47A1', '#0A3690', '#1155B8'],
+      shoes: ['#0A3690', '#051080', '#0A4090'],
+      hair: '#4A3020',
+      skin: '#D4A574',
+      skinDark: '#B4956A',
+      hat: '#1565C0'
+    },
+    '#FF0000': { // Arena-Leiter - red
+      shirt: ['#C62828', '#8B0000', '#E53935'],
+      pants: ['#4A1515', '#3A0A0A', '#5A1A1A'],
+      shoes: ['#3A0A0A', '#2A0505', '#4A0A0A'],
+      hair: '#3A2020',
+      skin: '#D4A574',
+      skinDark: '#B4956A',
+      hat: '#C62828'
+    },
+    };
+  return colorMap[color] || {
+    shirt: ['#3A5F8C', '#2D4A6E', '#4C78A8'],
+    pants: ['#2F4F4F', '#232F2F', '#3D5D5D'],
+    shoes: ['#1A1A1A', '#0D0D0D', '#2A2A2A'],
+    hair: '#3A2A20',
+    skin: '#D4A574',
+    skinDark: '#B4956A',
+    hat: color
+  };
+};
+
 const NPCWithBuilding = ({ name, color, position, icon, onClick }: { 
   name: string; 
   color: string; 
@@ -53,6 +130,10 @@ const NPCWithBuilding = ({ name, color, position, icon, onClick }: {
   const playerPos = useGameStore(s => s.playerPosition);
   const [hovered, setHovered] = useState(false);
   const floatPhase = useRef(Math.random() * Math.PI * 2);
+
+  const npcColors = getBuildingNPCColors(color);
+  const skin = npcColors.skin;
+  const skinDark = npcColors.skinDark;
 
   useFrame(() => {
     if (!meshRef.current) return;
@@ -87,57 +168,190 @@ const NPCWithBuilding = ({ name, color, position, icon, onClick }: {
       <group ref={meshRef}>
         {/* Shadow */}
         <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.6, 32]} />
-          <meshStandardMaterial color="#000" transparent opacity={0.2} />
+          <circleGeometry args={[0.5, 12]} />
+          <meshStandardMaterial color="#000" transparent opacity={0.15} />
         </mesh>
         
-        {/* Body - more detailed */}
-        <mesh position={[0, 0.85, 0]} castShadow receiveShadow>
-          <capsuleGeometry args={[0.32, 0.6, 16, 32]} />
-          <meshStandardMaterial color={color} roughness={0.4} metalness={0.2} />
+        {/* Left Leg */}
+        <mesh position={[0.1, 0.2, 0]} castShadow>
+          <boxGeometry args={[0.16, 0.4, 0.16]} />
+          <meshStandardMaterial color={npcColors.pants[0]} roughness={0.8} />
+        </mesh>
+        <mesh position={[0.1, 0.42, 0.04]} castShadow>
+          <boxGeometry args={[0.16, 0.04, 0.18]} />
+          <meshStandardMaterial color={npcColors.pants[1]} roughness={0.8} />
         </mesh>
         
-        {/* Head - more detailed */}
-        <mesh position={[0, 1.55, 0]} castShadow receiveShadow>
-          <sphereGeometry args={[0.32, 32, 32]} />
-          <meshStandardMaterial color="#FFDAB9" roughness={0.5} metalness={0.1} />
+        {/* Right Leg */}
+        <mesh position={[-0.1, 0.2, 0]} castShadow>
+          <boxGeometry args={[0.16, 0.4, 0.16]} />
+          <meshStandardMaterial color={npcColors.pants[0]} roughness={0.8} />
+        </mesh>
+        <mesh position={[-0.1, 0.42, 0.04]} castShadow>
+          <boxGeometry args={[0.16, 0.04, 0.18]} />
+          <meshStandardMaterial color={npcColors.pants[1]} roughness={0.8} />
         </mesh>
         
-        {/* Eyes with shine */}
-        <mesh position={[0.1, 1.57, 0.25]}>
-          <sphereGeometry args={[0.05, 12, 12]} />
-          <meshStandardMaterial color="#1a1a1a" roughness={0.2} metalness={0.5} />
+        {/* Boots */}
+        <mesh position={[0.1, 0.04, 0.02]} castShadow>
+          <boxGeometry args={[0.18, 0.08, 0.2]} />
+          <meshStandardMaterial color={npcColors.shoes[0]} roughness={0.7} />
         </mesh>
-        <mesh position={[-0.1, 1.57, 0.25]}>
-          <sphereGeometry args={[0.05, 12, 12]} />
-          <meshStandardMaterial color="#1a1a1a" roughness={0.2} metalness={0.5} />
-        </mesh>
-        
-        {/* Eye shine */}
-        <mesh position={[0.1, 1.58, 0.28]}>
-          <sphereGeometry args={[0.015, 6, 6]} />
-          <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={0.5} />
-        </mesh>
-        <mesh position={[-0.1, 1.58, 0.28]}>
-          <sphereGeometry args={[0.015, 6, 6]} />
-          <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={0.5} />
+        <mesh position={[-0.1, 0.04, 0.02]} castShadow>
+          <boxGeometry args={[0.18, 0.08, 0.2]} />
+          <meshStandardMaterial color={npcColors.shoes[0]} roughness={0.7} />
         </mesh>
         
-        {/* Hat/Helmet - more detailed */}
-        <mesh position={[0, 1.82, 0]} castShadow receiveShadow>
-          <coneGeometry args={[0.32, 0.5, 16]} />
-          <meshStandardMaterial color={color} roughness={0.3} metalness={0.4} />
+        {/* Body - Torso */}
+        <mesh position={[0, 0.85, 0]} castShadow>
+          <boxGeometry args={[0.5, 0.55, 0.25]} />
+          <meshStandardMaterial color={npcColors.shirt[0]} roughness={0.75} />
+        </mesh>
+        {/* Shirt stripe left */}
+        <mesh position={[0.2, 0.85, 0.126]} castShadow>
+          <boxGeometry args={[0.08, 0.4, 0.01]} />
+          <meshStandardMaterial color={npcColors.shirt[2]} roughness={0.7} />
+        </mesh>
+        {/* Shirt stripe right */}
+        <mesh position={[-0.2, 0.85, 0.126]} castShadow>
+          <boxGeometry args={[0.08, 0.4, 0.01]} />
+          <meshStandardMaterial color={npcColors.shirt[2]} roughness={0.7} />
         </mesh>
         
-        {/* Icon indicator - floating animation */}
-        <mesh position={[0, 2.3, 0]}>
-          <sphereGeometry args={[0.15, 16, 16]} />
+        {/* Belt */}
+        <mesh position={[0, 0.58, 0]} castShadow>
+          <boxGeometry args={[0.52, 0.08, 0.26]} />
+          <meshStandardMaterial color="#3A2A10" roughness={0.6} />
+        </mesh>
+        <mesh position={[0.12, 0.58, 0.14]} castShadow>
+          <boxGeometry args={[0.08, 0.08, 0.03]} />
+          <meshStandardMaterial color="#FFD700" metalness={0.8} roughness={0.2} />
+        </mesh>
+        
+        {/* Arms */}
+        <mesh position={[0.32, 0.85, 0]} castShadow>
+          <boxGeometry args={[0.14, 0.5, 0.14]} />
+          <meshStandardMaterial color={npcColors.shirt[0]} roughness={0.75} />
+        </mesh>
+        <mesh position={[0.32, 0.58, 0]} castShadow>
+          <boxGeometry args={[0.12, 0.08, 0.12]} />
+          <meshStandardMaterial color={npcColors.shoes[0]} roughness={0.7} />
+        </mesh>
+        
+        <mesh position={[-0.32, 0.85, 0]} castShadow>
+          <boxGeometry args={[0.14, 0.5, 0.14]} />
+          <meshStandardMaterial color={npcColors.shirt[0]} roughness={0.75} />
+        </mesh>
+        <mesh position={[-0.32, 0.58, 0]} castShadow>
+          <boxGeometry args={[0.12, 0.08, 0.12]} />
+          <meshStandardMaterial color={npcColors.shoes[0]} roughness={0.7} />
+        </mesh>
+        
+        {/* Head */}
+        <group position={[0, 1.45, 0]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.44, 0.44, 0.4]} />
+            <meshStandardMaterial color={skin} roughness={0.6} />
+          </mesh>
+          
+          <mesh position={[0, -0.18, 0.06]} castShadow>
+            <boxGeometry args={[0.36, 0.12, 0.32]} />
+            <meshStandardMaterial color={skinDark} roughness={0.6} />
+          </mesh>
+          
+          <mesh position={[0, -0.04, 0.22]} castShadow>
+            <boxGeometry args={[0.08, 0.1, 0.08]} />
+            <meshStandardMaterial color={skinDark} roughness={0.5} />
+          </mesh>
+          
+          {/* Eyes */}
+          <mesh position={[0.1, 0.06, 0.2]} castShadow>
+            <boxGeometry args={[0.1, 0.1, 0.04]} />
+            <meshStandardMaterial color="#FFF" roughness={0.3} />
+          </mesh>
+          <mesh position={[-0.1, 0.06, 0.2]} castShadow>
+            <boxGeometry args={[0.1, 0.1, 0.04]} />
+            <meshStandardMaterial color="#FFF" roughness={0.3} />
+          </mesh>
+          
+          <mesh position={[0.1, 0.05, 0.22]} castShadow>
+            <boxGeometry args={[0.06, 0.06, 0.02]} />
+            <meshStandardMaterial color="#1A1A2A" roughness={0.2} />
+          </mesh>
+          <mesh position={[-0.1, 0.05, 0.22]} castShadow>
+            <boxGeometry args={[0.06, 0.06, 0.02]} />
+            <meshStandardMaterial color="#1A1A2A" roughness={0.2} />
+          </mesh>
+          
+          <mesh position={[0.12, 0.08, 0.225]} castShadow>
+            <boxGeometry args={[0.02, 0.02, 0.01]} />
+            <meshStandardMaterial color="#FFF" emissive="#FFF" emissiveIntensity={0.5} />
+          </mesh>
+          <mesh position={[-0.08, 0.08, 0.225]} castShadow>
+            <boxGeometry args={[0.02, 0.02, 0.01]} />
+            <meshStandardMaterial color="#FFF" emissive="#FFF" emissiveIntensity={0.5} />
+          </mesh>
+          
+          {/* Eyebrows */}
+          <mesh position={[0.1, 0.16, 0.18]} castShadow>
+            <boxGeometry args={[0.1, 0.03, 0.04]} />
+            <meshStandardMaterial color={npcColors.hair} roughness={0.8} />
+          </mesh>
+          <mesh position={[-0.1, 0.16, 0.18]} castShadow>
+            <boxGeometry args={[0.1, 0.03, 0.04]} />
+            <meshStandardMaterial color={npcColors.hair} roughness={0.8} />
+          </mesh>
+          
+          {/* Mouth */}
+          <mesh position={[0, -0.12, 0.2]} castShadow>
+            <boxGeometry args={[0.12, 0.03, 0.04]} />
+            <meshStandardMaterial color="#C45050" roughness={0.5} />
+          </mesh>
+          
+          {/* Blush */}
+          <mesh position={[0.16, -0.02, 0.18]} castShadow>
+            <boxGeometry args={[0.06, 0.04, 0.02]} />
+            <meshStandardMaterial color="#E8A0A0" transparent opacity={0.4} roughness={0.4} />
+          </mesh>
+          <mesh position={[-0.16, -0.02, 0.18]} castShadow>
+            <boxGeometry args={[0.06, 0.04, 0.02]} />
+            <meshStandardMaterial color="#E8A0A0" transparent opacity={0.4} roughness={0.4} />
+          </mesh>
+          
+          {/* Hair */}
+          <mesh position={[0, 0.22, -0.04]} castShadow>
+            <boxGeometry args={[0.46, 0.14, 0.42]} />
+            <meshStandardMaterial color={npcColors.hair} roughness={0.85} />
+          </mesh>
+          <mesh position={[0.2, 0.1, 0.1]} castShadow>
+            <boxGeometry args={[0.08, 0.2, 0.12]} />
+            <meshStandardMaterial color={npcColors.hair} roughness={0.85} />
+          </mesh>
+          <mesh position={[-0.2, 0.1, 0.1]} castShadow>
+            <boxGeometry args={[0.08, 0.2, 0.12]} />
+            <meshStandardMaterial color={npcColors.hair} roughness={0.85} />
+          </mesh>
+          
+          {/* Hat - based on NPC color */}
+          <mesh position={[0, 0.32, 0]} castShadow>
+            <coneGeometry args={[0.24, 0.3, 4]} />
+            <meshStandardMaterial color={npcColors.hat} roughness={0.4} />
+          </mesh>
+          <mesh position={[0, 0.2, 0]} castShadow>
+            <boxGeometry args={[0.36, 0.1, 0.36]} />
+            <meshStandardMaterial color={npcColors.hat} roughness={0.5} />
+          </mesh>
+        </group>
+        
+        {/* Icon indicator */}
+        <mesh position={[0, 2.1, 0]}>
+          <boxGeometry args={[0.2, 0.2, 0.2]} />
           <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={1} />
         </mesh>
-        <pointLight position={[0, 2.2, 0]} color="#FFD700" intensity={1} distance={4} />
+        <pointLight position={[0, 2.1, 0]} color="#FFD700" intensity={1} distance={3} />
         
         {hovered && (
-          <Html position={[0, 2.5, 0]} center>
+          <Html position={[0, 2.4, 0]} center>
             <div style={{
               background: 'rgba(255,255,255,0.95)',
               borderRadius: 10,
@@ -162,7 +376,7 @@ const NPCWithBuilding = ({ name, color, position, icon, onClick }: {
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       >
-        <sphereGeometry args={[1.5, 8, 8]} />
+        <boxGeometry args={[1.2, 2, 1.2]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
     </group>
