@@ -40,6 +40,8 @@ const WarriorWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> })
       <boxGeometry args={[0.06, 0.72, 0.01]} />
       <meshStandardMaterial color="#E8EEF8" flatShading metalness={1} roughness={0.02} />
     </mesh>
+    {/* Sizzle effect */}
+    <pointLight position={[0, 0.4, 0]} color="#FFD700" intensity={0.3} distance={2} />
     {/* Tip */}
     <mesh position={[0, 0.78, 0]} castShadow rotation={[0, 0, Math.PI / 4]}>
       <boxGeometry args={[0.08, 0.08, 0.04]} />

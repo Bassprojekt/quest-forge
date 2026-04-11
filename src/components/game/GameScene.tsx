@@ -275,16 +275,16 @@ export const GameScene = () => {
         <ambientLight intensity={0.4 * nightIntensity} color={isNight ? '#1a1a3a' : '#FFF8E7'} />
         <directionalLight
           position={[30, 50, 20]}
-          intensity={1.8 * nightIntensity}
+          intensity={1.9 * nightIntensity}
           color={isNight ? '#6666aa' : '#FFF5D4'}
           castShadow
-          shadow-mapSize-width={3072}
-          shadow-mapSize-height={3072}
-          shadow-camera-far={400}
-          shadow-camera-left={-120}
-          shadow-camera-right={120}
-          shadow-camera-top={120}
-          shadow-camera-bottom={-120}
+          shadow-mapSize-width={4096}
+          shadow-mapSize-height={4096}
+          shadow-camera-far={500}
+          shadow-camera-left={-150}
+          shadow-camera-right={150}
+          shadow-camera-top={150}
+          shadow-camera-bottom={-150}
           shadow-bias={-0.0001}
           shadow-normalBias={0.02}
         />
@@ -302,11 +302,13 @@ export const GameScene = () => {
         {weather === 'rainy' && <RainParticles />}
 
         {/* Ambient particles for atmosphere */}
-        {currentZone === 'hub' && !isNight && <AmbientParticles count={40} color="#FFFACD" area={50} height={20} />}
-        {currentZone === 'hub' && isNight && <FireflyParticles count={25} />}
+        {currentZone === 'hub' && !isNight && <AmbientParticles count={50} color="#FFFACD" area={60} height={25} />}
+        {currentZone === 'hub' && isNight && <FireflyParticles count={35} />}
 
-        {/* Forest dust particles */}
-        {currentZone.includes('forest') && <AmbientParticles count={30} color="#90EE90" area={30} height={8} />}
+        {/* Zone-specific particles */}
+        {currentZone.includes('forest') && <AmbientParticles count={35} color="#90EE90" area={35} height={10} />}
+        {currentZone === 'frozen_peaks' && <AmbientParticles count={25} color="#E0FFFF" area={25} height={5} />}
+        {currentZone === 'lava_caverns' && <AmbientParticles count={20} color="#FF6B35" area={20} height={8} />}
 
         <ThirdPersonCamera />
         <Player />
