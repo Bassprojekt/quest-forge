@@ -21,6 +21,7 @@ import { PetCompanion } from './PetCompanion';
 import { LoginScreen } from './LoginScreen';
 import { TutorialScreen } from './TutorialScreen';
 import { ChatUI } from './ChatUI';
+import { MobileControls } from './MobileControls';
 import { useAccountStore } from '@/store/accountStore';
 import { useTutorialStore } from '@/store/tutorialStore';
 import { useGameStore } from '@/store/gameStore';
@@ -212,6 +213,7 @@ export const GameScene = () => {
       {showGuild && <GuildUI onClose={() => setShowGuild(false)} />}
       {showBank && <BankUI onClose={() => setShowBank(false)} />}
       <ChatUI onClose={() => {}} />
+      <MobileControls />
       <HUD />
       <Canvas
         shadows

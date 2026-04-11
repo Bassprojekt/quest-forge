@@ -1,18 +1,31 @@
 // Procedural sound effects using Web Audio API
 import { useSettingsStore } from '@/store/settingsStore';
 
-type AudioContextType = AudioContext | undefined;
+let audioCtx: AudioContext | undefined = undefined;
 
-const getAudioContext = (): AudioContextType => {
+const getAudioContext = (): AudioContext | undefined => {
   if (typeof window === 'undefined') return undefined;
-  return window.AudioContext ? new window.AudioContext() : (window as { webkitAudioContext?: () => AudioContext }).webkitAudioContext?.() ?? undefined;
+  try {
+    if (!audioCtx) {
+      audioCtx = window.AudioContext ? new window.AudioContext() : (window as { webkitAudioContext?: () => AudioContext }).webkitAudioContext?.() ?? undefined;
+    }
+    return audioCtx;
+  } catch (e) {
+    console.warn('AudioContext not available:', e);
+    return undefined;
+  }
 };
 
-const audioCtx = getAudioContext();
-
 function ensureCtx() {
-  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-  return audioCtx;
+  try {
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+    return audioCtx;
+  } catch (e) {
+    console.warn('Audio context error:', e);
+    return undefined;
+  }
 }
 
 function getVolumeMultiplier(): number {
