@@ -15,6 +15,8 @@ export interface Enemy {
   xpReward: number;
   goldReward: number;
   zone: ZoneType;
+  isBoss?: boolean;
+  specialAbility?: string;
 }
 
 export interface Skill {
