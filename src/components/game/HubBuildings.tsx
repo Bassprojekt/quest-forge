@@ -87,41 +87,51 @@ const NPCWithBuilding = ({ name, color, position, icon, onClick }: {
       <group ref={meshRef}>
         {/* Shadow */}
         <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.5, 12]} />
-          <meshStandardMaterial color="#000" transparent opacity={0.15} />
+          <circleGeometry args={[0.6, 32]} />
+          <meshStandardMaterial color="#000" transparent opacity={0.2} />
         </mesh>
         
-        {/* Body */}
-        <mesh position={[0, 0.85, 0]} castShadow>
-          <capsuleGeometry args={[0.28, 0.55, 8, 16]} />
-          <meshStandardMaterial color={color} roughness={0.5} />
+        {/* Body - more detailed */}
+        <mesh position={[0, 0.85, 0]} castShadow receiveShadow>
+          <capsuleGeometry args={[0.32, 0.6, 16, 32]} />
+          <meshStandardMaterial color={color} roughness={0.4} metalness={0.2} />
         </mesh>
         
-        {/* Head */}
-        <mesh position={[0, 1.5, 0]} castShadow>
-          <sphereGeometry args={[0.28, 16, 16]} />
-          <meshStandardMaterial color="#FFDAB9" roughness={0.6} />
+        {/* Head - more detailed */}
+        <mesh position={[0, 1.55, 0]} castShadow receiveShadow>
+          <sphereGeometry args={[0.32, 32, 32]} />
+          <meshStandardMaterial color="#FFDAB9" roughness={0.5} metalness={0.1} />
         </mesh>
         
-        {/* Eyes */}
-        <mesh position={[0.1, 1.52, 0.22]}>
-          <sphereGeometry args={[0.04, 6, 6]} />
-          <meshStandardMaterial color="#333" />
+        {/* Eyes with shine */}
+        <mesh position={[0.1, 1.57, 0.25]}>
+          <sphereGeometry args={[0.05, 12, 12]} />
+          <meshStandardMaterial color="#1a1a1a" roughness={0.2} metalness={0.5} />
         </mesh>
-        <mesh position={[-0.1, 1.52, 0.22]}>
-          <sphereGeometry args={[0.04, 6, 6]} />
-          <meshStandardMaterial color="#333" />
-        </mesh>
-        
-        {/* Hat/Helmet */}
-        <mesh position={[0, 1.75, 0]} castShadow>
-          <coneGeometry args={[0.28, 0.4, 8]} />
-          <meshStandardMaterial color={color} roughness={0.5} metalness={0.3} />
+        <mesh position={[-0.1, 1.57, 0.25]}>
+          <sphereGeometry args={[0.05, 12, 12]} />
+          <meshStandardMaterial color="#1a1a1a" roughness={0.2} metalness={0.5} />
         </mesh>
         
-        {/* Icon indicator */}
-        <mesh position={[0, 2.2, 0]}>
-          <sphereGeometry args={[0.12, 8, 8]} />
+        {/* Eye shine */}
+        <mesh position={[0.1, 1.58, 0.28]}>
+          <sphereGeometry args={[0.015, 6, 6]} />
+          <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={0.5} />
+        </mesh>
+        <mesh position={[-0.1, 1.58, 0.28]}>
+          <sphereGeometry args={[0.015, 6, 6]} />
+          <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={0.5} />
+        </mesh>
+        
+        {/* Hat/Helmet - more detailed */}
+        <mesh position={[0, 1.82, 0]} castShadow receiveShadow>
+          <coneGeometry args={[0.32, 0.5, 16]} />
+          <meshStandardMaterial color={color} roughness={0.3} metalness={0.4} />
+        </mesh>
+        
+        {/* Icon indicator - floating animation */}
+        <mesh position={[0, 2.3, 0]}>
+          <sphereGeometry args={[0.15, 16, 16]} />
           <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={1} />
         </mesh>
         <pointLight position={[0, 2.2, 0]} color="#FFD700" intensity={1} distance={4} />
