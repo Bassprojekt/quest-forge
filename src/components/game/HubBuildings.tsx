@@ -501,36 +501,47 @@ export const HubBuildings = ({ onOpenShop, onOpenGuild, onOpenBank, onOpenPotion
   // Detailed Tree Component
 const DetailedTree = ({ position, variant }: { position: [number, number, number]; variant: number }) => {
   const ref = useRef<THREE.Group>(null);
+  
+  const trunkColors = ['#5D4037', '#4E342E', '#6D4C41'];
+  const leafColors = [
+    ['#2E7D32', '#388E3C', '#43A047'],
+    ['#1B5E20', '#2E7D32', '#388E3C'],
+    ['#388E3C', '#43A047', '#4CAF50'],
+    ['#FF69B4', '#FFB6C1', '#FF91A4'], // cherry blossom
+    ['#2E8B57', '#3CB371', '#48D1CC'], // tropical
+  ];
+  const c = variant % leafColors.length;
+  
   useFrame(({ clock }) => {
     if (ref.current) {
       ref.current.rotation.z = Math.sin(clock.elapsedTime * 0.5 + position[0]) * 0.02;
     }
   });
   
-  const trunkColor = '#5D4037';
-  const leafColors = ['#2E7D32', '#1B5E20', '#388E3C', '#43A047'];
-  const leafColor = leafColors[variant % leafColors.length];
-  
   return (
     <group ref={ref} position={position}>
-      <mesh position={[0, 1.5, 0]} castShadow>
-        <cylinderGeometry args={[0.15, 0.25, 3, 12]} />
-        <meshStandardMaterial color={trunkColor} roughness={0.9} />
+      {/* Trunk - slightly tilted */}
+      <mesh position={[0.1, 1.5, 0]} rotation={[0, 0, 0.08]} castShadow>
+        <cylinderGeometry args={[0.12, 0.2, 3, 6]} />
+        <meshStandardMaterial color={trunkColors[variant % trunkColors.length]} roughness={0.9} />
       </mesh>
-      {/* Main foliage */}
-      <mesh position={[0, 3.5, 0]} castShadow>
-        <coneGeometry args={[1.5, 3, 16]} />
-        <meshStandardMaterial color={leafColor} roughness={0.7} metalness={0.1} />
+      
+      {/* Main foliage - slightly offset */}
+      <mesh position={[0.2, 3.3, 0.1]} castShadow>
+        <coneGeometry args={[1.3, 2.5, 8]} />
+        <meshStandardMaterial color={leafColors[c][0]} roughness={0.7} />
       </mesh>
-      {/* Second layer */}
-      <mesh position={[0, 4.8, 0]} castShadow>
-        <coneGeometry args={[1.2, 2.5, 16]} />
-        <meshStandardMaterial color={leafColor} roughness={0.7} metalness={0.1} />
+      
+      {/* Second layer - different green */}
+      <mesh position={[-0.3, 4.2, -0.2]} castShadow>
+        <coneGeometry args={[1, 2, 8]} />
+        <meshStandardMaterial color={leafColors[c][1]} roughness={0.7} />
       </mesh>
-      {/* Top */}
-      <mesh position={[0, 5.8, 0]} castShadow>
-        <coneGeometry args={[0.8, 2, 16]} />
-        <meshStandardMaterial color={leafColor} roughness={0.6} metalness={0.1} />
+      
+      {/* Top - lighter */}
+      <mesh position={[0.1, 5, 0]} castShadow>
+        <coneGeometry args={[0.6, 1.5, 6]} />
+        <meshStandardMaterial color={leafColors[c][2]} roughness={0.6} />
       </mesh>
     </group>
   );
@@ -619,33 +630,66 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
         );
       })}
 
-      {/* ==================== NEUE GEBÄUDE & NPCs ==================== */}
+{/* ==================== NEUE GEBÄUDE & NPCs ==================== */}
 
-      {/* Waffenladen - Westen */}
+      {/* Waffenladen - Westen - improved */}
       <group position={[-20, 0, 20]}>
+        {/* Main walls - 2 tones */}
         <mesh position={[0, 1.5, 0]} castShadow>
-          <boxGeometry args={[4, 3, 4]} />
-          <meshStandardMaterial color="#8B4513" roughness={0.8} />
+          <boxGeometry args={[4.2, 3, 4.2]} />
+          <meshStandardMaterial color="#8B4513" roughness={0.75} />
         </mesh>
-        <mesh position={[0, 3.2, 0]} castShadow>
-          <boxGeometry args={[4.5, 0.4, 4.5]} />
+        <mesh position={[0.05, 1.5, 0.15]} castShadow>
+          <boxGeometry args={[3.8, 2.8, 3.8]} />
           <meshStandardMaterial color="#A0522D" roughness={0.7} />
         </mesh>
-        <mesh position={[0, 3.5, 0]} castShadow>
-          <boxGeometry args={[3, 0.6, 3]} />
-          <meshStandardMaterial color="#8B4513" roughness={0.8} />
+        
+        {/* Roof with overhang */}
+        <mesh position={[0, 3.2, 0]} castShadow>
+          <boxGeometry args={[4.8, 0.35, 4.8]} />
+          <meshStandardMaterial color="#5D4037" roughness={0.8} />
         </mesh>
-        {/* Schild */}
-        <mesh position={[0, 2.5, 2.1]} castShadow>
-          <boxGeometry args={[1.5, 1, 0.1]} />
+        <mesh position={[0, 3.5, 0]} castShadow>
+          <boxGeometry args={[3.2, 0.5, 3.2]} />
+          <meshStandardMaterial color="#6D4C41" roughness={0.75} />
+        </mesh>
+        
+        {/* Windows - dark with frame */}
+        {[-1.2, 1.2].map((x, i) => (
+          <group key={i} position={[x, 1.8, 2.15]}>
+            <mesh castShadow>
+              <boxGeometry args={[0.7, 0.7, 0.1]} />
+              <meshStandardMaterial color="#3E2723" roughness={0.6} />
+            </mesh>
+            <mesh position={[0, 0, 0.02]}>
+              <boxGeometry args={[0.55, 0.55, 0.08]} />
+              <meshStandardMaterial color="#FFEB3B" emissive="#FFB300" emissiveIntensity={0.4} />
+            </mesh>
+          </group>
+        ))}
+        
+        {/* Door */}
+        <mesh position={[0, 0.75, 2.15]} castShadow>
+          <boxGeometry args={[0.9, 1.5, 0.12]} />
+          <meshStandardMaterial color="#4E342E" roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 0.55, 2.22]}>
+          <boxGeometry args={[0.15, 0.15, 0.05]} />
+          <meshStandardMaterial color="#FFD700" metalness={0.8} roughness={0.3} />
+        </mesh>
+        
+        {/* Sign */}
+        <mesh position={[0, 2.8, 2.2]} castShadow>
+          <boxGeometry args={[1.6, 0.8, 0.15]} />
           <meshStandardMaterial color="#4169E1" roughness={0.5} />
         </mesh>
-        <mesh position={[0, 2.5, 2.15]}>
-          <boxGeometry args={[1.2, 0.7, 0.05]} />
+        <mesh position={[0, 2.8, 2.28]}>
+          <boxGeometry args={[1.4, 0.6, 0.05]} />
           <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={0.3} />
         </mesh>
+        
         {/* Waffen-NPC */}
-<NPCWithBuilding name="Alchemist Anton" color="#9C27B0" position={[0, 0, 3]} icon="⚗️" onClick={() => onOpenPotionCraft?.()} />
+        <NPCWithBuilding name="Alchemist Anton" color="#9C27B0" position={[0, 0, 3]} icon="⚗️" onClick={() => onOpenPotionCraft?.()} />
         <NPCWithBuilding name="Handwerker Hagen" color="#FF9800" position={[2.5, 0, 3]} icon="🔨" onClick={() => onOpenWeaponCraft?.()} />
       </group>
 

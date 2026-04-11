@@ -28,18 +28,30 @@ const Flower = ({ position, color, scale = 1 }: { position: [number, number, num
   </group>
 );
 
-const Tree = ({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) => (
-  <group position={position} scale={scale}>
-    <mesh position={[0, 1.5, 0]} castShadow>
-      <cylinderGeometry args={[0.3, 0.4, 3, 8]} />
-      <meshStandardMaterial color="#8B6914" roughness={0.9} />
-    </mesh>
-    <mesh position={[0, 3.5, 0]} castShadow>
-      <sphereGeometry args={[2, 12, 12]} />
-      <meshStandardMaterial color="#228B22" roughness={0.8} />
-    </mesh>
-  </group>
-);
+const Tree = ({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) => {
+  const greens = ['#2E7D32', '#388E3C', '#43A047', '#1B5E20', '#4CAF50'];
+  const green = greens[Math.floor(Math.abs(position[0] * position[2]) % greens.length)];
+  
+  return (
+    <group position={position} scale={scale}>
+      {/* Trunk - slightly bent */}
+      <mesh position={[0.1, 1.5, 0]} castShadow rotation={[0, 0, 0.05]}>
+        <cylinderGeometry args={[0.25, 0.35, 3, 6]} />
+        <meshStandardMaterial color="#5D4037" roughness={0.9} />
+      </mesh>
+      {/* Main foliage - slightly deformed */}
+      <mesh position={[0.3, 3.3, 0.2]} castShadow>
+        <sphereGeometry args={[2, 10, 8]} />
+        <meshStandardMaterial color={green} roughness={0.75} />
+      </mesh>
+      {/* Secondary foliage */}
+      <mesh position={[-0.5, 4, -0.3]} castShadow scale={0.7}>
+        <sphereGeometry args={[1.5, 8, 6]} />
+        <meshStandardMaterial color={greens[(Math.floor(position[0] * 7) + 1) % greens.length]} roughness={0.7} />
+      </mesh>
+    </group>
+  );
+};
 
 const Rock = ({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) => (
   <group position={position} scale={scale}>
