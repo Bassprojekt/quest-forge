@@ -15,7 +15,7 @@ const getMapHalfSize = (zone: string): number => {
 };
 
 const WarriorWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> }) => (
-  <group ref={swingRef} position={[0.38, 0.92, 0.15]} rotation={[-0.2, 0, 0]}>
+  <group ref={swingRef} position={[-0.38, 0.92, 0.15]} rotation={[-0.2, 0, 0]}>
     {/* Handle */}
     <mesh position={[0, -0.15, 0]} castShadow>
       <boxGeometry args={[0.07, 0.22, 0.07]} />
@@ -61,7 +61,7 @@ const WarriorWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> })
 );
 
 const MageWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> }) => (
-  <group ref={swingRef} position={[-0.48, 0.55, 0.1]} rotation={[-0.2, 0, 0.15]}>
+  <group ref={swingRef} position={[0.48, 0.55, 0.1]} rotation={[-0.2, 0, 0.15]}>
     {/* Staff shaft */}
     <mesh position={[0, 0.2, 0]} castShadow>
       <boxGeometry args={[0.06, 1.2, 0.06]} />
@@ -86,7 +86,7 @@ const MageWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> }) =>
 );
 
 const ArcherWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> }) => (
-  <group ref={swingRef} position={[-0.48, 0.7, 0.1]} rotation={[0, 0, 0.2]}>
+  <group ref={swingRef} position={[0.48, 0.7, 0.1]} rotation={[0, 0, 0.2]}>
     {/* Bow body */}
     <mesh position={[0, 0, 0]} castShadow>
       <torusGeometry args={[0.4, 0.03, 6, 12, Math.PI]} />
@@ -188,12 +188,12 @@ export const Player = () => {
           // Sword swing forward (downward slash)
           const swing = Math.sin(swingProgress * Math.PI);
           swordRef.current.rotation.x = 0.3 + swing * 2.2;
-          swordRef.current.rotation.z = -0.1 + swing * 0.5;
+          swordRef.current.rotation.z = 0.1 - swing * 0.5;
           swordRef.current.position.z = 0.1 - swing * 0.3;
         }
       } else {
         swordRef.current.rotation.x = THREE.MathUtils.lerp(swordRef.current.rotation.x, playerClass === 'mage' ? -0.2 : 0.3, 8 * delta);
-        swordRef.current.rotation.z = THREE.MathUtils.lerp(swordRef.current.rotation.z, playerClass === 'archer' ? 0.2 : -0.1, 8 * delta);
+        swordRef.current.rotation.z = THREE.MathUtils.lerp(swordRef.current.rotation.z, playerClass === 'archer' ? 0.2 : 0.1, 8 * delta);
         if (playerClass !== 'archer') swordRef.current.position.z = THREE.MathUtils.lerp(swordRef.current.position.z, 0.1, 8 * delta);
       }
     }
