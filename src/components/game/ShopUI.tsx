@@ -53,24 +53,34 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
         </div>
 
         <div className="flex gap-2 mb-4">
-          <button onClick={() => setTab('items')}
-            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
-              tab === 'items' ? 'bg-[#4169E1] text-white' : 'bg-[#F0F0F0] text-[#888] hover:text-[#333]'
-            }`}>
-            🧪 TRÄNKE
-          </button>
-          <button onClick={() => setTab('pets')}
-            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
-              tab === 'pets' ? 'bg-[#FF69B4] text-white' : 'bg-[#F0F0F0] text-[#888] hover:text-[#333]'
-            }`}>
-            🐾 PETS
-          </button>
-          <button onClick={() => setTab('cosmetics')}
-            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
-              tab === 'cosmetics' ? 'bg-[#9C27B0] text-white' : 'bg-[#F0F0F0] text-[#888] hover:text-[#333]'
-            }`}>
-            ✨ KOSMETIK ({cosmeticItems.length})
-          </button>
+          {initialTab !== 'pets' && (
+            <>
+              <button onClick={() => setTab('items')}
+                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                  tab === 'items' ? 'bg-[#4169E1] text-white' : 'bg-[#F0F0F0] text-[#888] hover:text-[#333]'
+                }`}>
+                🧪 TRÄNKE
+              </button>
+              <button onClick={() => setTab('pets')}
+                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                  tab === 'pets' ? 'bg-[#FF69B4] text-white' : 'bg-[#F0F0F0] text-[#888] hover:text-[#333]'
+                }`}>
+                🐾 PETS
+              </button>
+              <button onClick={() => setTab('cosmetics')}
+                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                  tab === 'cosmetics' ? 'bg-[#9C27B0] text-white' : 'bg-[#F0F0F0] text-[#888] hover:text-[#333]'
+                }`}>
+                ✨ KOSMETIK ({cosmeticItems.length})
+              </button>
+            </>
+          )}
+          {initialTab === 'pets' && (
+            <button onClick={() => setTab('pets')}
+              className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#FF69B4] text-white">
+              🐾 PETS
+            </button>
+          )}
         </div>
 
         <div className="space-y-2 max-h-64 overflow-y-auto">
