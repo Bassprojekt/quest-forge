@@ -1021,8 +1021,6 @@ export const EnemyEntity = ({ enemy }: Props) => {
   useFrame((state) => {
     if (!meshRef.current) return;
     if (wasAlive.current && !enemy.alive) {
-      // eslint-disable-next-line no-alert
-      alert('[MOB] Kill: ' + enemy.name);
       updateKillProgress(enemy.name);
       wasAlive.current = false;
     }
