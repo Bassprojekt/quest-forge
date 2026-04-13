@@ -180,10 +180,10 @@ const IndividualPet = ({ pet, index }: { pet: Pet; index: number }) => {
       meshRef.current.position.z = newZ;
     }
     
-    // Healer: Alle 5 Sekunden heilen
+    // Healer: Alle 10 Sekunden heilen
     if (pet.bonusType === 'heal') {
       const now = Date.now() / 1000;
-      if (now - lastHeal.current > 5) {
+      if (now - lastHeal.current > 10) {
         const healAmount = pet.bonusValue || 20;
         const newHp = Math.min(playerMaxHp, playerHp + healAmount);
         setPlayerHp(newHp);

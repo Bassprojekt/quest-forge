@@ -253,14 +253,7 @@ export const GameScene = () => {
     return () => clearInterval(hpRegenInterval);
   }, [playerHp, playerMaxHp, setPlayerHp]);
 
-  // MP Regeneration (1 MP every 15 seconds when not full)
-  useEffect(() => {
-    if (playerMana >= playerMaxMana) return;
-    const mpRegenInterval = setInterval(() => {
-      setPlayerMana(Math.min(playerMaxMana, playerMana + 1));
-    }, 15000);
-    return () => clearInterval(mpRegenInterval);
-  }, [playerMana, playerMaxMana, setPlayerMana]);
+  // Mana regeneriert nicht mehr automatisch - nur noch durch Tränke
 
   const isLoggedIn = useAccountStore(s => s.isLoggedIn());
   const currentUsername = useAccountStore(s => s.getCurrentUsername());
