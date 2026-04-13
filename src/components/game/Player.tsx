@@ -15,99 +15,73 @@ const getMapHalfSize = (zone: string): number => {
 };
 
 const WarriorWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> }) => (
-  <group ref={swingRef} position={[-0.38, 0.92, 0.15]} rotation={[-0.2, 0, 0]}>
+  <group ref={swingRef} position={[0.35, 0.7, 0.2]} rotation={[-0.1, 0, 0.1]}>
+    {/* Arm */}
+    <mesh position={[0, -0.25, 0]} castShadow>
+      <boxGeometry args={[0.12, 0.35, 0.12]} />
+      <meshStandardMaterial color="#E8C39E" flatShading roughness={0.7} />
+    </mesh>
     {/* Handle */}
-    <mesh position={[0, -0.15, 0]} castShadow>
-      <boxGeometry args={[0.07, 0.22, 0.07]} />
+    <mesh position={[0, -0.42, 0]} castShadow rotation={[0, 0, 0.1]}>
+      <boxGeometry args={[0.06, 0.18, 0.06]} />
       <meshStandardMaterial color="#4A2A10" flatShading roughness={0.6} />
     </mesh>
     {/* Guard */}
-    <mesh position={[0, -0.28, 0]} castShadow>
-      <boxGeometry args={[0.10, 0.06, 0.10]} />
+    <mesh position={[0, -0.52, 0]} castShadow>
+      <boxGeometry args={[0.12, 0.04, 0.08]} />
       <meshStandardMaterial color="#FFD700" flatShading metalness={0.9} roughness={0.2} />
-    </mesh>
-    {/* Pommel */}
-    <mesh position={[0, -0.02, 0]} castShadow>
-      <boxGeometry args={[0.28, 0.05, 0.10]} />
-      <meshStandardMaterial color="#FFD700" flatShading metalness={0.9} roughness={0.2} />
-    </mesh>
-    {/* Gem */}
-    <mesh position={[0.12, -0.02, 0.05]} castShadow>
-      <boxGeometry args={[0.04, 0.04, 0.04]} />
-      <meshStandardMaterial color="#FF3333" emissive="#FF3333" emissiveIntensity={0.8} flatShading metalness={0.3} />
-    </mesh>
-    <mesh position={[-0.12, -0.02, 0.05]} castShadow>
-      <boxGeometry args={[0.04, 0.04, 0.04]} />
-      <meshStandardMaterial color="#FF3333" emissive="#FF3333" emissiveIntensity={0.8} flatShading metalness={0.3} />
     </mesh>
     {/* Blade */}
-    <mesh position={[0, 0.38, 0]} castShadow>
-      <boxGeometry args={[0.10, 0.72, 0.04]} />
-      <meshStandardMaterial color="#D0D8E8" flatShading metalness={0.95} roughness={0.05} />
+    <mesh position={[0, -0.15, 0]} castShadow>
+      <boxGeometry args={[0.08, 0.5, 0.03]} />
+      <meshStandardMaterial color="#C0C8D0" flatShading metalness={0.95} roughness={0.05} />
     </mesh>
-    {/* Blade edge highlight */}
-    <mesh position={[0, 0.38, 0.025]} castShadow>
-      <boxGeometry args={[0.06, 0.72, 0.01]} />
-      <meshStandardMaterial color="#E8EEF8" flatShading metalness={1} roughness={0.02} />
+    {/* Blade shine */}
+    <mesh position={[0, -0.15, 0.02]} castShadow>
+      <boxGeometry args={[0.04, 0.5, 0.01]} />
+      <meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={0.3} flatShading metalness={1} roughness={0.02} />
     </mesh>
-    {/* Sizzle effect */}
-    <pointLight position={[0, 0.4, 0]} color="#FFD700" intensity={0.3} distance={2} />
     {/* Tip */}
-    <mesh position={[0, 0.78, 0]} castShadow rotation={[0, 0, Math.PI / 4]}>
-      <boxGeometry args={[0.08, 0.08, 0.04]} />
-      <meshStandardMaterial color="#D0D8E8" flatShading metalness={0.95} roughness={0.05} />
+    <mesh position={[0, 0.12, 0]} castShadow>
+      <boxGeometry args={[0.06, 0.06, 0.03]} />
+      <meshStandardMaterial color="#C0C8D0" flatShading metalness={0.95} roughness={0.05} />
     </mesh>
   </group>
 );
 
 const MageWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> }) => (
-  <group ref={swingRef} position={[0.48, 0.55, 0.1]} rotation={[-0.2, 0, 0.15]}>
+  <group ref={swingRef} position={[0.35, 0.7, 0.2]} rotation={[-0.1, 0, 0.1]}>
+    {/* Arm */}
+    <mesh position={[0, -0.25, 0]} castShadow>
+      <boxGeometry args={[0.12, 0.35, 0.12]} />
+      <meshStandardMaterial color="#E8C39E" flatShading roughness={0.7} />
+    </mesh>
     {/* Staff shaft */}
-    <mesh position={[0, 0.2, 0]} castShadow>
-      <boxGeometry args={[0.06, 1.2, 0.06]} />
+    <mesh position={[0, -0.4, 0]} castShadow rotation={[0, 0, 0.1]}>
+      <boxGeometry args={[0.05, 1.1, 0.05]} />
       <meshStandardMaterial color="#5C3A1E" flatShading />
     </mesh>
     {/* Staff orb */}
-    <mesh position={[0, 0.85, 0]} castShadow>
-      <sphereGeometry args={[0.12, 8, 8]} />
+    <mesh position={[0, 0.25, 0]} castShadow>
+      <sphereGeometry args={[0.1, 8, 8]} />
       <meshStandardMaterial color="#9C27B0" emissive="#9C27B0" emissiveIntensity={1.5} flatShading />
-    </mesh>
-    {/* Orb glow ring */}
-    <mesh position={[0, 0.85, 0]} rotation={[Math.PI / 2, 0, 0]}>
-      <ringGeometry args={[0.14, 0.18, 8]} />
-      <meshStandardMaterial color="#CE93D8" emissive="#CE93D8" emissiveIntensity={2} transparent opacity={0.6} side={THREE.DoubleSide} />
-    </mesh>
-    {/* Staff bottom crystal */}
-    <mesh position={[0, -0.42, 0]} castShadow rotation={[0, 0, Math.PI / 4]}>
-      <boxGeometry args={[0.06, 0.06, 0.06]} />
-      <meshStandardMaterial color="#7B1FA2" flatShading metalness={0.5} />
     </mesh>
   </group>
 );
 
 const ArcherWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> }) => (
-  <group ref={swingRef} position={[0.48, 0.7, 0.1]} rotation={[0, 0, 0.2]}>
+  <group ref={swingRef} position={[0.35, 0.7, 0.2]} rotation={[0, 0, 0.1]}>
+    {/* Arm */}
+    <mesh position={[0, -0.25, 0]} castShadow>
+      <boxGeometry args={[0.12, 0.35, 0.12]} />
+      <meshStandardMaterial color="#E8C39E" flatShading roughness={0.7} />
+    </mesh>
     {/* Bow body */}
-    <mesh position={[0, 0, 0]} castShadow>
-      <torusGeometry args={[0.4, 0.03, 6, 12, Math.PI]} />
+    <mesh position={[0, -0.45, 0]} castShadow>
+      <torusGeometry args={[0.35, 0.025, 6, 12, Math.PI]} />
       <meshStandardMaterial color="#8B4513" flatShading />
     </mesh>
-    {/* Bowstring */}
-    <mesh position={[0, 0, 0]}>
-      <cylinderGeometry args={[0.005, 0.005, 0.78, 4]} />
-      <meshStandardMaterial color="#F5DEB3" />
-    </mesh>
-    {/* Arrow */}
-    <mesh position={[0.05, 0, 0.02]} rotation={[Math.PI / 2, 0, 0]}>
-      <cylinderGeometry args={[0.015, 0.015, 0.6, 4]} />
-      <meshStandardMaterial color="#DEB887" flatShading />
-    </mesh>
-    {/* Arrow tip */}
-    <mesh position={[0.05, 0, 0.33]} rotation={[Math.PI / 2, 0, 0]}>
-      <coneGeometry args={[0.03, 0.08, 4]} />
-      <meshStandardMaterial color="#C0C0C0" flatShading metalness={0.8} />
-    </mesh>
-  </group>
+</group>
 );
 
 export const Player = () => {
@@ -172,29 +146,31 @@ export const Player = () => {
     }
     const now = performance.now() / 1000;
 
-    // Weapon swing animation - swing FORWARD (along Z axis)
+    // Weapon swing animation - arm swing combat
     if (swordRef.current) {
       if (swingTimer.current > 0) {
         swingTimer.current -= delta;
-        const swingProgress = 1 - (swingTimer.current / 0.3);
+        const swingProgress = 1 - (swingTimer.current / 0.25);
         if (playerClass === 'mage') {
-          // Staff thrust forward
-          swordRef.current.rotation.x = Math.sin(swingProgress * Math.PI) * -1.0;
-          swordRef.current.position.z = 0.1 + Math.sin(swingProgress * Math.PI) * 0.3;
+          // Staff thrust
+          swordRef.current.rotation.x = -0.1 + Math.sin(swingProgress * Math.PI) * -0.8;
+          swordRef.current.position.z = 0.2 + Math.sin(swingProgress * Math.PI) * 0.4;
         } else if (playerClass === 'archer') {
-          // Bow pull back then release
-          swordRef.current.rotation.x = Math.sin(swingProgress * Math.PI) * -0.3;
+          // Bow aim
+          swordRef.current.rotation.x = Math.sin(swingProgress * Math.PI) * -0.2;
         } else {
-          // Sword swing forward (downward slash)
+          // Arm swing slash - more dramatic
           const swing = Math.sin(swingProgress * Math.PI);
-          swordRef.current.rotation.x = 0.3 + swing * 2.2;
-          swordRef.current.rotation.z = 0.1 - swing * 0.5;
-          swordRef.current.position.z = 0.1 - swing * 0.3;
+          swordRef.current.rotation.x = -0.1 + swing * 1.5;
+          swordRef.current.rotation.z = 0.1 + swing * 0.6;
+          swordRef.current.position.z = 0.2 - swing * 0.3;
+          swordRef.current.position.y = 0.7 + swing * 0.15;
         }
       } else {
-        swordRef.current.rotation.x = THREE.MathUtils.lerp(swordRef.current.rotation.x, playerClass === 'mage' ? -0.2 : 0.3, 8 * delta);
-        swordRef.current.rotation.z = THREE.MathUtils.lerp(swordRef.current.rotation.z, playerClass === 'archer' ? 0.2 : 0.1, 8 * delta);
-        if (playerClass !== 'archer') swordRef.current.position.z = THREE.MathUtils.lerp(swordRef.current.position.z, 0.1, 8 * delta);
+        swordRef.current.rotation.x = THREE.MathUtils.lerp(swordRef.current.rotation.x, -0.1, 8 * delta);
+        swordRef.current.rotation.z = THREE.MathUtils.lerp(swordRef.current.rotation.z, 0.1, 8 * delta);
+        swordRef.current.position.z = THREE.MathUtils.lerp(swordRef.current.position.z, 0.2, 8 * delta);
+        swordRef.current.position.y = THREE.MathUtils.lerp(swordRef.current.position.y, 0.7, 8 * delta);
       }
     }
 
@@ -464,13 +440,13 @@ export const Player = () => {
         </mesh>
         </group>
 
-        {/* Right arm (weapon arm) */}
-        <group ref={rightArmRef} position={[-0.38, 0.92, 0]} rotation={[-armSwing, 0, 0]}>
+        {/* Right arm (weapon arm) - now on right side */}
+        <group ref={rightArmRef} position={[0.38, 0.92, 0]} rotation={[-armSwing, 0, 0]}>
           <mesh castShadow><boxGeometry args={[0.14, 0.40, 0.14]} /><meshStandardMaterial color={tunicColor} flatShading /></mesh>
           <mesh position={[0, -0.24, 0]} castShadow><boxGeometry args={[0.12, 0.12, 0.12]} /><meshStandardMaterial color="#FFCC99" flatShading /></mesh>
         </group>
         {/* Left arm */}
-        <group ref={leftArmRef} position={[0.38, 0.92, 0]} rotation={[armSwing, 0, 0]}>
+        <group ref={leftArmRef} position={[-0.38, 0.92, 0]} rotation={[armSwing, 0, 0]}>
           <mesh castShadow><boxGeometry args={[0.14, 0.40, 0.14]} /><meshStandardMaterial color={tunicColor} flatShading /></mesh>
           <mesh position={[0, -0.24, 0]} castShadow><boxGeometry args={[0.12, 0.12, 0.12]} /><meshStandardMaterial color="#FFCC99" flatShading /></mesh>
         </group>
