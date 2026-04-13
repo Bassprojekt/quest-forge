@@ -13,21 +13,27 @@ const HitBurst = ({ position }: { position: [number, number, number] }) => {
   const ref = useRef<THREE.Points>(null);
   const time = useRef(0);
 
-  const { positions, velocities } = useMemo(() => {
-    const count = 12;
+  const { positions, velocities, colors } = useMemo(() => {
+    const count = 20;
     const pos = new Float32Array(count * 3);
+    const col = new Float32Array(count * 3);
     const vel: THREE.Vector3[] = [];
+    const particleColors = ['#FF0000', '#FF4500', '#FFD700', '#FFA500'];
     for (let i = 0; i < count; i++) {
       pos[i * 3] = 0;
       pos[i * 3 + 1] = 0;
       pos[i * 3 + 2] = 0;
+      const c = particleColors[Math.floor(Math.random() * particleColors.length)];
+      col[i * 3] = parseInt(c.slice(1, 3), 16) / 255;
+      col[i * 3 + 1] = parseInt(c.slice(3, 5), 16) / 255;
+      col[i * 3 + 2] = parseInt(c.slice(5, 7), 16) / 255;
       vel.push(new THREE.Vector3(
-        (Math.random() - 0.5) * 4,
-        Math.random() * 3 + 1,
-        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 6,
+        Math.random() * 5 + 2,
+        (Math.random() - 0.5) * 6,
       ));
     }
-    return { positions: pos, velocities: vel };
+    return { positions: pos, velocities: vel, colors: col };
   }, []);
 
   useFrame((_, delta) => {
@@ -55,8 +61,14 @@ const HitBurst = ({ position }: { position: [number, number, number] }) => {
           array={positions}
           itemSize={3}
         />
+        <bufferAttribute
+          attach="attributes-color"
+          count={colors.length / 3}
+          array={colors}
+          itemSize={3}
+        />
       </bufferGeometry>
-      <pointsMaterial color="#FFD700" size={0.15} transparent opacity={1} />
+      <pointsMaterial color="#FFD700" size={0.2} transparent opacity={1} vertexColors />
     </points>
   );
 };

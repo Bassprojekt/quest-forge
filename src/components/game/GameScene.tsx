@@ -338,6 +338,12 @@ export const GameScene = () => {
           {currentZone === 'enchanted_forest' && <AmbientParticles count={40} color="#7CFC00" area={35} height={15} />}
           {currentZone === 'celestial_plains' && <AmbientParticles count={35} color="#FFD700" area={40} height={12} />}
           {currentZone === 'shadow_realm' && <FireflyParticles count={25} />}
+        {currentZone === 'abyss' && <FireflyParticles count={30} />}
+        {currentZone === 'coral_reef' && <AmbientParticles count={20} color="#40E0D0" area={25} height={5} />}
+        {currentZone === 'floating_islands' && <AmbientParticles count={40} color="#E6E6FA" area={35} height={15} />}
+        {currentZone === 'pvp_arena' && <AmbientParticles count={15} color="#FF6347" area={15} height={3} />}
+        {currentZone === 'raid_dungeon' && <FireflyParticles count={40} />}
+        {currentZone === 'arena_colosseum' && <AmbientParticles count={20} color="#FFD700" area={20} height={5} />}
 
         <ThirdPersonCamera />
         <Player />
