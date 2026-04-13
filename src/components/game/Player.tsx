@@ -1,8 +1,18 @@
 import { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useGameStore } from '@/store/gameStore';
+import { useGameStore, ZONES } from '@/store/gameStore';
 import { useKeyboard } from '@/hooks/useKeyboard';
+
+const getMapHalfSize = (zone: string): number => {
+  const sizes: Record<string, number> = {
+    hub: 80, grasslands: 50, mushroom_forest: 60, frozen_peaks: 70, lava_caverns: 75,
+    coral_reef: 70, shadow_swamp: 80, crystal_highlands: 90, void_nexus: 100,
+    dragon_lair: 110, enchanted_forest: 120, floating_islands: 130, abyss: 140,
+    celestial_plains: 150, shadow_realm: 160, pvp_arena: 25, raid_dungeon: 75, arena_colosseum: 50,
+  };
+  return sizes[zone] || 50;
+};
 
 const WarriorWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> }) => (
   <group ref={swingRef} position={[0.38, 0.92, 0.15]} rotation={[-0.2, 0, 0]}>
@@ -240,8 +250,9 @@ export const Player = () => {
       dashTimer.current -= delta;
       meshRef.current.position.addScaledVector(dashDir.current, 40 * delta);
       if (dashTimer.current <= 0) setDashActive(false);
-      meshRef.current.position.x = THREE.MathUtils.clamp(meshRef.current.position.x, -100, 100);
-      meshRef.current.position.z = THREE.MathUtils.clamp(meshRef.current.position.z, -100, 100);
+      const mapHalfSize = getMapHalfSize(currentZone);
+      meshRef.current.position.x = THREE.MathUtils.clamp(meshRef.current.position.x, -mapHalfSize, mapHalfSize);
+      meshRef.current.position.z = THREE.MathUtils.clamp(meshRef.current.position.z, -mapHalfSize, mapHalfSize);
       setPlayerPosition([meshRef.current.position.x, meshRef.current.position.y, meshRef.current.position.z]);
       return;
     }
@@ -305,7 +316,16 @@ export const Player = () => {
 
     // Manual WASD movement
     if (!isAutoMoving && !autoMoveEnemyId) {
-      const speed = 8;
+      const baseSpeed = useGameStore.getState().playerSpeed;
+      const equippedPets = useGameStore.getState().pets.filter(p => p.equipped);
+      let speedBonus = 0;
+      for (const pet of equippedPets) {
+        if (pet.bonusType === 'speed') {
+          speedBonus += pet.bonusValue;
+        }
+      }
+      const totalSpeed = baseSpeed * (1 + speedBonus);
+      
       const dir = new THREE.Vector3();
       const cameraDir = new THREE.Vector3();
       state.camera.getWorldDirection(cameraDir);
@@ -326,7 +346,7 @@ export const Player = () => {
         if (autoMoveEnemyId) setAutoMoveTarget(null, null);
       }
 
-      velocity.current.lerp(dir.multiplyScalar(speed), 5 * delta);
+      velocity.current.lerp(dir.multiplyScalar(totalSpeed), 5 * delta);
     } else if (!isAutoMoving && autoMoveEnemyId) {
       // Standing still attacking - cancel with WASD
       if (keys.current.w || keys.current.a || keys.current.s || keys.current.d) {
@@ -341,8 +361,9 @@ export const Player = () => {
     }
 
     meshRef.current.position.addScaledVector(velocity.current, delta);
-    meshRef.current.position.x = THREE.MathUtils.clamp(meshRef.current.position.x, -1000, 1000);
-    meshRef.current.position.z = THREE.MathUtils.clamp(meshRef.current.position.z, -1000, 1000);
+    const mapHalfSize = getMapHalfSize(currentZone);
+    meshRef.current.position.x = THREE.MathUtils.clamp(meshRef.current.position.x, -mapHalfSize, mapHalfSize);
+    meshRef.current.position.z = THREE.MathUtils.clamp(meshRef.current.position.z, -mapHalfSize, mapHalfSize);
     setPlayerPosition([meshRef.current.position.x, meshRef.current.position.y, meshRef.current.position.z]);
     
     // Idle animation phase - always update

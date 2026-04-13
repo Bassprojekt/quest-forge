@@ -520,80 +520,107 @@ const ElementalMob = ({ config, isTarget }: { config: ReturnType<typeof MOB_CONF
 
 const DragonMob = ({ config, isTarget }: { config: ReturnType<typeof MOB_CONFIGS[string]>; isTarget: boolean }) => {
   const scale = config.size;
+  const colors = getMobColors(config.bodyColor);
   return (
     <group>
-      <mesh position={[0, scale * 0.5, 0]} castShadow>
-        <capsuleGeometry args={[scale * 0.32, scale * 0.85, 8, 16]} />
-        <meshStandardMaterial color={config.bodyColor} roughness={0.5} metalness={0.2} />
+      {/* Body - blocky dragon */}
+      <mesh position={[0, scale * 0.7, 0]} castShadow>
+        <boxGeometry args={[scale * 1.2, scale * 1.4, scale * 1.6]} />
+        <meshStandardMaterial color={colors.base} roughness={0.6} />
       </mesh>
-      <mesh position={[0, scale * 0.05, 0]} castShadow>
-        <boxGeometry args={[scale * 0.5, scale * 0.1, scale * 0.7]} />
-        <meshStandardMaterial color={config.bodyColor} roughness={0.55} />
+      {/* Belly - lighter */}
+      <mesh position={[0, scale * 0.5, scale * 0.5]} castShadow>
+        <boxGeometry args={[scale * 0.8, scale * 1.0, scale * 0.5]} />
+        <meshStandardMaterial color={colors.light} roughness={0.5} />
       </mesh>
-      <mesh position={[0, scale * 1.05, scale * 0.22]} castShadow>
-        <coneGeometry args={[scale * 0.28, scale * 0.55, 5]} />
-        <meshStandardMaterial color={config.bodyColor} roughness={0.5} />
+      {/* Head */}
+      <group position={[0, scale * 1.6, scale * 0.5]}>
+        <mesh castShadow>
+          <boxGeometry args={[scale * 0.9, scale * 0.7, scale * 0.8]} />
+          <meshStandardMaterial color={colors.base} roughness={0.6} />
+        </mesh>
+        {/* Snout */}
+        <mesh position={[0, -scale * 0.1, scale * 0.45]} castShadow>
+          <boxGeometry args={[scale * 0.5, scale * 0.35, scale * 0.4]} />
+          <meshStandardMaterial color={colors.dark} roughness={0.5} />
+        </mesh>
+        {/* Nostrils */}
+        <mesh position={[scale * 0.12, -scale * 0.05, scale * 0.65]}>
+          <boxGeometry args={[scale * 0.1, scale * 0.08, scale * 0.05]} />
+          <meshStandardMaterial color="#222222" roughness={0.3} />
+        </mesh>
+        <mesh position={[-scale * 0.12, -scale * 0.05, scale * 0.65]}>
+          <boxGeometry args={[scale * 0.1, scale * 0.08, scale * 0.05]} />
+          <meshStandardMaterial color="#222222" roughness={0.3} />
+        </mesh>
+        {/* Eyes - angry but cute */}
+        <mesh position={[scale * 0.28, scale * 0.15, scale * 0.35]} castShadow>
+          <boxGeometry args={[scale * 0.25, scale * 0.2, scale * 0.15]} />
+          <meshStandardMaterial color="#FFFF00" roughness={0.3} />
+        </mesh>
+        <mesh position={[-scale * 0.28, scale * 0.15, scale * 0.35]} castShadow>
+          <boxGeometry args={[scale * 0.25, scale * 0.2, scale * 0.15]} />
+          <meshStandardMaterial color="#FFFF00" roughness={0.3} />
+        </mesh>
+        {/* Pupils */}
+        <mesh position={[scale * 0.28, scale * 0.13, scale * 0.44]}>
+          <boxGeometry args={[scale * 0.12, scale * 0.15, scale * 0.05]} />
+          <meshStandardMaterial color="#FF0000" roughness={0.2} />
+        </mesh>
+        <mesh position={[-scale * 0.28, scale * 0.13, scale * 0.44]}>
+          <boxGeometry args={[scale * 0.12, scale * 0.15, scale * 0.05]} />
+          <meshStandardMaterial color="#FF0000" roughness={0.2} />
+        </mesh>
+        {/* Horns */}
+        <mesh position={[scale * 0.35, scale * 0.45, 0]} rotation={[0, 0, -0.4]} castShadow>
+          <boxGeometry args={[scale * 0.08, scale * 0.4, scale * 0.08]} />
+          <meshStandardMaterial color={colors.dark} roughness={0.7} />
+        </mesh>
+        <mesh position={[-scale * 0.35, scale * 0.45, 0]} rotation={[0, 0, 0.4]} castShadow>
+          <boxGeometry args={[scale * 0.08, scale * 0.4, scale * 0.08]} />
+          <meshStandardMaterial color={colors.dark} roughness={0.7} />
+        </mesh>
+      </group>
+      {/* Legs - blocky */}
+      <mesh position={[scale * 0.4, scale * 0.15, scale * 0.35]} castShadow>
+        <boxGeometry args={[scale * 0.35, scale * 0.3, scale * 0.35]} />
+        <meshStandardMaterial color={colors.base} roughness={0.6} />
       </mesh>
-      <mesh position={[0, scale * 1.45, scale * 0.08]} castShadow>
-        <boxGeometry args={[scale * 0.15, scale * 0.12, scale * 0.25]} />
-        <meshStandardMaterial color={config.accentColor} roughness={0.4} emissive={config.accentColor} emissiveIntensity={0.3} />
+      <mesh position={[-scale * 0.4, scale * 0.15, scale * 0.35]} castShadow>
+        <boxGeometry args={[scale * 0.35, scale * 0.3, scale * 0.35]} />
+        <meshStandardMaterial color={colors.base} roughness={0.6} />
       </mesh>
-      <mesh position={[scale * 0.38, scale * 0.95, scale * 0.12]} castShadow>
-        <boxGeometry args={[scale * 0.55, scale * 0.1, scale * 0.35]} />
-        <meshStandardMaterial color={config.accentColor} roughness={0.35} metalness={0.3} />
+      <mesh position={[scale * 0.4, scale * 0.15, -scale * 0.35]} castShadow>
+        <boxGeometry args={[scale * 0.35, scale * 0.3, scale * 0.35]} />
+        <meshStandardMaterial color={colors.base} roughness={0.6} />
       </mesh>
-      <mesh position={[-scale * 0.38, scale * 0.95, scale * 0.12]} castShadow>
-        <boxGeometry args={[scale * 0.55, scale * 0.1, scale * 0.35]} />
-        <meshStandardMaterial color={config.accentColor} roughness={0.35} metalness={0.3} />
+      <mesh position={[-scale * 0.4, scale * 0.15, -scale * 0.35]} castShadow>
+        <boxGeometry args={[scale * 0.35, scale * 0.3, scale * 0.35]} />
+        <meshStandardMaterial color={colors.base} roughness={0.6} />
       </mesh>
-      <mesh position={[scale * 0.38, scale * 0.95, scale * 0.25]} castShadow>
-        <boxGeometry args={[scale * 0.5, scale * 0.06, scale * 0.25]} />
-        <meshStandardMaterial color={config.bodyColor} roughness={0.4} />
+      {/* Tail */}
+      <mesh position={[0, scale * 0.35, -scale * 1.1]} rotation={[0.5, 0, 0]} castShadow>
+        <boxGeometry args={[scale * 0.3, scale * 0.3, scale * 1.0]} />
+        <meshStandardMaterial color={colors.base} roughness={0.6} />
       </mesh>
-      <mesh position={[-scale * 0.38, scale * 0.95, scale * 0.25]} castShadow>
-        <boxGeometry args={[scale * 0.5, scale * 0.06, scale * 0.25]} />
-        <meshStandardMaterial color={config.bodyColor} roughness={0.4} />
+      {/* Tail spikes */}
+      <mesh position={[0, scale * 0.5, -scale * 1.6]} castShadow>
+        <boxGeometry args={[scale * 0.2, scale * 0.15, scale * 0.15]} />
+        <meshStandardMaterial color={colors.accent} roughness={0.5} />
       </mesh>
-      <mesh position={[0, scale * 1.35, scale * 0.32]}>
-        <sphereGeometry args={[scale * 0.065, 10, 10]} />
-        <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={0.9} />
-      </mesh>
-      <mesh position={[0, scale * 1.35, scale * 0.38]}>
-        <sphereGeometry args={[scale * 0.035, 8, 8]} />
-        <meshStandardMaterial color="#1a1a2e" />
-      </mesh>
-      <mesh position={[0, scale * 1.37, scale * 0.4]} scale={0.5}>
-        <sphereGeometry args={[scale * 0.012, 6, 6]} />
-        <meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={1} />
-      </mesh>
-      <mesh position={[scale * 0.22, scale * 1.15, -scale * 0.22]} rotation={[0.35, 0, 0]} castShadow>
-        <coneGeometry args={[scale * 0.09, scale * 0.28, 4]} />
-        <meshStandardMaterial color={config.accentColor} roughness={0.4} metalness={0.2} />
-      </mesh>
-      <mesh position={[-scale * 0.22, scale * 1.15, -scale * 0.22]} rotation={[0.35, 0, 0]} castShadow>
-        <coneGeometry args={[scale * 0.09, scale * 0.28, 4]} />
-        <meshStandardMaterial color={config.accentColor} roughness={0.4} metalness={0.2} />
-      </mesh>
-      <mesh position={[scale * 0.22, scale * 1.2, scale * 0.35]} castShadow>
-        <capsuleGeometry args={[scale * 0.04, scale * 0.2, 4, 6]} />
-        <meshStandardMaterial color={config.accentColor} roughness={0.35} />
-      </mesh>
-      <mesh position={[-scale * 0.22, scale * 1.2, scale * 0.35]} castShadow>
-        <capsuleGeometry args={[scale * 0.04, scale * 0.2, 4, 6]} />
-        <meshStandardMaterial color={config.accentColor} roughness={0.35} />
-      </mesh>
-      <mesh position={[scale * 0.15, scale * 0.4, scale * 0.55]} rotation={[0.2, 0, 0]} castShadow>
-        <capsuleGeometry args={[scale * 0.05, scale * 0.18, 4, 6]} />
-        <meshStandardMaterial color={config.bodyColor} roughness={0.5} />
-      </mesh>
-      <mesh position={[-scale * 0.15, scale * 0.4, scale * 0.55]} rotation={[0.2, 0, 0]} castShadow>
-        <capsuleGeometry args={[scale * 0.05, scale * 0.18, 4, 6]} />
-        <meshStandardMaterial color={config.bodyColor} roughness={0.5} />
-      </mesh>
-      <mesh position={[0, scale * 0.25, scale * 0.6]} castShadow>
-        <coneGeometry args={[scale * 0.06, scale * 0.15, 4]} />
-        <meshStandardMaterial color={config.accentColor} roughness={0.4} />
-      </mesh>
+      {/* Wings */}
+      {config.hasWings && (
+        <group>
+          <mesh position={[scale * 0.8, scale * 1.2, -scale * 0.2]} rotation={[0, 0.3, 0.5]} castShadow>
+            <boxGeometry args={[scale * 0.1, scale * 0.8, scale * 1.2]} />
+            <meshStandardMaterial color={colors.dark} roughness={0.5} />
+          </mesh>
+          <mesh position={[-scale * 0.8, scale * 1.2, -scale * 0.2]} rotation={[0, -0.3, -0.5]} castShadow>
+            <boxGeometry args={[scale * 0.1, scale * 0.8, scale * 1.2]} />
+            <meshStandardMaterial color={colors.dark} roughness={0.5} />
+          </mesh>
+        </group>
+      )}
       {config.hasWings && (
         <group>
           <mesh position={[scale * 0.75, scale * 1.1, -scale * 0.1]} rotation={[0, 0, 0.5]} castShadow>

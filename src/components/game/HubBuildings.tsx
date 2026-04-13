@@ -140,10 +140,10 @@ const NPCWithBuilding = ({ name, color, position, icon, onClick }: {
     floatPhase.current += 0.015;
     meshRef.current.position.y = Math.sin(floatPhase.current) * 0.03;
     
-    // NPCs look at player (back to center) - fixed orientation
-    const toPlayerX = playerPos[0] - position[0];
-    const toPlayerZ = playerPos[2] - position[2];
-    meshRef.current.rotation.y = Math.atan2(toPlayerX, toPlayerZ);
+    // NPCs face center (0,0,0)
+    const toCenterX = -position[0];
+    const toCenterZ = -position[2];
+    meshRef.current.rotation.y = Math.atan2(toCenterX, toCenterZ);
   });
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {

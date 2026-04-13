@@ -4,13 +4,14 @@ export interface Quest {
   id: string;
   title: string;
   description: string;
-  type: 'kill' | 'collect' | 'escort';
+  type: 'kill' | 'collect' | 'escort' | 'special' | 'level';
   target: string;
   targetItem?: string;
   required: number;
   current: number;
   rewardXp: number;
   rewardGold: number;
+  rewardGems?: number;
   rewardItem?: string;
   status: 'available' | 'active' | 'completed' | 'claimed';
   npcName: string;
@@ -54,6 +55,19 @@ const INITIAL_QUESTS: Quest[] = [
   { id: 'q21', title: 'Pilzsammler', description: 'Sammle 5 Pilze im Pilzwald.', type: 'collect', target: 'Pilz', targetItem: 'Pilz', required: 5, current: 0, rewardXp: 150, rewardGold: 75, status: 'available', npcName: 'Apothekerin Flora' },
   { id: 'q22', title: 'Kristallsucher', description: 'Sammle 3 Kristalle.', type: 'collect', target: 'Kristall', targetItem: 'Kristall', required: 3, current: 0, rewardXp: 300, rewardGold: 150, status: 'available', npcName: 'Waffenhändler Erik' },
   { id: 'q23', title: 'Schattenessenz', description: 'Sammle 4 Schattenperlen.', type: 'collect', target: 'Schattenperle', targetItem: 'Schattenperle', required: 4, current: 0, rewardXp: 400, rewardGold: 200, status: 'available', npcName: 'Schmied Vulkan' },
+  // Neue Quests
+  { id: 'q24', title: 'Edelsteinjäger', description: 'Sammle 5 Edelsteine von Bossen.', type: 'collect', target: 'Edelstein', targetItem: 'Edelstein', required: 5, current: 0, rewardXp: 500, rewardGold: 250, rewardGems: 2, status: 'available', npcName: 'Bankier Boris' },
+  { id: 'q25', title: 'Nihilschlund', description: 'Besiege den Nihilschlund.', type: 'kill', target: 'Nihilschlund', required: 1, current: 0, rewardXp: 2500, rewardGold: 1200, rewardGems: 5, status: 'available', npcName: 'Raid-Leiter Roy' },
+  { id: 'q26', title: 'Käferplage', description: 'Töte 5 Edelsteinkäfer.', type: 'kill', target: 'Edelsteinkäfer', required: 5, current: 0, rewardXp: 600, rewardGold: 300, status: 'available', npcName: 'Apothekerin Flora' },
+  { id: 'q27', title: 'Alchemist', description: 'Sammle 10 Heilkräuter.', type: 'collect', target: 'Heilkräuter', targetItem: 'Heilkräuter', required: 10, current: 0, rewardXp: 200, rewardGold: 100, status: 'available', npcName: 'Alchemist Anton' },
+  { id: 'q28', title: 'Schmiedemeister', description: 'Sammle 5 Eisenerz.', type: 'collect', target: 'Eisenerz', targetItem: 'Eisenerz', required: 5, current: 0, rewardXp: 150, rewardGold: 75, status: 'available', npcName: 'Handwerker Hagen' },
+  { id: 'q29', title: 'Korallensammler', description: 'Sammle 8 Korallen.', type: 'collect', target: 'Koralle', targetItem: 'Koralle', required: 8, current: 0, rewardXp: 350, rewardGold: 175, status: 'available', npcName: 'Händler Hans' },
+  { id: 'q30', title: 'Nebelwandler', description: 'Besiege den Nebelwandler.', type: 'kill', target: 'Nebelwandler', required: 1, current: 0, rewardXp: 800, rewardGold: 400, status: 'available', npcName: 'Event-Verkünder Evi' },
+  { id: 'q31', title: 'Friedensstifter', description: 'Besiege 10 Feinde in der PvP Arena.', type: 'kill', target: 'Spieler', required: 10, current: 0, rewardXp: 1000, rewardGold: 500, rewardGems: 3, status: 'available', npcName: 'Arena-Leiter Max' },
+  { id: 'q32', title: 'Guild-Gründer', description: 'Gründe eine Gilde.', type: 'special', target: 'Gilde', required: 1, current: 0, rewardXp: 2000, rewardGold: 1000, rewardGems: 5, status: 'available', npcName: 'Gildenmeisterin Gabi' },
+  { id: 'q33', title: 'Freunde-Finder', description: 'Füge 3 Freunde hinzu.', type: 'special', target: 'Freunde', required: 3, current: 0, rewardXp: 300, rewardGold: 150, status: 'available', npcName: 'Freunde-Finder Finn' },
+  { id: 'q34', title: 'Level-Master', description: 'Erreiche Level 20.', type: 'level', target: 'Level', required: 20, current: 0, rewardXp: 0, rewardGold: 2000, rewardGems: 10, status: 'available', npcName: 'Event-Verkünder Evi' },
+  { id: 'q35', title: 'Monster-Sammler', description: 'Besiege alle Monster-Typen mindestens 1x.', type: 'special', target: 'Monster', required: 20, current: 0, rewardXp: 3000, rewardGold: 1500, rewardGems: 8, status: 'available', npcName: 'Freunde-Finder Finn' },
 ];
 
 export const useQuestStore = create<QuestState>((set, get) => ({

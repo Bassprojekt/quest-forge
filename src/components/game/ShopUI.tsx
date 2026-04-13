@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
 
-type Tab = 'items' | 'pets';
+type Tab = 'items' | 'pets' | 'cosmetics';
 type ShopType = 'general' | 'weapons' | 'armor' | 'potions';
 
 interface Props {
@@ -13,15 +13,17 @@ interface Props {
 
 const SHOP_TITLES: Record<ShopType, string> = {
   general: '🏪 Laden',
-  weapons: '⚔️ Waffen-Schmied',
-  armor: '🛡️ Rüstungs-Schmied',
-  potions: '🧪 Apotheke',
+  weapons: '⚔️ Waffen',
+  armor: '🛡️ Rüstung',
+  potions: '🧪 Tränke',
 };
 
 export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', showOnlyPets = false }: Props) => {
   const [tab, setTab] = useState<Tab>(initialTab);
   const gold = useGameStore(s => s.playerGold);
+  const gems = useGameStore(s => s.playerGems);
   const shopItems = useGameStore(s => s.shopItems);
+  const cosmeticItems = shopItems.filter(item => item.type === 'cosmetic');
   const pets = useGameStore(s => s.pets);
   const buyItem = useGameStore(s => s.buyItem);
   const buyPet = useGameStore(s => s.buyPet);
@@ -44,7 +46,8 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[#4169E1] font-bold text-lg">{SHOP_TITLES[shopType]}</h2>
           <div className="flex items-center gap-3">
-            <span className="text-[#FF9800] text-sm font-bold">💰 {gold} Gold</span>
+            <span className="text-[#FF9800] text-sm font-bold">💰 {gold}</span>
+            <span className="text-[#E040FB] text-sm font-bold">💎 {gems}</span>
             <button onClick={onClose} className="text-[#AAA] hover:text-[#333] text-xl">✕</button>
           </div>
         </div>
@@ -60,12 +63,21 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
             className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
               tab === 'pets' ? 'bg-[#FF69B4] text-white' : 'bg-[#F0F0F0] text-[#888] hover:text-[#333]'
             }`}>
-            PETS
+            🐾 PETS
+          </button>
+          <button onClick={() => setTab('cosmetics')}
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+              tab === 'cosmetics' ? 'bg-[#9C27B0] text-white' : 'bg-[#F0F0F0] text-[#888] hover:text-[#333]'
+            }`}>
+            ✨ KOSMETIK ({cosmeticItems.length})
           </button>
         </div>
 
         <div className="space-y-2 max-h-64 overflow-y-auto">
           {tab === 'items' && shopItems.filter(item => {
+            if (shopType === 'potions') return item.type === 'potion';
+            if (shopType === 'weapons') return item.type === 'weapon';
+            if (shopType === 'armor') return item.type === 'armor';
             return item.type === 'potion';
           }).map(item => (
             <div key={item.id} className="bg-[#F8F6F0] rounded-xl p-3 border border-[#E0D5C0] flex items-center justify-between">
@@ -121,6 +133,36 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
                         : 'bg-[#E0E0E0] text-[#999] cursor-not-allowed'
                     }`}>
                     {pet.price} 💰
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {tab === 'cosmetics' && cosmeticItems.map(item => (
+            <div key={item.id}
+              className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-3 border-2 border-purple-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="text-3xl">{item.icon || '✨'}</div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-purple-800 text-sm font-bold">{item.name}</span>
+                  </div>
+                  <div className="text-purple-600 text-[10px] font-semibold">+{item.value}% XP</div>
+                </div>
+              </div>
+              <div>
+                {item.owned ? (
+                  <span className="text-purple-600 text-[10px] font-bold">✓ GEKAUFT</span>
+                ) : (
+                  <button onClick={() => buyItem(item.id)}
+                    disabled={gems < item.price}
+                    className={`px-3 py-1 rounded-lg text-[10px] font-bold ${
+                      gems >= item.price
+                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}>
+                    {item.price} 💎
                   </button>
                 )}
               </div>

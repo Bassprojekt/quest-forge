@@ -5,6 +5,7 @@ import { useSkillTreeStore } from '@/store/skillTreeStore';
 import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
 import { QuestUI } from './QuestUI';
 import { ShopUI } from './ShopUI';
+import { PetBuffUI } from './PetBuffUI';
 import { InventoryUI } from './InventoryUI';
 import { SkillTreeUI } from './SkillTreeUI';
 import { SettingsDialog } from './SettingsDialog';
@@ -26,7 +27,16 @@ export const HUD = () => {
   const attackPower = useGameStore(s => s.playerAttackPower);
   const defense = useGameStore(s => s.playerDefense);
   const gold = useGameStore(s => s.playerGold);
+  const gems = useGameStore(s => s.playerGems);
+  const claimDailyReward = useGameStore(s => s.claimDailyReward);
+  const lastDailyReward = useGameStore(s => s.lastDailyReward);
   const enemies = useGameStore(s => s.enemies);
+  
+  const canClaimDaily = (() => {
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    return !lastDailyReward || (now - lastDailyReward) >= dayMs;
+  })();
   const respawnEnemies = useGameStore(s => s.respawnEnemies);
   const respawnPlayer = useGameStore(s => s.respawnPlayer);
   const skills = useGameStore(s => s.skills);
@@ -55,6 +65,7 @@ export const HUD = () => {
   const totalDamageDealt = useGameStore(s => s.totalDamageDealt);
 
   const [showShop, setShowShop] = useState(false);
+  const [showPetBuff, setShowPetBuff] = useState(false);
   const [shopTab, setShopTab] = useState<'items' | 'pets'>('items');
   const [showInventory, setShowInventory] = useState(false);
   const [showSkillTree, setShowSkillTree] = useState(false);
@@ -124,6 +135,7 @@ export const HUD = () => {
         </div>
       )} */}
       {showShop && <ShopUI onClose={() => setShowShop(false)} initialTab={shopTab} />}
+        {showPetBuff && <PetBuffUI onClose={() => setShowPetBuff(false)} />}
       {showInventory && <InventoryUI onClose={() => setShowInventory(false)} />}
       {showSkillTree && <SkillTreeUI onClose={() => setShowSkillTree(false)} />}
       
@@ -156,7 +168,13 @@ export const HUD = () => {
                 <span>⚔️ {attackPower}</span>
                 <span>🛡️ {defense}</span>
                 <span>💰 {gold}</span>
+                <span>💎 {gems}</span>
               </div>
+              {canClaimDaily && (
+                <button onClick={claimDailyReward} className="ml-2 px-2 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold rounded-lg hover:from-amber-500 hover:to-orange-600 animate-pulse">
+                  🎁 Täglich!
+                </button>
+              )}
             </div>
           </div>
 
@@ -246,6 +264,9 @@ export const HUD = () => {
         <div className="flex gap-1">
           <button onClick={() => setShowSettings(true)} className="w-10 h-10 bg-white/90 backdrop-blur-md border-2 border-amber-200 rounded-xl flex items-center justify-center hover:bg-gray-100">
             <span className="text-lg">⚙️</span>
+          </button>
+          <button onClick={() => setShowPetBuff(true)} className="w-10 h-10 bg-purple-500/90 backdrop-blur-md border-2 border-purple-400 rounded-xl flex items-center justify-center hover:bg-purple-600">
+            <span className="text-lg">🐾</span>
           </button>
           <button onClick={() => setShowAchievements(true)} className="w-10 h-10 bg-white/90 backdrop-blur-md border-2 border-amber-200 rounded-xl flex items-center justify-center hover:bg-gray-100">
             <span className="text-lg">🏆</span>

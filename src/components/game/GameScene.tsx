@@ -1,6 +1,7 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Player } from './Player';
+import { BuffPet } from './BuffPet';
 import { ThirdPersonCamera } from './ThirdPersonCamera';
 import { EnemyEntity } from './EnemyEntity';
 import { GameWorld } from './GameWorld';
@@ -25,7 +26,7 @@ import { EventsUI } from './EventsUI';
 import { RaidUI } from './RaidUI';
 import { GuildUI } from './GuildUI';
 import { BankUI } from './BankUI';
-import { PetCompanion } from './PetCompanion';
+import { useCompanionStore } from '@/store/companionStore';
 import { LoginScreen } from './LoginScreen';
 import { TutorialScreen } from './TutorialScreen';
 import { ChatUI } from './ChatUI';
@@ -81,6 +82,35 @@ export const GameScene = () => {
   const baseSkyColor = ZONE_SKY[currentZone] || '#87CEEB';
   const skyColor = weather === 'rainy' ? '#4A5568' : weather === 'foggy' ? '#9CA3AF' : baseSkyColor;
   const fogColor = WEATHER_FOG[weather] || '#000000';
+  const handleAFKTimeout = useGameStore(s => s.handleAFKTimeout);
+  const respawnPlayer = useGameStore(s => s.respawnPlayer);
+  const setPlayerPosition = useGameStore(s => s.setPlayerPosition);
+  const lastInputTime = useRef(Date.now());
+  
+  // AFK detection - 1 hour timeout
+  useEffect(() => {
+    const afkTimer = setInterval(() => {
+      const inactive = Date.now() - lastInputTime.current;
+      if (inactive > 3600000) {
+        handleAFKTimeout();
+        lastInputTime.current = Date.now();
+      }
+    }, 60000);
+    return () => clearInterval(afkTimer);
+  }, [handleAFKTimeout]);
+  
+  // Track player input
+  useEffect(() => {
+    const onInput = () => { lastInputTime.current = Date.now(); };
+    window.addEventListener('keydown', onInput);
+    window.addEventListener('mousedown', onInput);
+    window.addEventListener('touchstart', onInput);
+    return () => {
+      window.removeEventListener('keydown', onInput);
+      window.removeEventListener('mousedown', onInput);
+      window.removeEventListener('touchstart', onInput);
+    };
+  }, []);
   
   // Day/Night lighting adjustment
   const isNight = timeOfDay < 0.25 || timeOfDay > 0.75;
@@ -307,12 +337,18 @@ export const GameScene = () => {
 
         {/* Zone-specific particles */}
         {currentZone.includes('forest') && <AmbientParticles count={35} color="#90EE90" area={35} height={10} />}
-        {currentZone === 'frozen_peaks' && <AmbientParticles count={25} color="#E0FFFF" area={25} height={5} />}
-        {currentZone === 'lava_caverns' && <AmbientParticles count={20} color="#FF6B35" area={20} height={8} />}
+{currentZone === 'frozen_peaks' && <AmbientParticles count={25} color="#E0FFFF" area={25} height={5} />}
+          {currentZone === 'lava_caverns' && <AmbientParticles count={20} color="#FF6B35" area={20} height={8} />}
+          {currentZone === 'crystal_highlands' && <AmbientParticles count={30} color="#00FFFF" area={30} height={12} />}
+          {currentZone === 'void_nexus' && <FireflyParticles count={30} />}
+          {currentZone === 'dragon_lair' && <AmbientParticles count={25} color="#FF4500" area={25} height={10} />}
+          {currentZone === 'enchanted_forest' && <AmbientParticles count={40} color="#7CFC00" area={35} height={15} />}
+          {currentZone === 'celestial_plains' && <AmbientParticles count={35} color="#FFD700" area={40} height={12} />}
+          {currentZone === 'shadow_realm' && <FireflyParticles count={25} />}
 
         <ThirdPersonCamera />
         <Player />
-        <PetCompanion />
+        <BuffPet />
         <LaserBeam />
         <DamageNumbers />
         <GroundItems />

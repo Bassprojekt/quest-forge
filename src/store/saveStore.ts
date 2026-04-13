@@ -1,4 +1,4 @@
-import { useGameStore, ZoneType, PlayerClass } from './gameStore';
+import { useGameStore, ZoneType, PlayerClass, INITIAL_SHOP_ITEMS } from './gameStore';
 import { useSkillTreeStore } from './skillTreeStore';
 import { useCompanionStore } from './companionStore';
 import { useQuestStore } from './questStore';
@@ -22,6 +22,8 @@ interface SaveData {
     playerLevel: number;
     playerAttackPower: number;
     playerGold: number;
+    playerGems: number;
+    lastDailyReward: number;
     playerDefense: number;
     playerSpeed: number;
     currentZone: ZoneType;
@@ -73,6 +75,8 @@ function getSaveData(): SaveData {
       playerLevel: game.playerLevel,
       playerAttackPower: game.playerAttackPower,
       playerGold: game.playerGold,
+      playerGems: game.playerGems,
+      lastDailyReward: game.lastDailyReward,
       playerDefense: game.playerDefense,
       playerSpeed: game.playerSpeed,
       currentZone: game.currentZone,
@@ -118,6 +122,8 @@ function restoreFromData(data: SaveData): boolean {
     playerLevel: data.game.playerLevel,
     playerAttackPower: data.game.playerAttackPower,
     playerGold: data.game.playerGold,
+    playerGems: data.game.playerGems || 0,
+    lastDailyReward: data.game.lastDailyReward || 0,
     playerDefense: data.game.playerDefense,
     playerSpeed: data.game.playerSpeed,
     currentZone: data.game.currentZone as ZoneType,
@@ -125,6 +131,17 @@ function restoreFromData(data: SaveData): boolean {
     shopItems: data.game.shopItems,
     pets: data.game.pets,
   });
+
+  // Add missing cosmetic items to shop
+  const newCosmeticItems = INITIAL_SHOP_ITEMS.filter(i => i.type === 'cosmetic');
+  const currentShop = useGameStore.getState().shopItems;
+  const existingIds = currentShop.map((i: { id: string }) => i.id);
+  const missingCosmetics = newCosmeticItems.filter((i: { id: string }) => !existingIds.includes(i.id));
+  if (missingCosmetics.length > 0) {
+    useGameStore.setState({
+      shopItems: [...currentShop, ...missingCosmetics]
+    });
+  }
 
   if (data.skillTree) {
     useSkillTreeStore.setState({

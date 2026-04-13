@@ -45,17 +45,19 @@ export interface Pet {
 export interface ShopItem {
   id: string;
   name: string;
-  type: 'weapon' | 'armor' | 'potion';
+  type: 'weapon' | 'armor' | 'potion' | 'cosmetic';
   stat: string;
   value: number;
   price: number;
   owned: boolean;
+  rarity?: 'common' | 'rare' | 'epic' | 'legendary';
+  icon?: string;
 }
 
 export interface InventoryItem {
   id: string;
   name: string;
-  type: 'weapon' | 'armor' | 'potion' | 'material';
+  type: 'weapon' | 'armor' | 'potion' | 'material' | 'cosmetic';
   icon: string;
   stat: string;
   value: number;
@@ -230,6 +232,9 @@ export interface GameState {
   playerPosition: [number, number, number];
   playerAttackPower: number;
   playerGold: number;
+  playerGems: number;
+  playerPetSlots: number;
+  lastDailyReward: number;
   playerDefense: number;
   playerSpeed: number;
   skills: Skill[];
@@ -282,12 +287,16 @@ export interface GameState {
   setCurrentZone: (zone: ZoneType) => void;
   advanceToNextZone: () => void;
   respawnPlayer: () => void;
+  handleAFKTimeout: () => void;
   resetPosition: () => void;
   resetGame: () => void;
   buyItem: (itemId: string) => boolean;
   buyPet: (petId: string) => boolean;
   equipPet: (petId: string) => void;
   addGold: (amount: number) => void;
+  addGems: (amount: number) => void;
+  unlockPetSlot: () => boolean;
+  claimDailyReward: () => boolean;
   equipItem: (itemId: string) => void;
   usePotion: (itemId: string) => void;
   sellItem: (itemId: string) => void;
@@ -310,7 +319,7 @@ export interface GameState {
   unlockAchievement: (id: string) => void;
 }
 
-const INITIAL_SHOP_ITEMS: ShopItem[] = [
+export const INITIAL_SHOP_ITEMS: ShopItem[] = [
   { id: 'wpn-1', name: 'Holzschwert', type: 'weapon', stat: '+5 ATK', value: 5, price: 50, owned: false },
   { id: 'wpn-2', name: 'Dolch', type: 'weapon', stat: '+8 ATK', value: 8, price: 80, owned: false },
   { id: 'wpn-3', name: 'Eisenklinge', type: 'weapon', stat: '+12 ATK', value: 12, price: 120, owned: false },
@@ -343,6 +352,13 @@ const INITIAL_SHOP_ITEMS: ShopItem[] = [
   { id: 'pot-6', name: 'Großer MP-Trank', type: 'potion', stat: '+100 MP', value: 100, price: 150, owned: false },
   { id: 'pot-7', name: 'Epischer HP-Trank', type: 'potion', stat: '+300 HP', value: 300, price: 300, owned: false },
   { id: 'pot-8', name: 'Legendärer HP-Trank', type: 'potion', stat: '+500 HP', value: 500, price: 600, owned: false },
+  { id: 'cosm-glow-red', name: 'Roter Glow', type: 'cosmetic', stat: '+10% XP', value: 10, price: 5, owned: false, icon: '🔴' },
+  { id: 'cosm-glow-blue', name: 'Blauer Glow', type: 'cosmetic', stat: '+10% XP', value: 10, price: 5, owned: false, icon: '🔵' },
+  { id: 'cosm-glow-gold', name: 'Goldener Glow', type: 'cosmetic', stat: '+15% XP', value: 15, price: 10, owned: false, icon: '🟡' },
+  { id: 'cosm-glow-purple', name: 'Violetter Glow', type: 'cosmetic', stat: '+20% XP', value: 20, price: 15, owned: false, icon: '🟣' },
+  { id: 'cosm-trail-star', name: 'Stern-Spur', type: 'cosmetic', stat: '+25% XP', value: 25, price: 25, owned: false, icon: '⭐' },
+  { id: 'cosm-trail-heart', name: 'Herz-Spur', type: 'cosmetic', stat: '+25% XP', value: 25, price: 25, owned: false, icon: '💖' },
+  { id: 'cosm aura-rainbow', name: 'Regenbogen-Aura', type: 'cosmetic', stat: '+50% XP', value: 50, price: 50, owned: false, icon: '🌈' },
 ];
 
 export const CRAFTING_RECIPES: CraftingRecipe[] = [
@@ -404,6 +420,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   playerPosition: [0, 0, 0],
   playerAttackPower: 15,
   playerGold: 50,
+  playerGems: 0,
+  playerPetSlots: 1,
+  lastDailyReward: 0,
   playerDefense: 0,
   playerSpeed: 8,
   skills: [],
@@ -463,11 +482,18 @@ autoFight: false,
     else if (pClass === 'archer') playArrowShoot();
     else playSwordSlash();
 
-    const equippedPet = state.pets.find(p => p.equipped);
+    const equippedPets = state.pets.filter(p => p.equipped);
     let bonusDmg = 0;
-    if (equippedPet && equippedPet.bonusType === 'damage') {
-      bonusDmg = Math.floor(state.playerAttackPower * equippedPet.bonusValue);
+    let critBonus = 0;
+    
+    for (const pet of equippedPets) {
+      if (pet.bonusType === 'damage') {
+        bonusDmg += Math.floor(state.playerAttackPower * pet.bonusValue);
+      } else if (pet.bonusType === 'crit') {
+        critBonus += pet.bonusValue;
+      }
     }
+    
     const equippedWeapon = state.inventory.find(i => i.type === 'weapon' && i.equipped);
     const weaponBonus = equippedWeapon ? equippedWeapon.value : 0;
     let totalAtk = state.playerAttackPower + bonusDmg + weaponBonus;
@@ -476,7 +502,8 @@ autoFight: false,
     const comboBonus = Math.min(state.comboCount * 0.1, 0.5);
     totalAtk = Math.floor(totalAtk * (1 + comboBonus));
     
-    const critChance = pClass === 'archer' ? 0.25 : 0.15;
+    let critChance = pClass === 'archer' ? 0.25 : 0.15;
+    critChance += critBonus;
     const isCrit = Math.random() < critChance;
     const critMult = pClass === 'archer' ? 2.0 : 1.5;
     const finalDmg = isCrit ? Math.floor(totalAtk * critMult) : totalAtk;
@@ -510,6 +537,7 @@ autoFight: false,
 
     let xpGain = 0;
     let goldGain = 0;
+    let gemGain = 0;
     if (wasAlive && nowDead && killed) {
       // Level-Gap XP Berechnung
       const enemyLevel = ZONES.find(z => z.id === killed.zone)?.requiredLevel || 1;
@@ -534,6 +562,9 @@ autoFight: false,
       
       xpGain = Math.floor(killed.xpReward * xpMult);
       goldGain = Math.floor(killed.goldReward * goldMult);
+      const isBoss = killed.name.includes('Fürst') || killed.name.includes('König') || killed.name.includes('Herr') || killed.name.includes('Meister') || killed.name.includes('Lord');
+      // Höhere Drop-Rate: Boss 1-5, Normal 50%
+      const gemGain = isBoss ? Math.floor(Math.random() * 5) + 1 : (Math.random() < 0.5 ? 1 : 0);
       
       // Combo erhöhen bei Kill
       const newCombo = Date.now() - state.comboTimer < 5000 ? Math.min(state.comboCount + 1, 5) : 1;
@@ -600,6 +631,7 @@ autoFight: false,
       playerHp: newLevel > state.playerLevel ? 100 + (newLevel - 1) * 20 : state.playerHp,
       playerMana: newLevel > state.playerLevel ? 50 + (newLevel - 1) * 10 : state.playerMana,
       playerGold: state.playerGold + goldGain,
+      playerGems: state.playerGems + gemGain,
       damagePopups: popups,
       hitEffectPos: hitPos,
       levelUpEffect: didLevelUp,
@@ -621,10 +653,15 @@ autoFight: false,
       set(s => ({ playerHp: Math.min(s.playerMaxHp, s.playerHp + healAmount) }));
       return;
     }
-    const equippedPet = state.pets.find(p => p.equipped);
+    const equippedPets = state.pets.filter(p => p.equipped);
     const equippedArmor = state.inventory.find(i => i.type === 'armor' && i.equipped);
     let reduction = state.playerDefense + (equippedArmor ? equippedArmor.value : 0);
-    if (equippedPet && equippedPet.bonusType === 'defense') reduction += Math.floor(amount * equippedPet.bonusValue);
+    
+    for (const pet of equippedPets) {
+      if (pet.bonusType === 'defense') {
+        reduction += Math.floor(amount * pet.bonusValue);
+      }
+    }
     if (state.shieldActive) reduction += Math.floor(amount * 0.7);
     const finalDmg = Math.max(1, amount - reduction);
     set(s => ({ playerHp: Math.max(0, s.playerHp - finalDmg) }));
@@ -715,6 +752,23 @@ autoFight: false,
     });
   },
 
+  handleAFKTimeout: () => {
+    const state = get();
+    if (state.currentZone === 'hub') return;
+    const zoneInfo = ZONES.find(z => z.id === 'hub');
+    const spawnX = zoneInfo?.center[0] ?? 0;
+    const spawnZ = zoneInfo?.center[1] ?? 0;
+    set({ 
+      playerHp: state.playerMaxHp, 
+      playerPosition: [spawnX, 0, spawnZ],
+      currentZone: 'hub',
+      enemies: [],
+      groundItems: [],
+      playerMana: state.playerMaxMana,
+      autoFight: false,
+    });
+  },
+
   resetPosition: () => {
     const zoneInfo = ZONES.find(z => z.id === 'hub');
     set({ 
@@ -763,13 +817,35 @@ autoFight: false,
   buyItem: (itemId) => {
     const state = get();
     const item = state.shopItems.find(i => i.id === itemId);
-    if (!item || item.owned || state.playerGold < item.price) return false;
+    if (!item || item.owned) return false;
+    
+    // Handle cosmetic items - pay with gems
+    if (item.type === 'cosmetic') {
+      if (state.playerGems < item.price) return false;
+      const shopItems = state.shopItems.map(i => i.id === itemId ? { ...i, owned: true } : i);
+      const invItem: InventoryItem = {
+        id: `inv-${item.id}`,
+        name: item.name,
+        type: item.type,
+        icon: item.icon || '✨',
+        stat: item.stat,
+        value: item.value,
+        equipped: false,
+        quantity: 1,
+        rarity: item.price >= 50 ? 'legendary' : item.price >= 25 ? 'epic' : item.price >= 10 ? 'rare' : 'common',
+      };
+      set({ shopItems, playerGems: state.playerGems - item.price, inventory: [...state.inventory, invItem] });
+      return true;
+    }
+    
+    // Handle weapons, armor, potions - pay with gold
+    if (state.playerGold < item.price) return false;
     const shopItems = state.shopItems.map(i => i.id === itemId ? { ...i, owned: true } : i);
     const invItem: InventoryItem = {
       id: `inv-${item.id}`,
       name: item.name,
       type: item.type,
-      icon: item.type === 'weapon' ? '⚔️' : '🛡️',
+      icon: item.type === 'weapon' ? '⚔️' : item.type === 'armor' ? '🛡️' : '🧪',
       stat: item.stat,
       value: item.value,
       equipped: false,
@@ -795,6 +871,32 @@ autoFight: false,
   },
 
   addGold: (amount) => set(s => ({ playerGold: s.playerGold + amount })),
+  addGems: (amount) => set(s => ({ playerGems: s.playerGems + amount })),
+
+  unlockPetSlot: () => {
+    const state = get();
+    const costs = [100, 200, 300, 400]; // Preise für Slots 2,3,4,5
+    const slotCost = costs[state.playerPetSlots - 1];
+    if (!slotCost || state.playerGems < slotCost) return false;
+    set({ playerGems: state.playerGems - slotCost, playerPetSlots: state.playerPetSlots + 1 });
+    return true;
+  },
+
+  claimDailyReward: () => {
+    const state = get();
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const lastClaim = state.lastDailyReward || 0;
+    if (now - lastClaim < dayMs) return false;
+    const goldReward = 50 + state.playerLevel * 10;
+    const gemReward = state.playerLevel >= 10 ? 1 : 0;
+    set({ 
+      playerGold: state.playerGold + goldReward,
+      playerGems: state.playerGems + gemReward,
+      lastDailyReward: now,
+    });
+    return true;
+  },
 
   equipItem: (itemId) => {
     const state = get();

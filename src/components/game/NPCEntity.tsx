@@ -82,10 +82,10 @@ export const NPCEntity = ({ name, position, color, onClick }: Props) => {
     floatPhase.current += 0.015;
     meshRef.current.position.y = position[1] + Math.sin(floatPhase.current) * 0.03;
     
-    // NPCs look at player - back to center is wrong
-    const toPlayerX = playerPos[0] - position[0];
-    const toPlayerZ = playerPos[2] - position[2];
-    meshRef.current.rotation.y = Math.atan2(toPlayerX, toPlayerZ);
+    // NPCs face center (0,0,0)
+    const toCenterX = -position[0];
+    const toCenterZ = -position[2];
+    meshRef.current.rotation.y = Math.atan2(toCenterX, toCenterZ);
   });
   
   const handleClick = () => {
@@ -103,7 +103,7 @@ export const NPCEntity = ({ name, position, color, onClick }: Props) => {
   };
   
   const skin = npcColors.skin;
-  const skinDark = '#B8956A4';
+  const skinDark = '#B8956A';
   
   return (
     <group position={[position[0], 0, position[2]]}>
