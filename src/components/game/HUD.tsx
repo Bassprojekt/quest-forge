@@ -58,6 +58,7 @@ export const HUD = () => {
   const setAutoLoot = useGameStore(s => s.setAutoLoot);
   const setPlayerPosition = useGameStore(s => s.setPlayerPosition);
   const playerLevel = useGameStore(s => s.playerLevel);
+  const playerTitle = useGameStore(s => s.playerTitle);
   const comboCount = useGameStore(s => s.comboCount);
   const comboTimer = useGameStore(s => s.comboTimer);
   const totalKills = useGameStore(s => s.totalKills);
@@ -124,6 +125,7 @@ export const HUD = () => {
 
   const playerClass = useGameStore(s => s.playerClass);
   const className = playerClass === 'warrior' ? '⚔️ ' + t('warrior') : playerClass === 'mage' ? '🔮 ' + t('mage') : '🏹 ' + t('archer');
+  const titleName = playerTitle ? ` [${playerTitle}]` : '';
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50" style={{ fontFamily: "'Fredoka', sans-serif" }}>
@@ -163,7 +165,7 @@ export const HUD = () => {
               <span className="text-blue-600 text-sm font-bold">{level}</span>
             </div>
             <div className="flex-1">
-              <div className="text-gray-800 text-sm font-bold">{className}</div>
+              <div className="text-gray-800 text-sm font-bold">{className}{titleName}</div>
               <div className="text-gray-500 text-xs flex gap-3">
                 <span>⚔️ {attackPower}</span>
                 <span>🛡️ {defense}</span>

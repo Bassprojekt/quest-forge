@@ -238,6 +238,7 @@ export interface GameState {
   lastDailyReward: number;
   playerDefense: number;
   playerSpeed: number;
+  playerTitle: string;
   skills: Skill[];
   activeSkill: string | null;
   shieldActive: boolean;
@@ -296,6 +297,7 @@ export interface GameState {
   equipPet: (petId: string) => void;
   addGold: (amount: number) => void;
   addXp: (amount: number) => void;
+  setTitle: (title: string) => void;
   addGems: (amount: number) => void;
   unlockPetSlot: () => boolean;
   claimDailyReward: () => boolean;
@@ -440,6 +442,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   lastDailyReward: 0,
   playerDefense: 0,
   playerSpeed: 8,
+  playerTitle: 'Neuling',
   skills: [],
   activeSkill: null,
   shieldActive: false,
@@ -916,8 +919,10 @@ popups.push({
       playerXpToLevel: newXpToLevel,
       playerLevel: newLevel,
       playerMaxHp: newPlayerMaxHp,
+      playerTitle: newLevel >= 50 ? 'Legend' : newLevel >= 40 ? 'Hero' : newLevel >= 30 ? 'Champion' : newLevel >= 20 ? 'Veteran' : newLevel >= 15 ? 'Elite' : newLevel >= 10 ? 'Expert' : newLevel >= 5 ? 'Adventurer' : 'Neuling',
     };
   }),
+  setTitle: (title) => set({ playerTitle: title }),
   addGems: (amount) => set(s => ({ playerGems: s.playerGems + amount })),
 
   unlockPetSlot: () => {
