@@ -392,7 +392,7 @@ const INITIAL_PETS: Pet[] = [
   { id: 'pet-shadow', name: 'Schatten Uri', bonus: '+60% Schaden', bonusValue: 0.6, bonusType: 'damage', price: 7000, rarity: 'legendary', owned: false, equipped: false },
   { id: 'pet-abyss', name: 'Abgrund Bestie', bonus: '+70% Schaden', bonusValue: 0.7, bonusType: 'damage', price: 10000, rarity: 'legendary', owned: false, equipped: false },
   { id: 'pet-celestial', name: 'Himmelsfee', bonus: '+25% Heilung', bonusValue: 0.25, bonusType: 'heal', price: 5000, rarity: 'epic', owned: false, equipped: false },
-  { id: 'pet-dragon', name: 'Mini Drache', bonus: '+80% Schaden', bonusValue: 0.8, bonusType: 'damage', price: 15000, rarity: 'legendary', owned: false, equipped: false },
+  { id: 'pet-ancient', name: 'Uralter Drache', bonus: '+80% Schaden', bonusValue: 0.8, bonusType: 'damage', price: 15000, rarity: 'legendary', owned: false, equipped: false },
 ];
 
 const INITIAL_INVENTORY: InventoryItem[] = [
