@@ -1021,6 +1021,7 @@ export const EnemyEntity = ({ enemy }: Props) => {
   useFrame((state) => {
     if (!meshRef.current) return;
     if (wasAlive.current && !enemy.alive) {
+      console.log('[MOB] Died:', enemy.name, 'calling updateKillProgress');
       updateKillProgress(enemy.name);
       wasAlive.current = false;
     }
