@@ -78,14 +78,23 @@ export const useQuestStore = create<QuestState>((set, get) => ({
 
   acceptQuest: (id) => {
     set(s => ({
-      quests: s.quests.map(q => q.id === id ? { ...q, status: 'active' as const } : q),
+      quests: s.quests.map(q => {
+        if (q.id === id) {
+          console.log('[QUEST] Accepted quest:', q.title, 'target:', q.target, 'required:', q.required);
+          return { ...q, status: 'active' as const };
+        }
+        return q;
+      }),
     }));
   },
 
   updateKillProgress: (enemyName) => {
+    console.log('[QUEST] updateKillProgress called with:', enemyName);
     set(s => ({
       quests: s.quests.map(q => {
-        if (q.status !== 'active' || q.target !== enemyName) return q;
+        const matches = q.status === 'active' && q.target === enemyName;
+        if (matches) console.log('[QUEST] Quest progress:', q.title, q.current, '/', q.required);
+        if (!matches) return q;
         const newCurrent = Math.min(q.current + 1, q.required);
         return {
           ...q,
