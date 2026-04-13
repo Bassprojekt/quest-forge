@@ -26,6 +26,7 @@ import { EventsUI } from './EventsUI';
 import { RaidUI } from './RaidUI';
 import { GuildUI } from './GuildUI';
 import { BankUI } from './BankUI';
+import { LeaderboardBoard } from './LeaderboardBoard';
 import { useCompanionStore } from '@/store/companionStore';
 import { LoginScreen } from './LoginScreen';
 import { TutorialScreen } from './TutorialScreen';
@@ -378,6 +379,7 @@ export const GameScene = () => {
             <NPCEntity name={merchantName} position={[6, 0, 6]} color="#4169E1" />
             <NPCEntity name={petMasterName} position={[-6, 0, -6]} color="#FF69B4" onClick={handleOpenPets} />
             <NPCEntity name={rebirthAltarName} position={[6, 0, -6]} color="#FFD700" />
+            <LeaderboardBoard />
           </>
         )}
 
