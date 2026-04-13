@@ -21,6 +21,7 @@ const COLORS = {
   heal: '#44CC44',
   xp: '#FFD700',
   gold: '#FF9800',
+  gem: '#E040FB',
 };
 
 const PREFIXES = {
@@ -29,6 +30,7 @@ const PREFIXES = {
   heal: '+',
   xp: '+',
   gold: '+',
+  gem: '+',
 };
 
 const SUFFIXES = {
@@ -37,10 +39,11 @@ const SUFFIXES = {
   heal: ' HP',
   xp: ' XP',
   gold: ' 💰',
+  gem: ' 💎',
 };
 
 interface DamageNumberProps {
-  popup: { id: string; position: [number, number, number]; amount: number; type: 'damage' | 'heal' | 'xp' | 'gold' | 'crit'; timestamp: number };
+  popup: { id: string; position: [number, number, number]; amount: number; type: 'damage' | 'heal' | 'xp' | 'gold' | 'crit' | 'gem'; timestamp: number };
 }
 
 const DamageNumber = ({ popup }: DamageNumberProps) => {
@@ -57,7 +60,7 @@ const DamageNumber = ({ popup }: DamageNumberProps) => {
     }
   });
 
-  const typeIndex = popup.type === 'xp' ? 0.3 : popup.type === 'gold' ? 0.6 : 0;
+  const typeIndex = popup.type === 'xp' ? 0.3 : popup.type === 'gold' ? 0.6 : popup.type === 'gem' ? 0.9 : 0;
 
   return (
     <group position={[popup.position[0] + typeIndex, popup.position[1] + 1.5, popup.position[2]]}>

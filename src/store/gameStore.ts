@@ -94,7 +94,7 @@ export interface DamagePopup {
   id: string;
   position: [number, number, number];
   amount: number;
-  type: 'damage' | 'heal' | 'xp' | 'gold' | 'crit';
+  type: 'damage' | 'heal' | 'xp' | 'gold' | 'crit' | 'gem';
   timestamp: number;
 }
 
@@ -594,13 +594,22 @@ autoFight: false,
         type: 'xp',
         timestamp: Date.now() + 200,
       });
-      popups.push({
+popups.push({
         id: `gold-${popupIdCounter++}`,
         position: [...killed.position] as [number, number, number],
         amount: goldGain,
         type: 'gold',
-        timestamp: Date.now() + 400,
+        timestamp: Date.now() + 300,
       });
+      if (gemGain > 0) {
+        popups.push({
+          id: `gem-${popupIdCounter++}`,
+          position: [...killed.position] as [number, number, number],
+          amount: gemGain,
+          type: 'gem',
+          timestamp: Date.now() + 350,
+        });
+      }
       if (Math.random() < 0.35) {
         const isBoss = killed.name.includes('Fürst') || killed.name.includes('König') || killed.name.includes('Herr') || killed.name.includes('Meister') || killed.name.includes('Lord');
         const dropTable = [
