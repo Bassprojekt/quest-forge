@@ -295,6 +295,7 @@ export interface GameState {
   buyPet: (petId: string) => boolean;
   equipPet: (petId: string) => void;
   addGold: (amount: number) => void;
+  addXp: (amount: number) => void;
   addGems: (amount: number) => void;
   unlockPetSlot: () => boolean;
   claimDailyReward: () => boolean;
@@ -875,6 +876,26 @@ autoFight: false,
   },
 
   addGold: (amount) => set(s => ({ playerGold: s.playerGold + amount })),
+  addXp: (amount) => set(s => {
+    let newXp = s.playerXp + amount;
+    let newLevel = s.playerLevel;
+    let newXpToLevel = s.playerXpToLevel;
+    let newPlayerMaxHp = s.playerMaxHp;
+    
+    while (newXp >= newXpToLevel) {
+      newXp -= newXpToLevel;
+      newLevel++;
+      newXpToLevel = Math.floor(newXpToLevel * 1.2);
+      newPlayerMaxHp += 10;
+    }
+    
+    return {
+      playerXp: newXp,
+      playerXpToLevel: newXpToLevel,
+      playerLevel: newLevel,
+      playerMaxHp: newPlayerMaxHp,
+    };
+  }),
   addGems: (amount) => set(s => ({ playerGems: s.playerGems + amount })),
 
   unlockPetSlot: () => {

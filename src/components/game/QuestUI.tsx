@@ -9,6 +9,7 @@ export const QuestUI = () => {
   const claimReward = useQuestStore(s => s.claimReward);
   const setShowQuestDialog = useQuestStore(s => s.setShowQuestDialog);
   const addGold = useGameStore(s => s.addGold);
+  const addXp = useGameStore(s => s.addXp);
 
   if (!showDialog || !selectedNpc) return null;
 
@@ -16,7 +17,10 @@ export const QuestUI = () => {
 
   const handleClaim = (id: string) => {
     const reward = claimReward(id);
-    if (reward) addGold(reward.gold);
+    if (reward) {
+      addGold(reward.gold);
+      addXp(reward.xp);
+    }
   };
 
   return (
