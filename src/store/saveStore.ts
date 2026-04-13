@@ -143,6 +143,26 @@ function restoreFromData(data: SaveData): boolean {
     });
   }
 
+  // Add missing pets to existing save
+  const loadedPets: Pet[] = data.game.pets || [];
+  const loadedPetIds = loadedPets.map((p: Pet) => p.id);
+  const INITIAL_PETS_ADD: Pet[] = [
+    { id: 'pet-fairy', name: 'Wald Fee', bonus: '+10% Krit', bonusValue: 0.1, bonusType: 'crit', price: 400, rarity: 'rare', owned: false, equipped: false },
+    { id: 'pet-ghost', name: 'Geist Gigi', bonus: '+25% Speed', bonusValue: 0.25, bonusType: 'speed', price: 600, rarity: 'rare', owned: false, equipped: false },
+    { id: 'pet-treant', name: 'Treant Torin', bonus: '+35% Defense', bonusValue: 0.35, bonusType: 'defense', price: 2500, rarity: 'legendary', owned: false, equipped: false },
+    { id: 'pet-elemental', name: 'Elementar Emil', bonus: '+50% Schaden', bonusValue: 0.5, bonusType: 'damage', price: 5000, rarity: 'legendary', owned: false, equipped: false },
+    { id: 'pet-shadow', name: 'Schatten Uri', bonus: '+60% Schaden', bonusValue: 0.6, bonusType: 'damage', price: 7000, rarity: 'legendary', owned: false, equipped: false },
+    { id: 'pet-abyss', name: 'Abgrund Bestie', bonus: '+70% Schaden', bonusValue: 0.7, bonusType: 'damage', price: 10000, rarity: 'legendary', owned: false, equipped: false },
+    { id: 'pet-celestial', name: 'Himmelsfee', bonus: '+25% Heilung', bonusValue: 0.25, bonusType: 'heal', price: 5000, rarity: 'epic', owned: false, equipped: false },
+    { id: 'pet-ancient', name: 'Uralter Drache', bonus: '+80% Schaden', bonusValue: 0.8, bonusType: 'damage', price: 15000, rarity: 'legendary', owned: false, equipped: false },
+  ];
+  const missingPets = INITIAL_PETS_ADD.filter((p: Pet) => !loadedPetIds.includes(p.id));
+  if (missingPets.length > 0) {
+    useGameStore.setState({
+      pets: [...loadedPets, ...missingPets]
+    });
+  }
+
   if (data.skillTree) {
     useSkillTreeStore.setState({
       skillPoints: data.skillTree.skillPoints,
