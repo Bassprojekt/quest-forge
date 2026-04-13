@@ -1,5 +1,4 @@
-import { useRef, useState, useEffect, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useRef, useMemo } from 'react';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
@@ -19,7 +18,6 @@ const SIMULATED_PLAYERS = [
 
 export const LeaderboardBoard = () => {
   const ref = useRef<THREE.Group>(null);
-  const lastUpdate = useRef(Date.now());
   
   const playerLevel = useGameStore(s => s.playerLevel);
   const playerGold = useGameStore(s => s.playerGold);
@@ -28,18 +26,9 @@ export const LeaderboardBoard = () => {
     const players = [...SIMULATED_PLAYERS, { name: 'DU', level: playerLevel, gold: playerGold }];
     return players.sort((a, b) => b.level - a.level || b.gold - a.gold).slice(0, 10);
   }, [playerLevel, playerGold]);
-  
-  useFrame(() => {
-    if (!ref.current) return;
-    ref.current.rotation.y = Math.sin(Date.now() / 3000) * 0.03;
-    
-    if (Date.now() - lastUpdate.current > 15 * 60 * 1000) {
-      lastUpdate.current = Date.now();
-    }
-  });
 
-  const medalEmojis = ['🥇', '🥈', '🥉', '4', '5', '6', '7', '8', '9', '10'];
-  const rowColors = ['#FFD700', '#C0C0C0', '#CD7F32', '#4169E1', '#4169E1', '#4169E1', '#4169E1', '#4169E1', '#4169E1', '#4169E1'];
+  const MEDAL_EMOJIS = ['🥇', '🥈', '🥉', '4', '5', '6', '7', '8', '9', '10'];
+const ROW_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32', '#4169E1', '#4169E1', '#4169E1', '#4169E1', '#4169E1', '#4169E1', '#4169E1'];
 
   return (
     <group ref={ref} position={[-18, 4, -28]}>
@@ -72,10 +61,10 @@ export const LeaderboardBoard = () => {
             <Text
               position={[0, 0.5, 0.1]}
               fontSize={0.18}
-              color={rowColors[i]}
+              color={ROW_COLORS[i]}
               anchorX="center"
             >
-              {medalEmojis[i]}
+              {MEDAL_EMOJIS[i]}
             </Text>
             <Text
               position={[0, 0.2, 0.1]}
