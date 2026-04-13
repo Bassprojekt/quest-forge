@@ -146,11 +146,12 @@ export const Player = () => {
     }
     const now = performance.now() / 1000;
 
-    // Weapon swing animation - arm swing combat
-    if (swordRef.current) {
+    // Weapon swing animation - arm swing combat with body movement
+    if (swordRef.current && torsoRef.current) {
       if (swingTimer.current > 0) {
         swingTimer.current -= delta;
         const swingProgress = 1 - (swingTimer.current / 0.25);
+        
         if (playerClass === 'mage') {
           // Staff thrust
           swordRef.current.rotation.x = -0.1 + Math.sin(swingProgress * Math.PI) * -0.8;
@@ -159,18 +160,32 @@ export const Player = () => {
           // Bow aim
           swordRef.current.rotation.x = Math.sin(swingProgress * Math.PI) * -0.2;
         } else {
-          // Arm swing slash - more dramatic
+          // Full body swing - dramatic combat move
           const swing = Math.sin(swingProgress * Math.PI);
-          swordRef.current.rotation.x = -0.1 + swing * 1.5;
-          swordRef.current.rotation.z = 0.1 + swing * 0.6;
-          swordRef.current.position.z = 0.2 - swing * 0.3;
-          swordRef.current.position.y = 0.7 + swing * 0.15;
+          
+          // Arm swings up and down
+          swordRef.current.rotation.x = -0.1 + swing * 1.8;
+          swordRef.current.rotation.z = 0.1 + swing * 0.8;
+          swordRef.current.position.z = 0.2 - swing * 0.4;
+          swordRef.current.position.y = 0.7 + swing * 0.2;
+          
+          // Body leans into the swing
+          torsoRef.current.rotation.z = swing * 0.15;
+          torsoRef.current.rotation.y = swing * 0.1;
+          
+          // Slight body step
+          meshRef.current.position.x += swing * 0.02;
         }
       } else {
+        // Return to idle - smooth lerp
         swordRef.current.rotation.x = THREE.MathUtils.lerp(swordRef.current.rotation.x, -0.1, 8 * delta);
         swordRef.current.rotation.z = THREE.MathUtils.lerp(swordRef.current.rotation.z, 0.1, 8 * delta);
         swordRef.current.position.z = THREE.MathUtils.lerp(swordRef.current.position.z, 0.2, 8 * delta);
         swordRef.current.position.y = THREE.MathUtils.lerp(swordRef.current.position.y, 0.7, 8 * delta);
+        
+        // Body returns to normal
+        torsoRef.current.rotation.z = THREE.MathUtils.lerp(torsoRef.current.rotation.z, 0, 8 * delta);
+        torsoRef.current.rotation.y = THREE.MathUtils.lerp(torsoRef.current.rotation.y, 0, 8 * delta);
       }
     }
 
