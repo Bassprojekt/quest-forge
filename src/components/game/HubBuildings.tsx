@@ -689,10 +689,9 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={0.3} />
         </mesh>
         
-        {/* Alchemist & Handwerker & Tierhändler - vor dem Gebäude (nahe Tür) */}
+        {/* Alchemist & Handwerker - vor dem Gebäude (nahe Tür) */}
         <NPCWithBuilding name="Alchemist Anton" color="#9C27B0" position={[0, 0, 3]} icon="⚗️" onClick={() => onOpenPotionCraft?.()} />
         <NPCWithBuilding name="Handwerker Hagen" color="#FF9800" position={[2.5, 0, 3]} icon="🔨" onClick={() => onOpenWeaponCraft?.()} />
-        <NPCWithBuilding name="Tierhändler Tobi" color="#FF69B4" position={[-2.5, 0, 3]} icon="🐾" onClick={() => onOpenShop?.('pets')} />
       </group>
 
       {/* Bank/Lager - Osten Nord - door faces center */}
