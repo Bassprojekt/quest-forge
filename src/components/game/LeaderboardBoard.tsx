@@ -38,7 +38,6 @@ export const LeaderboardBoard = () => {
         color="#FFD700"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/Fredoka-Bold.ttf"
       >
         🏆 RANGLISTE 🏆
       </Text>
