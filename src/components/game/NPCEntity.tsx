@@ -89,7 +89,8 @@ export const NPCEntity = ({ name, position, color, onClick }: Props) => {
   });
   
   const handleClick = () => {
-    console.log('[NPC] Clicked:', name, 'has onClick:', !!onClick);
+    // eslint-disable-next-line no-alert
+    alert('[NPC] Clicked: ' + name);
     if (onClick) {
       onClick();
       return;
@@ -97,9 +98,11 @@ export const NPCEntity = ({ name, position, color, onClick }: Props) => {
     const dx = playerPos[0] - position[0];
     const dz = playerPos[2] - position[2];
     const dist = Math.sqrt(dx * dx + dz * dz);
-    console.log('[NPC] Distance to', name, ':', dist);
+    // eslint-disable-next-line no-alert
+    alert('[NPC] dist=' + dist + ' for ' + name);
     if (dist < 5) {
-      console.log('[NPC] Opening quest dialog for:', name);
+      // eslint-disable-next-line no-alert
+      alert('[NPC] Opening quest for: ' + name);
       setSelectedNpc(name);
       setShowQuestDialog(true);
     }
