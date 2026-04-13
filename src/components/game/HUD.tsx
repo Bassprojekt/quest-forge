@@ -467,20 +467,39 @@ export const HUD = () => {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between p-2 bg-amber-50 rounded-xl">
-                <span className="font-bold">Dein Level</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🥇</span>
+                  <span className="font-bold">Dein Level</span>
+                </div>
                 <span className="font-bold text-amber-600">{playerLevel}</span>
               </div>
               <div className="flex items-center justify-between p-2 bg-amber-50 rounded-xl">
-                <span className="font-bold">Gesamt Kills</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">⚔️</span>
+                  <span className="font-bold">Rang</span>
+                </div>
+                <span className="font-bold text-amber-600">{playerTitle}</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-amber-50 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">💀</span>
+                  <span className="font-bold">Gesamt Kills</span>
+                </div>
                 <span className="font-bold text-amber-600">{totalKills}</span>
               </div>
               <div className="flex items-center justify-between p-2 bg-amber-50 rounded-xl">
-                <span className="font-bold">Verdientes Gold</span>
-                <span className="font-bold text-amber-600">{totalGoldEarned}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">💰</span>
+                  <span className="font-bold">Verdientes Gold</span>
+                </div>
+                <span className="font-bold text-amber-600">{totalGoldEarned.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between p-2 bg-amber-50 rounded-xl">
-                <span className="font-bold">Ausgeteilter Schaden</span>
-                <span className="font-bold text-amber-600">{totalDamageDealt}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">⚡</span>
+                  <span className="font-bold">Schaden (Gesamt)</span>
+                </div>
+                <span className="font-bold text-amber-600">{totalDamageDealt.toLocaleString()}</span>
               </div>
               <div className="border-t pt-2 mt-2">
                 <div className="text-xs text-gray-500 text-center">Lokal gespeichert im Browser</div>
