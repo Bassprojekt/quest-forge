@@ -186,37 +186,49 @@ export const HUD = () => {
 
           <div className="mb-2">
             <div className="flex justify-between text-xs mb-1">
-              <span className="text-red-500 font-semibold">❤️ {t('hp')}</span>
-              <span className="text-gray-500">{hp}/{maxHp}</span>
+              <span className="text-red-600 font-bold">❤️ HP</span>
+              <span className="text-gray-600 font-semibold">{hp}/{maxHp}</span>
             </div>
-            <div className="h-3 rounded-full overflow-hidden bg-red-200">
-              <div className="h-full rounded-full transition-all" style={{ width: `${hpPercent}%`, background: hpPercent > 50 ? '#4CAF50' : hpPercent > 25 ? '#FF9800' : '#F44336' }} />
+            <div className="h-4 rounded-full overflow-hidden bg-red-100 shadow-inner">
+              <div className="h-full rounded-full transition-all duration-300" style={{ 
+                width: `${hpPercent}%`, 
+                background: hpPercent > 50 ? 'linear-gradient(90deg, #4CAF50, #66BB6A)' : hpPercent > 25 ? 'linear-gradient(90deg, #FF9800, #FFA726)' : 'linear-gradient(90deg, #F44336, #EF5350)',
+                boxShadow: 'inset 0 2px 3px rgba(255,255,255,0.3)'
+              }} />
             </div>
           </div>
 
           <div className="mb-2">
             <div className="flex justify-between text-xs mb-1">
-              <span className="text-blue-500 font-semibold">💧 {t('mp')}</span>
-              <span className="text-gray-500">{mana}/{maxMana}</span>
+              <span className="text-blue-600 font-bold">💧 MP</span>
+              <span className="text-gray-600 font-semibold">{mana}/{maxMana}</span>
             </div>
-            <div className="h-2.5 rounded-full overflow-hidden bg-blue-200">
-              <div className="h-full rounded-full" style={{ width: `${manaPercent}%`, background: 'linear-gradient(90deg, #42A5F5, #64B5F6)' }} />
+            <div className="h-3 rounded-full overflow-hidden bg-blue-100 shadow-inner">
+              <div className="h-full rounded-full transition-all duration-300" style={{ 
+                width: `${manaPercent}%`, 
+                background: 'linear-gradient(90deg, #2196F3, #42A5F5)',
+                boxShadow: 'inset 0 2px 3px rgba(255,255,255,0.3)'
+              }} />
             </div>
           </div>
 
           <div>
             <div className="flex justify-between text-xs mb-1">
-              <span className="text-orange-500 font-semibold">⭐ {t('xp')}</span>
-              <span className="text-gray-500">{xp}/{xpToLevel}</span>
+              <span className="text-amber-600 font-bold">⭐ XP</span>
+              <span className="text-gray-600 font-semibold">{xp}/{xpToLevel}</span>
             </div>
-            <div className="h-2.5 rounded-full overflow-hidden bg-orange-200">
-              <div className="h-full rounded-full" style={{ width: `${xpPercent}%`, background: 'linear-gradient(90deg, #FFB300, #FFC107)' }} />
+            <div className="h-3 rounded-full overflow-hidden bg-amber-100 shadow-inner">
+              <div className="h-full rounded-full transition-all duration-300" style={{ 
+                width: `${xpPercent}%`, 
+                background: 'linear-gradient(90deg, #FF9800, #FFB74D)',
+                boxShadow: 'inset 0 2px 3px rgba(255,255,255,0.3)'
+              }} />
             </div>
           </div>
 
           {skillPoints > 0 && (
-            <button onClick={() => setShowSkillTree(true)} className="mt-2 w-full px-2 py-1 rounded-lg text-xs font-bold bg-orange-100 text-orange-500 border border-orange-200 animate-pulse">
-              ✨ {skillPoints} {t('skillPointsAvailable')}
+            <button onClick={() => setShowSkillTree(true)} className="mt-3 w-full px-3 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-orange-400 to-amber-500 text-white border border-orange-300 shadow-md hover:from-orange-500 hover:to-amber-600 transition-all animate-bounce">
+              ⚡ +{skillPoints} Skillpunkte
             </button>
           )}
         </div>
