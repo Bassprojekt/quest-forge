@@ -17,19 +17,30 @@ Quest Forge ist ein klassisches Fantasy-MMORPG, das du direkt im Browser spielst
 1. **Level aufsteigen** - Werde stärker durch Erfahrungspunkte
 2. **Gegner besiegen** - Verschiedene Monster in verschiedenen Zonen
 3. **Ausrüstung sammeln** - Bessere Waffen und Rüstungen kaufen
-4. **Quests abschließen** - Belohnungen verdienen
-5. **Haustiere finden** - Begleiter für Boni
+4. **Quests abschließen** - 35+ Quests mit tollen Belohnungen
+5. **Pets kaufen** - 16 verschiedene Pets mit Buffs
+6. **Edelsteine sammeln** - Kosmetik und Pet-Slots kaufen
 
-## 🗺️ Zonen (vom Leichten zum Schweren)
+## 🗺️ Zonen (18 Zonen)
 
-1. **Grüne Wiesen** - Einsteigerzone
-2. **Pilzwald** - Mittelstufe
-3. **Frostgipfel** - Fortgeschrittene
-4. **Lava-Höhlen** - Herausfordernd
-5. **Korallenriff** - Unterwasser-Abenteuer
-6. **Schattensumpf** - Dunkle Kreaturen
-7. **Kristall-Hochländer** - Endgame
-8. **Void-Nexus** - Boss-Zone
+1. **Hub** - Hauptstadt mit NPCs, Shop, Quests
+2. **Grüne Wiesen** - Einsteigerzone
+3. **Pilzwald** - Mittelstufe
+4. **Frostgipfel** - Fortgeschrittene
+5. **Lava-Höhlen** - Herausfordernd
+6. **Korallenriff** - Unterwasser-Abenteuer
+7. **Schattensumpf** - Dunkle Kreaturen
+8. **Kristall-Hochländer** - Endgame
+9. **Void-Nexus** - Boss-Zone
+10. **Drachenhöhle** - Drachen-Boss
+11. **Verzauberter Wald** - Magische Gegner
+12. **Schwebende Inseln** - Luftig
+13. **Abgrund** - Hohe Gegner
+14. **Himmelsebenen** - Engel
+15. **Schattenreich** - Dunkle Macht
+16. **PvP Arena** - Spieler gegen Spieler
+17. **Raid Dungeon** - 8 Spieler Raid
+18. **Arena Kolosseum** - Gladiator
 
 ## ⚔️ Spielmechaniken
 
@@ -46,10 +57,29 @@ Quest Forge ist ein klassisches Fantasy-MMORPG, das du direkt im Browser spielst
 - Leichtere Gegner geben mehr XP
 
 ### Tag/Nacht-Zyklus
-- Die Beleuchtung ändert sich alle Minute
+- Die Beleuchtung ändert sich alle 60 Sekunden
 
 ### Weather Effects
 - Sonnig, Regen, Nebel
+
+### Pet-Buff System 🐾
+- Pets sammeln automatisch Items in der Nähe ein
+- Verschiedene Buff-Typen: Schaden, Defense, Speed, Krit, Heilung
+- Bis zu 5 Pet-Slots (mit 💎 freischaltbar)
+- Pets folgen dem Spieler und heilen alle 5 Sekunden
+
+### Zone-Wände
+- Jede Zone hat Wände an allen 4 Seiten
+- Kollisionserkennung verhindert das Verlassen
+
+### Tägliche Belohnungen 🎁
+- Gold: 50 + (Level × 10)
+- 💎 ab Level 10
+
+### Edelsteine 💎
+- Boss-Drop: 1-5 pro Boss
+- Normaler Mob: 50% Chance auf 1
+- Kosmetik-Items und Pet-Slots kaufbar
 
 ## 🏆 Achievements
 
