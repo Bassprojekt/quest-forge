@@ -78,7 +78,7 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
             if (shopType === 'potions') return item.type === 'potion';
             if (shopType === 'weapons') return item.type === 'weapon';
             if (shopType === 'armor') return item.type === 'armor';
-            return item.type === 'potion';
+            return true;
           }).map(item => (
             <div key={item.id} className="bg-[#F8F6F0] rounded-xl p-3 border border-[#E0D5C0] flex items-center justify-between">
               <div>
