@@ -497,7 +497,7 @@ const GLBFountain = () => {
   );
 };
 
-export const HubBuildings = ({ onOpenShop, onOpenGuild, onOpenBank, onOpenPotionCraft, onOpenWeaponCraft, onOpenPVPArena, onOpenFriends, onOpenEvents, onOpenRaid }: { onOpenShop?: (tab: 'items' | 'pets', shopType?: 'general' | 'weapons' | 'armor' | 'potions') => void; onOpenGuild?: () => void; onOpenBank?: () => void; onOpenPotionCraft?: () => void; onOpenWeaponCraft?: () => void; onOpenPVPArena?: () => void; onOpenFriends?: () => void; onOpenEvents?: () => void; onOpenRaid?: () => void }) => {
+export const HubBuildings = ({ onOpenShop, onOpenGuild, onOpenBank, onOpenPotionCraft, onOpenWeaponCraft, onOpenPVPArena, onOpenFriends, onOpenEvents, onOpenRaid, onOpenPetTournament }: { onOpenShop?: (tab: 'items' | 'pets', shopType?: 'general' | 'weapons' | 'armor' | 'potions') => void; onOpenGuild?: () => void; onOpenBank?: () => void; onOpenPotionCraft?: () => void; onOpenWeaponCraft?: () => void; onOpenPVPArena?: () => void; onOpenFriends?: () => void; onOpenEvents?: () => void; onOpenRaid?: () => void; onOpenPetTournament?: () => void }) => {
 
   // Detailed Tree Component
 const DetailedTree = ({ position, variant }: { position: [number, number, number]; variant: number }) => {

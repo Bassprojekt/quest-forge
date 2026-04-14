@@ -27,6 +27,7 @@ import { RaidUI } from './RaidUI';
 import { GuildUI } from './GuildUI';
 import { BankUI } from './BankUI';
 import { LeaderboardBoard } from './LeaderboardBoard';
+import { PetTournamentUI } from './PetTournamentUI';
 import { useCompanionStore } from '@/store/companionStore';
 import { LoginScreen } from './LoginScreen';
 import { TutorialScreen } from './TutorialScreen';
@@ -121,6 +122,7 @@ export const GameScene = () => {
   const [showShop, setShowShop] = useState(false);
   const [showGuild, setShowGuild] = useState(false);
   const [showBank, setShowBank] = useState(false);
+  const [showPetTournament, setShowPetTournament] = useState(false);
   const [showPotionCraft, setShowPotionCraft] = useState(false);
   const [showWeaponCraft, setShowWeaponCraft] = useState(false);
   const [showPVPArena, setShowPVPArena] = useState(false);
@@ -152,6 +154,10 @@ export const GameScene = () => {
 
   const handleOpenBank = useCallback(() => {
     setShowBank(true);
+  }, []);
+
+  const handleOpenPetTournament = useCallback(() => {
+    setShowPetTournament(true);
   }, []);
 
   const handleOpenPotionCraft = useCallback(() => {
@@ -280,6 +286,7 @@ export const GameScene = () => {
       <TeleportDialog open={showTeleportDialog} onOpenChange={setShowTeleportDialog} />
       {showShop && <ShopUI onClose={() => setShowShop(false)} initialTab={shopTab} shopType={shopType} />}
       {showGuild && <GuildUI onClose={() => setShowGuild(false)} />}
+      {showPetTournament && <PetTournamentUI onClose={() => setShowPetTournament(false)} />}
       {showBank && <BankUI onClose={() => setShowBank(false)} />}
       {showPotionCraft && <CraftingUI onClose={() => setShowPotionCraft(false)} />}
       {showWeaponCraft && <WeaponCraftingUI onClose={() => setShowWeaponCraft(false)} />}

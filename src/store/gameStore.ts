@@ -41,6 +41,10 @@ export interface Pet {
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   owned: boolean;
   equipped: boolean;
+  level: number;
+  xp: number;
+  evolvedFrom: string | null;
+  maxLevel: number;
 }
 
 export interface ShopItem {
@@ -295,6 +299,8 @@ export interface GameState {
   buyItem: (itemId: string) => boolean;
   buyPet: (petId: string) => boolean;
   equipPet: (petId: string) => void;
+  evolvePet: (petId: string) => boolean;
+  addPetXp: (petId: string, xp: number) => void;
   addGold: (amount: number) => void;
   addXp: (amount: number) => void;
   setTitle: (title: string) => void;
@@ -394,22 +400,22 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
 ];
 
 const INITIAL_PETS: Pet[] = [
-  { id: 'pet-wolf', name: 'Baby Wolf', bonus: '+10% Schaden', bonusValue: 0.1, bonusType: 'damage', price: 80, rarity: 'common', owned: false, equipped: false },
-  { id: 'pet-cat', name: 'Flauschkatze', bonus: '+15% Speed', bonusValue: 0.15, bonusType: 'speed', price: 100, rarity: 'rare', owned: false, equipped: false },
-  { id: 'pet-dragon', name: 'Mini Drache', bonus: '+20% Schaden', bonusValue: 0.2, bonusType: 'damage', price: 250, rarity: 'epic', owned: false, equipped: false },
-  { id: 'pet-phoenix', name: 'Goldener Phönix', bonus: '+25% Defense', bonusValue: 0.25, bonusType: 'defense', price: 500, rarity: 'legendary', owned: false, equipped: false },
-  { id: 'pet-knight', name: 'Ritter Baldur', bonus: '+30% Defense', bonusValue: 0.3, bonusType: 'defense', price: 1500, rarity: 'epic', owned: false, equipped: false },
-  { id: 'pet-priestess', name: 'Priesterin Aria', bonus: '+20 HP/5s', bonusValue: 20, bonusType: 'heal', price: 1200, rarity: 'epic', owned: false, equipped: false },
-  { id: 'pet-ranger', name: 'Waldläufer Finn', bonus: '+35% Schaden', bonusValue: 0.35, bonusType: 'damage', price: 2000, rarity: 'legendary', owned: false, equipped: false },
-  { id: 'pet-wizard', name: 'Zauberer Merlin', bonus: '+40% Schaden', bonusValue: 0.4, bonusType: 'damage', price: 3000, rarity: 'legendary', owned: false, equipped: false },
-  { id: 'pet-fairy', name: 'Wald Fee', bonus: '+10% Krit', bonusValue: 0.1, bonusType: 'crit', price: 400, rarity: 'rare', owned: false, equipped: false },
-  { id: 'pet-ghost', name: 'Geist Gigi', bonus: '+25% Speed', bonusValue: 0.25, bonusType: 'speed', price: 600, rarity: 'rare', owned: false, equipped: false },
-  { id: 'pet-treant', name: 'Treant Torin', bonus: '+35% Defense', bonusValue: 0.35, bonusType: 'defense', price: 2500, rarity: 'legendary', owned: false, equipped: false },
-  { id: 'pet-elemental', name: 'Elementar Emil', bonus: '+50% Schaden', bonusValue: 0.5, bonusType: 'damage', price: 5000, rarity: 'legendary', owned: false, equipped: false },
-  { id: 'pet-shadow', name: 'Schatten Uri', bonus: '+60% Schaden', bonusValue: 0.6, bonusType: 'damage', price: 7000, rarity: 'legendary', owned: false, equipped: false },
-  { id: 'pet-abyss', name: 'Abgrund Bestie', bonus: '+70% Schaden', bonusValue: 0.7, bonusType: 'damage', price: 10000, rarity: 'legendary', owned: false, equipped: false },
-  { id: 'pet-celestial', name: 'Himmelsfee', bonus: '+25% Heilung', bonusValue: 0.25, bonusType: 'heal', price: 5000, rarity: 'epic', owned: false, equipped: false },
-  { id: 'pet-ancient', name: 'Uralter Drache', bonus: '+80% Schaden', bonusValue: 0.8, bonusType: 'damage', price: 15000, rarity: 'legendary', owned: false, equipped: false },
+  { id: 'pet-wolf', name: 'Baby Wolf', bonus: '+10% Schaden', bonusValue: 0.1, bonusType: 'damage', price: 80, rarity: 'common', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 10 },
+  { id: 'pet-wolf-adult', name: 'Erwachsener Wolf', bonus: '+20% Schaden', bonusValue: 0.2, bonusType: 'damage', price: 0, rarity: 'rare', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-wolf', maxLevel: 20 },
+  { id: 'pet-wolf-alpha', name: 'Alpha Wolf', bonus: '+35% Schaden', bonusValue: 0.35, bonusType: 'damage', price: 0, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-wolf-adult', maxLevel: 30 },
+  { id: 'pet-cat', name: 'Flauschkatze', bonus: '+15% Speed', bonusValue: 0.15, bonusType: 'speed', price: 100, rarity: 'rare', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 10 },
+  { id: 'pet-cat-ninja', name: 'Ninja Katze', bonus: '+25% Speed', bonusValue: 0.25, bonusType: 'speed', price: 0, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-cat', maxLevel: 20 },
+  { id: 'pet-dragon', name: 'Mini Drache', bonus: '+20% Schaden', bonusValue: 0.2, bonusType: 'damage', price: 250, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 15 },
+  { id: 'pet-dragon-elder', name: 'Elder Drache', bonus: '+40% Schaden', bonusValue: 0.4, bonusType: 'damage', price: 0, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-dragon', maxLevel: 30 },
+  { id: 'pet-phoenix', name: 'Goldener Phönix', bonus: '+25% Defense', bonusValue: 0.25, bonusType: 'defense', price: 500, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 20 },
+  { id: 'pet-knight', name: 'Ritter Baldur', bonus: '+30% Defense', bonusValue: 0.3, bonusType: 'defense', price: 1500, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 15 },
+  { id: 'pet-priestess', name: 'Priesterin Aria', bonus: '+20 HP/10s', bonusValue: 20, bonusType: 'heal', price: 1200, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 15 },
+  { id: 'pet-ranger', name: 'Waldläufer Finn', bonus: '+35% Schaden', bonusValue: 0.35, bonusType: 'damage', price: 2000, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 20 },
+  { id: 'pet-wizard', name: 'Zauberer Merlin', bonus: '+40% Schaden', bonusValue: 0.4, bonusType: 'damage', price: 3000, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 25 },
+  { id: 'pet-fairy', name: 'Wald Fee', bonus: '+10% Krit', bonusValue: 0.1, bonusType: 'crit', price: 400, rarity: 'rare', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 10 },
+  { id: 'pet-ghost', name: 'Geist Gigi', bonus: '+25% Speed', bonusValue: 0.25, bonusType: 'speed', price: 600, rarity: 'rare', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 15 },
+  { id: 'pet-treant', name: 'Treant Torin', bonus: '+35% Defense', bonusValue: 0.35, bonusType: 'defense', price: 2500, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 20 },
+  { id: 'pet-elemental', name: 'Elementar Emil', bonus: '+50% Schaden', bonusValue: 0.5, bonusType: 'damage', price: 5000, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 25 },
 ];
 
 const INITIAL_INVENTORY: InventoryItem[] = [
@@ -897,6 +903,41 @@ popups.push({
   equipPet: (petId) => {
     set(s => ({
       pets: s.pets.map(p => ({ ...p, equipped: p.id === petId && p.owned ? !p.equipped : (p.id === petId ? p.equipped : false) })),
+    }));
+  },
+
+  evolvePet: (petId) => {
+    const state = get();
+    const pet = state.pets.find(p => p.id === petId && p.owned);
+    if (!pet || pet.level < pet.maxLevel || !pet.evolvedFrom) return false;
+    
+    const evolvedPet = state.pets.find(p => p.id === pet.evolvedFrom && p.owned);
+    if (!evolvedPet) return false;
+    
+    const evolutionId = pet.id + '-evolved';
+    const existingEvolved = state.pets.find(p => p.id === evolutionId);
+    
+    if (existingEvolved) {
+      set({ pets: state.pets.map(p => p.id === evolutionId ? { ...p, owned: true, equipped: true } : p) });
+    } else {
+      set({ 
+        pets: [...state.pets, { ...pet, id: evolutionId, name: pet.name + ' (Evolved)', level: 1, xp: 0, owned: true, equipped: true }]
+      });
+    }
+    return true;
+  },
+
+  addPetXp: (petId, xp) => {
+    set(s => ({
+      pets: s.pets.map(p => {
+        if (p.id !== petId || !p.owned || p.level >= p.maxLevel) return p;
+        const newXp = p.xp + xp;
+        const xpToNext = p.maxLevel * 100;
+        if (newXp >= xpToNext) {
+          return { ...p, level: Math.min(p.level + 1, p.maxLevel), xp: newXp - xpToNext };
+        }
+        return { ...p, xp: newXp };
+      }),
     }));
   },
 

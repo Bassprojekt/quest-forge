@@ -44,10 +44,11 @@ const ROW_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32', '#4169E1', '#4169E1', '#416
       
       <Text
         position={[0, 2.3, 0.1]}
-        fontSize={0.35}
+        fontSize={0.4}
         color="#000000"
         anchorX="center"
         anchorY="middle"
+        wrap
       >
         🏆 TOP 10 RANKING 🏆
       </Text>
@@ -60,34 +61,38 @@ const ROW_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32', '#4169E1', '#4169E1', '#416
           <group key={i} position={[xPos, 0.8, 0]}>
             <Text
               position={[0, 0.5, 0.1]}
-              fontSize={0.18}
+              fontSize={0.2}
               color={ROW_COLORS[i]}
               anchorX="center"
+              wrap
             >
               {MEDAL_EMOJIS[i]}
             </Text>
             <Text
               position={[0, 0.2, 0.1]}
-              fontSize={0.15}
+              fontSize={0.18}
               color={isPlayer ? '#FF6B64' : '#FFFFFF'}
               anchorX="center"
               anchorY="middle"
+              wrap
             >
               {player.name}
             </Text>
             <Text
               position={[0, -0.1, 0.1]}
-              fontSize={0.14}
+              fontSize={0.16}
               color="#4CAF50"
               anchorX="center"
+              wrap
             >
               Lv{player.level}
             </Text>
             <Text
               position={[0, -0.35, 0.1]}
-              fontSize={0.12}
+              fontSize={0.14}
               color="#FFD700"
               anchorX="center"
+              wrap
             >
               💰{(player.gold / 1000).toFixed(0)}k
             </Text>
@@ -104,9 +109,10 @@ const ROW_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32', '#4169E1', '#4169E1', '#416
       
       <Text
         position={[0, -1.8, 0.1]}
-        fontSize={0.12}
+        fontSize={0.14}
         color="#666666"
         anchorX="center"
+        wrap
       >
         Updates alle 15 Min | Dein Rang: {allPlayers.findIndex(p => p.name === 'DU') + 1}
       </Text>
