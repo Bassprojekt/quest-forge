@@ -124,7 +124,12 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
             </div>
           ))}
 
-          {tab === 'pets' && pets.map(pet => (
+          {tab === 'pets' && pets.filter(p => {
+            const allPets = useGameStore.getState().allPets || [];
+            const isEvolutionForm = allPets.some(ep => ep.id === p.id && ep.evolvedFrom !== null);
+            if (isEvolutionForm) return false;
+            return true;
+          }).map(pet => (
             <div key={pet.id} className="bg-[#F8F6F0] rounded-xl p-3 border border-[#E0D5C0] flex items-center justify-between"
               style={{ borderColor: pet.owned ? rarityColors[pet.rarity] + '60' : undefined }}>
               <div>
