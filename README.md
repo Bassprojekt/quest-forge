@@ -19,7 +19,8 @@ Quest Forge ist ein klassisches Fantasy-MMORPG, das du direkt im Browser spielst
 3. **Ausrüstung sammeln** - Bessere Waffen und Rüstungen kaufen
 4. **Quests abschließen** - 35+ Quests mit tollen Belohnungen
 5. **Pets kaufen** - 16 verschiedene Pets mit Buffs
-6. **Edelsteine sammeln** - Kosmetik und Pet-Slots kaufen
+6. **Pet-Turnier** - Automatische Kämpfe für XP und Gold
+7. **Edelsteine sammeln** - Kosmetik und Pet-Slots kaufen
 
 ## 🗺️ Zonen (18 Zonen)
 
@@ -67,6 +68,10 @@ Quest Forge ist ein klassisches Fantasy-MMORPG, das du direkt im Browser spielst
 - Verschiedene Buff-Typen: Schaden, Defense, Speed, Krit, Heilung
 - Bis zu 5 Pet-Slots (mit 💎 freischaltbar)
 - Pets folgen dem Spieler und heilen alle 5 Sekunden
+- **Pet-Turnier Arena** - Schicke dein Pet ins Turnier für automatische Kämpfe
+  - Manuelle Kämpfe oder Auto-Send Modus
+  - XP und Gold bei jedem Sieg
+  - Pets evolvieren bei Level 10 auf höhere Stufen
 
 ### Zone-Wände
 - Jede Zone hat Wände an allen 4 Seiten
@@ -75,6 +80,14 @@ Quest Forge ist ein klassisches Fantasy-MMORPG, das du direkt im Browser spielst
 ### Tägliche Belohnungen 🎁
 - Gold: 50 + (Level × 10)
 - 💎 ab Level 10
+
+### Titel-System 👑
+- Verschiedene Titel basierend auf Spieler-Level
+- Mehr als 20 Titel von "Neuling" bis "Legendär"
+
+### Leaderboard 🏅
+- Rangliste der besten Spieler im Hub
+- Top 10 Spieler werden angezeigt
 
 ### Edelsteine 💎
 - Boss-Drop: 1-5 pro Boss
