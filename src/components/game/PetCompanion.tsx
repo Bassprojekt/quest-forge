@@ -9,69 +9,109 @@ const getDistance = (pos1: [number, number, number], pos2: [number, number, numb
   return Math.sqrt(dx*dx + dz*dz);
 };
 
-const Body = ({ size = [0.4,0.3,0.5], color }: { size?: [number, number, number], color: string }) => (
-  <mesh castShadow>
-    <boxGeometry args={size} />
-    <meshStandardMaterial color={color} />
-  </mesh>
-);
+const getPetType = (name: string) => {
+  const n = name.toLowerCase();
 
-const Head = ({ size = 0.2, color, position = [0,0.4,0] }: { size?: number, color: string, position?: [number, number, number] }) => (
-  <mesh position={position} castShadow>
-    <sphereGeometry args={[size, 8, 8]} />
-    <meshStandardMaterial color={color} />
-  </mesh>
-);
+  if (/drache|dragon/.test(n)) return 'dragon';
+  if (/wolf|wölf/.test(n)) return 'wolf';
+  if (/geist|ghost/.test(n)) return 'ghost';
+  if (/fee|fairy/.test(n)) return 'fairy';
+  if (/ritter|knight|baldur|champion/.test(n)) return 'knight';
+  if (/treant|torin/.test(n)) return 'treant';
+  if (/phönix|phoenix/.test(n)) return 'phoenix';
+  if (/katze|cat|ninja/.test(n)) return 'cat';
+  if (/zauberer|merlin/.test(n)) return 'wizard';
+  if (/priester|aria/.test(n)) return 'priestess';
+  if (/waldläufer|finn/.test(n)) return 'ranger';
+  if (/elementar|emil/.test(n)) return 'elemental';
 
-const Wing = ({ side = 1 }: { side?: number }) => (
-  <mesh position={[0.4 * side, 0.4, 0]} rotation={[0, 0, 0.5 * side]}>
-    <boxGeometry args={[0.5, 0.05, 0.2]} />
-    <meshStandardMaterial color="#aaa" />
-  </mesh>
-);
+  return 'default';
+};
 
-const Tail = ({ position = [0, 0, -0.4], color }: { position?: [number, number, number], color: string }) => (
-  <mesh position={position}>
-    <boxGeometry args={[0.2, 0.1, 0.4]} />
-    <meshStandardMaterial color={color} />
-  </mesh>
-);
+const getColor = (pet: ReturnType<typeof useGameStore.getState>['pets'][0]) => {
+  return pet.bonusType === 'heal' ? '#FFD700' :
+         pet.bonusType === 'damage' ? '#FF4444' :
+         pet.bonusType === 'defense' ? '#4488FF' :
+         '#44FF44';
+};
 
 const Dragon = ({ color, evolved }: { color: string, evolved: boolean }) => {
   const ref = useRef<THREE.Group>(null);
+
   useFrame(() => {
     if (ref.current) ref.current.rotation.y += 0.01;
   });
 
   return (
     <group ref={ref}>
-      <Body size={[0.6, 0.3, 0.8]} color={color} />
-      <Head color={color} position={[0, 0.5, -0.2]} />
-      <Wing side={1} />
-      <Wing side={-1} />
-      <Tail color={color} />
+      <mesh position={[0, 0.4, 0]}>
+        <boxGeometry args={[0.8, 0.3, 1]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+
+      <mesh position={[0, 0.7, -0.4]}>
+        <boxGeometry args={[0.3, 0.3, 0.3]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+
+      <mesh position={[0.5, 0.5, 0]} rotation={[0, 0, 0.5]}>
+        <boxGeometry args={[0.7, 0.05, 0.3]} />
+        <meshStandardMaterial color="#999" />
+      </mesh>
+      <mesh position={[-0.5, 0.5, 0]} rotation={[0, 0, -0.5]}>
+        <boxGeometry args={[0.7, 0.05, 0.3]} />
+        <meshStandardMaterial color="#999" />
+      </mesh>
+
       {evolved && <pointLight intensity={1} distance={3} color={color} />}
     </group>
   );
 };
 
-const Wolf = ({ color }: { color: string }) => {
+const Wolf = () => {
   const ref = useRef<THREE.Group>(null);
+
   useFrame(({ clock }) => {
-    if (ref.current) ref.current.position.y = Math.sin(clock.elapsedTime * 5) * 0.02;
+    if (ref.current) ref.current.position.y = Math.sin(clock.elapsedTime * 5) * 0.03;
   });
 
   return (
     <group ref={ref}>
-      <Body size={[0.6, 0.3, 0.4]} color="#555" />
-      <Head color="#555" position={[0, 0.5, -0.3]} />
-      <Tail color="#444" position={[0, 0, 0.4]} />
+      <mesh position={[0, 0.3, 0]}>
+        <boxGeometry args={[0.8, 0.3, 0.4]} />
+        <meshStandardMaterial color="#555" />
+      </mesh>
+
+      <mesh position={[0, 0.55, -0.35]}>
+        <boxGeometry args={[0.3, 0.25, 0.3]} />
+        <meshStandardMaterial color="#555" />
+      </mesh>
+
+      <mesh position={[0, 0.5, -0.55]}>
+        <boxGeometry args={[0.15, 0.15, 0.2]} />
+        <meshStandardMaterial color="#444" />
+      </mesh>
+
+      <mesh position={[-0.1, 0.7, -0.35]}>
+        <coneGeometry args={[0.08, 0.2, 4]} />
+        <meshStandardMaterial color="#333" />
+      </mesh>
+      <mesh position={[0.1, 0.7, -0.35]}>
+        <coneGeometry args={[0.08, 0.2, 4]} />
+        <meshStandardMaterial color="#333" />
+      </mesh>
+
+      <mesh position={[0, 0.35, 0.4]}>
+        <boxGeometry args={[0.1, 0.1, 0.3]} />
+        <meshStandardMaterial color="#333" />
+      </mesh>
     </group>
   );
 };
 
 const Ghost = () => {
   const ref = useRef<THREE.Group>(null);
+
   useFrame(({ clock }) => {
     if (ref.current) ref.current.position.y = Math.sin(clock.elapsedTime * 2) * 0.1;
   });
@@ -88,6 +128,7 @@ const Ghost = () => {
 
 const Fairy = ({ color }: { color: string }) => {
   const ref = useRef<THREE.Group>(null);
+
   useFrame(({ clock }) => {
     if (ref.current) ref.current.scale.setScalar(1 + Math.sin(clock.elapsedTime * 4) * 0.1);
   });
@@ -98,8 +139,15 @@ const Fairy = ({ color }: { color: string }) => {
         <sphereGeometry args={[0.15, 8, 8]} />
         <meshStandardMaterial emissive={color} color={color} />
       </mesh>
-      <Wing side={1} />
-      <Wing side={-1} />
+
+      <mesh position={[0.3, 0.3, 0]} rotation={[0, 0, 0.5]}>
+        <boxGeometry args={[0.4, 0.05, 0.2]} />
+        <meshStandardMaterial color="#aaa" />
+      </mesh>
+      <mesh position={[-0.3, 0.3, 0]} rotation={[0, 0, -0.5]}>
+        <boxGeometry args={[0.4, 0.05, 0.2]} />
+        <meshStandardMaterial color="#aaa" />
+      </mesh>
     </group>
   );
 };
@@ -110,7 +158,11 @@ const Knight = () => (
       <cylinderGeometry args={[0.2, 0.25, 0.6, 8]} />
       <meshStandardMaterial color="#777" metalness={0.8} />
     </mesh>
-    <Head color="#ffccaa" />
+
+    <mesh position={[0, 0.5, 0]}>
+      <sphereGeometry args={[0.2, 8, 8]} />
+      <meshStandardMaterial color="#ffccaa" />
+    </mesh>
   </group>
 );
 
@@ -125,8 +177,9 @@ const Treant = () => (
 
 const Phoenix = ({ color, evolved }: { color: string, evolved: boolean }) => {
   const ref = useRef<THREE.Group>(null);
+
   useFrame(({ clock }) => {
-    if (ref.current) ref.current.position.y = Math.sin(clock.elapsedTime * 3) * 0.05;
+    if (ref.current) ref.current.position.y = Math.sin(clock.elapsedTime * 3) * 0.08;
   });
 
   return (
@@ -135,14 +188,22 @@ const Phoenix = ({ color, evolved }: { color: string, evolved: boolean }) => {
         <sphereGeometry args={[0.25, 12, 12]} />
         <meshStandardMaterial color="#FFAA00" emissive="#FF6600" emissiveIntensity={0.3} />
       </mesh>
+
       <mesh position={[0, 0.9, 0]}>
-        <coneGeometry args={[0.15, 0.4, 8]} />
+        <coneGeometry args={[0.15, 0.5, 8]} />
         <meshStandardMaterial color="#FF4400" emissive="#FF2200" emissiveIntensity={0.5} />
       </mesh>
+
       {evolved && (
         <>
-          <Wing side={1} />
-          <Wing side={-1} />
+          <mesh position={[0.4, 0.5, 0]} rotation={[0, 0, 0.5]}>
+            <boxGeometry args={[0.5, 0.05, 0.25]} />
+            <meshStandardMaterial color="#FFAA00" />
+          </mesh>
+          <mesh position={[-0.4, 0.5, 0]} rotation={[0, 0, -0.5]}>
+            <boxGeometry args={[0.5, 0.05, 0.25]} />
+            <meshStandardMaterial color="#FFAA00" />
+          </mesh>
         </>
       )}
     </group>
@@ -151,21 +212,39 @@ const Phoenix = ({ color, evolved }: { color: string, evolved: boolean }) => {
 
 const Cat = () => {
   const ref = useRef<THREE.Group>(null);
+
   useFrame(({ clock }) => {
-    if (ref.current) ref.current.position.y = Math.sin(clock.elapsedTime * 4) * 0.01;
+    if (ref.current) ref.current.position.y = Math.sin(clock.elapsedTime * 4) * 0.015;
   });
 
   return (
     <group ref={ref}>
-      <Body size={[0.4, 0.25, 0.5]} color="#444" />
-      <Head color="#444" position={[0, 0.45, -0.1]} />
-      <mesh position={[-0.15, 0.65, -0.1]} rotation={[0.3, 0, 0]}>
-        <coneGeometry args={[0.06, 0.12, 4]} />
+      <mesh position={[0, 0.25, 0]}>
+        <boxGeometry args={[0.5, 0.25, 0.6]} />
+        <meshStandardMaterial color="#444" />
+      </mesh>
+
+      <mesh position={[0, 0.5, -0.2]}>
+        <sphereGeometry args={[0.2, 8, 8]} />
+        <meshStandardMaterial color="#444" />
+      </mesh>
+
+      <mesh position={[-0.12, 0.7, -0.2]} rotation={[0.3, 0, 0]}>
+        <coneGeometry args={[0.07, 0.15, 4]} />
         <meshStandardMaterial color="#333" />
       </mesh>
-      <mesh position={[0.15, 0.65, -0.1]} rotation={[0.3, 0, 0]}>
-        <coneGeometry args={[0.06, 0.12, 4]} />
+      <mesh position={[0.12, 0.7, -0.2]} rotation={[0.3, 0, 0]}>
+        <coneGeometry args={[0.07, 0.15, 4]} />
         <meshStandardMaterial color="#333" />
+      </mesh>
+
+      <mesh position={[-0.15, 0.45, 0.25]}>
+        <boxGeometry args={[0.1, 0.08, 0.15]} />
+        <meshStandardMaterial color="#222" />
+      </mesh>
+      <mesh position={[0.15, 0.45, 0.25]}>
+        <boxGeometry args={[0.1, 0.08, 0.15]} />
+        <meshStandardMaterial color="#222" />
       </mesh>
     </group>
   );
@@ -175,13 +254,19 @@ const Wizard = ({ color }: { color: string }) => (
   <group>
     <mesh>
       <cylinderGeometry args={[0.15, 0.2, 0.5, 8]} />
-      <meshStandardMaterial color="#4444aa" metalness={0.3} />
+      <meshStandardMaterial color="#4444aa" />
     </mesh>
-    <Head color="#ffccaa" position={[0, 0.45, 0]} />
+
+    <mesh position={[0, 0.45, 0]}>
+      <sphereGeometry args={[0.18, 8, 8]} />
+      <meshStandardMaterial color="#ffccaa" />
+    </mesh>
+
     <mesh position={[0, 0.7, 0]}>
       <coneGeometry args={[0.12, 0.25, 6]} />
       <meshStandardMaterial color="#4444aa" />
     </mesh>
+
     <mesh position={[0.25, 0.3, 0]} rotation={[0, 0, -0.5]}>
       <boxGeometry args={[0.35, 0.05, 0.08]} />
       <meshStandardMaterial color="#666" metalness={0.5} />
@@ -195,10 +280,15 @@ const Priestess = ({ color }: { color: string }) => (
       <cylinderGeometry args={[0.18, 0.22, 0.55, 8]} />
       <meshStandardMaterial color="#aa44aa" />
     </mesh>
-    <Head color="#ffccaa" position={[0, 0.48, 0]} />
+
+    <mesh position={[0, 0.48, 0]}>
+      <sphereGeometry args={[0.18, 8, 8]} />
+      <meshStandardMaterial color="#ffccaa" />
+    </mesh>
+
     <mesh position={[0, 0.65, 0]}>
       <coneGeometry args={[0.1, 0.2, 6]} />
-      <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={0.2} />
+      <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={0.3} />
     </mesh>
   </group>
 );
@@ -209,7 +299,12 @@ const Ranger = ({ color }: { color: string }) => (
       <cylinderGeometry args={[0.18, 0.22, 0.55, 8]} />
       <meshStandardMaterial color="#228822" />
     </mesh>
-    <Head color="#ffccaa" position={[0, 0.48, 0]} />
+
+    <mesh position={[0, 0.48, 0]}>
+      <sphereGeometry args={[0.18, 8, 8]} />
+      <meshStandardMaterial color="#ffccaa" />
+    </mesh>
+
     <mesh position={[0.25, 0.35, 0]} rotation={[0, 0, -0.3]}>
       <boxGeometry args={[0.35, 0.04, 0.04]} />
       <meshStandardMaterial color="#664422" />
@@ -219,9 +314,10 @@ const Ranger = ({ color }: { color: string }) => (
 
 const Elemental = ({ color }: { color: string }) => {
   const ref = useRef<THREE.Group>(null);
+
   useFrame(({ clock }) => {
     if (ref.current) {
-      ref.current.scale.setScalar(1 + Math.sin(clock.elapsedTime * 2) * 0.05);
+      ref.current.scale.setScalar(1 + Math.sin(clock.elapsedTime * 2) * 0.08);
     }
   });
 
@@ -229,13 +325,20 @@ const Elemental = ({ color }: { color: string }) => {
     <group ref={ref}>
       <mesh>
         <sphereGeometry args={[0.35, 12, 12]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.4} />
+      </mesh>
+
+      <mesh position={[0.35, 0.15, 0]}>
+        <sphereGeometry args={[0.18, 8, 8]} />
         <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
       </mesh>
-      <mesh position={[0.3, 0.2, 0]}>
+
+      <mesh position={[-0.35, 0.1, 0]}>
         <sphereGeometry args={[0.15, 8, 8]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
       </mesh>
-      <mesh position={[-0.3, 0.1, 0]}>
+
+      <mesh position={[0, 0, 0.3]}>
         <sphereGeometry args={[0.12, 8, 8]} />
         <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} />
       </mesh>
@@ -244,27 +347,29 @@ const Elemental = ({ color }: { color: string }) => {
 };
 
 const PetModel = ({ pet }: { pet: ReturnType<typeof useGameStore.getState>['pets'][0] }) => {
-  const name = pet.name.toLowerCase();
+  const type = getPetType(pet.name);
   const evolved = (pet.level || 1) > (pet.maxLevel || 10) / 2;
-  
-  const petColor = pet.bonusType === 'heal' ? '#FFD700' :
-                   pet.bonusType === 'damage' ? '#FF4444' :
-                   pet.bonusType === 'defense' ? '#4488FF' : '#44FF44';
+  const color = getColor(pet);
 
-  if (name.includes('drache') || name.includes('dragon')) return <Dragon color={petColor} evolved={evolved} />;
-  if (name.includes('wolf') || name.includes('bär')) return <Wolf color={petColor} />;
-  if (name.includes('geist') || name.includes('gigi')) return <Ghost />;
-  if (name.includes('fee')) return <Fairy color={petColor} />;
-  if (name.includes('ritter') || name.includes('baldur') || name.includes('champion')) return <Knight />;
-  if (name.includes('treant') || name.includes('torin')) return <Treant />;
-  if (name.includes('phönix') || name.includes('phoenix')) return <Phoenix color={petColor} evolved={evolved} />;
-  if (name.includes('katze') || name.includes('cat') || name.includes('ninja')) return <Cat />;
-  if (name.includes('zauberer') || name.includes('merlin')) return <Wizard color={petColor} />;
-  if (name.includes('priester') || name.includes('aria')) return <Priestess color={petColor} />;
-  if (name.includes('waldläufer') || name.includes('finn')) return <Ranger color={petColor} />;
-  if (name.includes('elementar') || name.includes('emil')) return <Elemental color={petColor} />;
+  if (type === 'dragon') return <Dragon color={color} evolved={evolved} />;
+  if (type === 'wolf') return <Wolf />;
+  if (type === 'ghost') return <Ghost />;
+  if (type === 'fairy') return <Fairy color={color} />;
+  if (type === 'knight') return <Knight />;
+  if (type === 'treant') return <Treant />;
+  if (type === 'phoenix') return <Phoenix color={color} evolved={evolved} />;
+  if (type === 'cat') return <Cat />;
+  if (type === 'wizard') return <Wizard color={color} />;
+  if (type === 'priestess') return <Priestess color={color} />;
+  if (type === 'ranger') return <Ranger color={color} />;
+  if (type === 'elemental') return <Elemental color={color} />;
 
-  return <Body color={petColor} />;
+  return (
+    <mesh>
+      <sphereGeometry args={[0.3, 12, 12]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+  );
 };
 
 export const PetCompanion = () => {
@@ -362,14 +467,12 @@ export const PetCompanion = () => {
 
   if (!pet) return null;
 
-  const petColor = pet.bonusType === 'heal' ? '#FFD700' :
-                  pet.bonusType === 'damage' ? '#FF4444' :
-                  pet.bonusType === 'defense' ? '#4488FF' : '#44FF44';
+  const color = getColor(pet);
 
   return (
     <group ref={meshRef} position={[playerPos[0], 0, playerPos[2] - targetOffset]}>
       <PetModel pet={pet} />
-      <pointLight position={[0, 0.5, 0]} color={petColor} intensity={0.5} distance={3} />
+      <pointLight intensity={0.5} distance={3} color={color} />
     </group>
   );
 };
