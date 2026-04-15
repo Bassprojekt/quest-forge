@@ -104,7 +104,7 @@ const WolfModel = () => (
 );
 
 const GhostModel = () => (
-  <group>
+  <group position={[0, 0.3, 0]}>
     <mesh>
       <sphereGeometry args={[0.3, 12, 12]} />
       <meshStandardMaterial color="#aaa" transparent opacity={0.6} />
@@ -121,7 +121,7 @@ const GhostModel = () => (
 );
 
 const FairyModel = ({ color }: { color: string }) => (
-  <group>
+  <group position={[0, 0.4, 0]}>
     <mesh>
       <sphereGeometry args={[0.15, 8, 8]} />
       <meshStandardMaterial emissive={color} color={color} />
@@ -175,7 +175,7 @@ const KnightModel = () => (
 );
 
 const TreantModel = () => (
-  <group>
+  <group position={[0, 0.4, 0]}>
     <mesh>
       <cylinderGeometry args={[0.3, 0.4, 0.8, 6]} />
       <meshStandardMaterial color="#228822" />
@@ -196,38 +196,38 @@ const TreantModel = () => (
 );
 
 const PhoenixModel = ({ color, evolved }: { color: string, evolved: boolean }) => (
-  <group>
-    <mesh position={[0, 0.5, 0]}>
+  <group position={[0, 0.3, 0]}>
+    <mesh position={[0, 0.2, 0]}>
       <sphereGeometry args={[0.25, 12, 12]} />
       <meshStandardMaterial color="#FFAA00" emissive="#FF6600" emissiveIntensity={0.3} />
     </mesh>
-    <mesh position={[0, 0.9, 0]}>
+    <mesh position={[0, 0.6, 0]}>
       <coneGeometry args={[0.15, 0.5, 8]} />
       <meshStandardMaterial color="#FF4400" emissive="#FF2200" emissiveIntensity={0.5} />
     </mesh>
-    <mesh position={[-0.08, 0.55, 0.2]}>
+    <mesh position={[-0.08, 0.25, 0.2]}>
       <sphereGeometry args={[0.035, 6, 6]} />
       <meshStandardMaterial color="#FFFFFF" />
     </mesh>
-    <mesh position={[0.08, 0.55, 0.2]}>
+    <mesh position={[0.08, 0.25, 0.2]}>
       <sphereGeometry args={[0.035, 6, 6]} />
       <meshStandardMaterial color="#FFFFFF" />
     </mesh>
-    <mesh position={[-0.08, 0.55, 0.23]}>
+    <mesh position={[-0.08, 0.25, 0.23]}>
       <sphereGeometry args={[0.02, 6, 6]} />
       <meshStandardMaterial color="#000000" />
     </mesh>
-    <mesh position={[0.08, 0.55, 0.23]}>
+    <mesh position={[0.08, 0.25, 0.23]}>
       <sphereGeometry args={[0.02, 6, 6]} />
       <meshStandardMaterial color="#000000" />
     </mesh>
     {evolved && (
       <>
-        <mesh position={[0.4, 0.5, 0]} rotation={[0, 0, 0.5]}>
+        <mesh position={[0.4, 0.2, 0]} rotation={[0, 0, 0.5]}>
           <boxGeometry args={[0.5, 0.05, 0.25]} />
           <meshStandardMaterial color="#FFAA00" />
         </mesh>
-        <mesh position={[-0.4, 0.5, 0]} rotation={[0, 0, -0.5]}>
+        <mesh position={[-0.4, 0.2, 0]} rotation={[0, 0, -0.5]}>
           <boxGeometry args={[0.5, 0.05, 0.25]} />
           <meshStandardMaterial color="#FFAA00" />
         </mesh>
@@ -282,8 +282,8 @@ const CatModel = () => (
 );
 
 const WizardModel = ({ color }: { color: string }) => (
-  <group>
-    <mesh>
+  <group position={[0, 0.3, 0]}>
+    <mesh position={[0, 0, 0]}>
       <cylinderGeometry args={[0.15, 0.2, 0.5, 8]} />
       <meshStandardMaterial color="#4444aa" />
     </mesh>
@@ -311,8 +311,8 @@ const WizardModel = ({ color }: { color: string }) => (
 );
 
 const PriestessModel = ({ color }: { color: string }) => (
-  <group>
-    <mesh>
+  <group position={[0, 0.3, 0]}>
+    <mesh position={[0, 0, 0]}>
       <cylinderGeometry args={[0.18, 0.22, 0.55, 8]} />
       <meshStandardMaterial color="#aa44aa" />
     </mesh>
@@ -344,8 +344,8 @@ const PriestessModel = ({ color }: { color: string }) => (
 );
 
 const RangerModel = ({ color }: { color: string }) => (
-  <group>
-    <mesh>
+  <group position={[0, 0.3, 0]}>
+    <mesh position={[0, 0, 0]}>
       <cylinderGeometry args={[0.18, 0.22, 0.55, 8]} />
       <meshStandardMaterial color="#228822" />
     </mesh>
@@ -377,7 +377,7 @@ const RangerModel = ({ color }: { color: string }) => (
 );
 
 const ElementalModel = ({ color }: { color: string }) => (
-  <group>
+  <group position={[0, 0.4, 0]}>
     <mesh>
       <sphereGeometry args={[0.35, 12, 12]} />
       <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.4} />
@@ -406,7 +406,7 @@ const ElementalModel = ({ color }: { color: string }) => (
 );
 
 const DefaultModel = ({ color }: { color: string }) => (
-  <group>
+  <group position={[0, 0.3, 0]}>
     <mesh>
       <sphereGeometry args={[0.3, 12, 12]} />
       <meshStandardMaterial color={color} />
