@@ -317,7 +317,7 @@ export const Player = () => {
     // Manual WASD movement
     if (!isAutoMoving && !autoMoveEnemyId) {
       const baseSpeed = useGameStore.getState().playerSpeed;
-      const equippedPets = useGameStore.getState().pets.filter(p => p.equipped);
+      const equippedPets = useGameStore.getState().pets.filter(p => p.equipped && !p.inTournament);
       let speedBonus = 0;
       for (const pet of equippedPets) {
         if (pet.bonusType === 'speed') {

@@ -217,7 +217,7 @@ const IndividualPet = ({ pet, index }: { pet: Pet; index: number }) => {
 
 export const BuffPet = () => {
   const pets = useGameStore(s => s.pets);
-  const equippedPets = pets.filter(p => p.equipped);
+  const equippedPets = pets.filter(p => p.equipped && !p.inTournament);
   
   if (equippedPets.length === 0) return null;
   

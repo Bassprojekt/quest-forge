@@ -138,13 +138,15 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
                 <div className="text-[#888] text-[10px]">🐾 {pet.bonus}</div>
               </div>
               <div>
-                {pet.owned ? (
+                {pet.owned && !pet.inTournament ? (
                   <button onClick={() => equipPet(pet.id)}
                     className={`px-3 py-1 rounded-lg text-[10px] font-bold ${
                       pet.equipped ? 'bg-[#FF69B4] text-white' : 'bg-[#F0F0F0] text-[#333] hover:bg-[#E0E0E0]'
                     }`}>
                     {pet.equipped ? '✨ AKTIV' : 'ANLEGEN'}
                   </button>
+                ) : pet.inTournament ? (
+                  <span className="px-2 py-1 bg-gray-300 text-gray-600 text-[10px] font-bold rounded-lg">🏟️</span>
                 ) : (
                   <button onClick={() => buyPet(pet.id)}
                     disabled={gold < pet.price}

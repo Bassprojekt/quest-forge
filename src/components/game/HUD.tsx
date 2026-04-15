@@ -46,7 +46,7 @@ export const HUD = () => {
   const setCurrentZone = useGameStore(s => s.setCurrentZone);
   const quests = useQuestStore(s => s.quests);
   const activeQuests = quests.filter(q => q.status === 'active' || q.status === 'completed');
-  const equippedPet = useGameStore(s => s.pets).find(p => p.equipped);
+  const equippedPet = useGameStore(s => s.pets).find(p => p.equipped && !p.inTournament);
   const inventory = useGameStore(s => s.inventory);
   const levelUpEffect = useGameStore(s => s.levelUpEffect);
   const skillPoints = useSkillTreeStore(s => s.skillPoints);

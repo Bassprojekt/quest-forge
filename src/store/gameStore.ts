@@ -928,16 +928,12 @@ popups.push({
     const nextEvolution = allPets.find(p => p.evolvedFrom === pet.id && p.rarity !== 'common');
     if (!nextEvolution) return false;
     
-    const evolutionId = pet.id + '-evolved';
-    const existingEvolved = state.pets.find(p => p.id === evolutionId);
-    
-    if (existingEvolved) {
-      set({ pets: state.pets.map(p => p.id === evolutionId ? { ...p, owned: true, equipped: true } : p) });
-    } else {
-      set({ 
-        pets: [...state.pets, { ...nextEvolution, id: evolutionId, level: 1, xp: 0, owned: true, equipped: true }]
-      });
-    }
+    set({ 
+      pets: state.pets.map(p => {
+        if (p.id !== petId) return p;
+        return { ...p, name: nextEvolution.name, bonus: nextEvolution.bonus, bonusValue: nextEvolution.bonusValue, bonusType: nextEvolution.bonusType, rarity: nextEvolution.rarity, maxLevel: nextEvolution.maxLevel, level: 1, xp: 0 };
+      })
+    });
     return true;
   },
 

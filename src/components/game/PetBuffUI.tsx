@@ -17,8 +17,8 @@ export const PetBuffUI = ({ onClose }: { onClose: () => void }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
   
-  const equippedPets = pets.filter(p => p.equipped);
-  const availablePets = pets.filter(p => p.owned && !p.equipped);
+  const equippedPets = pets.filter(p => p.equipped && !p.inTournament);
+  const availablePets = pets.filter(p => p.owned && !p.equipped && !p.inTournament);
   const slotCosts = [100, 200, 300, 400];
   const nextSlotCost = slotCosts[playerPetSlots - 1];
   const canUnlockMore = playerPetSlots < 5 && playerGems >= nextSlotCost;

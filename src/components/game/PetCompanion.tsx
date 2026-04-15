@@ -13,7 +13,7 @@ export const PetCompanion = () => {
   const meshRef = useRef<THREE.Group>(null);
   const playerPos = useGameStore(s => s.playerPosition);
   const pets = useGameStore(s => s.pets);
-  const equippedPet = pets.find(p => p.equipped);
+  const equippedPet = pets.find(p => p.equipped && !p.inTournament);
   const groundItems = useGameStore(s => s.groundItems);
   const pickupGroundItem = useGameStore(s => s.pickupGroundItem);
   const lastPickupTime = useRef(0);
