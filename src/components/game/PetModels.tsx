@@ -29,6 +29,27 @@ export const getPetColor = (pet: Pet) => {
          '#44FF44';
 };
 
+const Eyes = ({ position = [0, 0.75, -0.25], scale = 1 }: { position?: [number, number, number], scale?: number }) => (
+  <group position={position}>
+    <mesh position={[-0.08 * scale, 0, 0.08]}>
+      <sphereGeometry args={[0.04 * scale, 8, 8]} />
+      <meshStandardMaterial color="#FFFFFF" />
+    </mesh>
+    <mesh position={[0.08 * scale, 0, 0.08]}>
+      <sphereGeometry args={[0.04 * scale, 8, 8]} />
+      <meshStandardMaterial color="#FFFFFF" />
+    </mesh>
+    <mesh position={[-0.08 * scale, 0, 0.11]}>
+      <sphereGeometry args={[0.02 * scale, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
+    </mesh>
+    <mesh position={[0.08 * scale, 0, 0.11]}>
+      <sphereGeometry args={[0.02 * scale, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
+    </mesh>
+  </group>
+);
+
 const DragonModel = ({ color, evolved }: { color: string, evolved: boolean }) => (
   <group>
     <mesh position={[0, 0.4, 0]}>
@@ -39,6 +60,7 @@ const DragonModel = ({ color, evolved }: { color: string, evolved: boolean }) =>
       <boxGeometry args={[0.3, 0.3, 0.3]} />
       <meshStandardMaterial color={color} />
     </mesh>
+    <Eyes position={[0, 0.8, -0.45]} />
     <mesh position={[0.5, 0.5, 0]} rotation={[0, 0, 0.5]}>
       <boxGeometry args={[0.7, 0.05, 0.3]} />
       <meshStandardMaterial color="#999" />
@@ -77,6 +99,7 @@ const WolfModel = () => (
       <boxGeometry args={[0.1, 0.1, 0.3]} />
       <meshStandardMaterial color="#333" />
     </mesh>
+    <Eyes position={[0, 0.6, -0.45]} scale={0.8} />
   </group>
 );
 
@@ -86,6 +109,14 @@ const GhostModel = () => (
       <sphereGeometry args={[0.3, 12, 12]} />
       <meshStandardMaterial color="#aaa" transparent opacity={0.6} />
     </mesh>
+    <mesh position={[-0.1, 0.1, 0.25]}>
+      <sphereGeometry args={[0.05, 6, 6]} />
+      <meshStandardMaterial color="#0000FF" emissive="#0000FF" emissiveIntensity={0.8} />
+    </mesh>
+    <mesh position={[0.1, 0.1, 0.25]}>
+      <sphereGeometry args={[0.05, 6, 6]} />
+      <meshStandardMaterial color="#0000FF" emissive="#0000FF" emissiveIntensity={0.8} />
+    </mesh>
   </group>
 );
 
@@ -94,6 +125,22 @@ const FairyModel = ({ color }: { color: string }) => (
     <mesh>
       <sphereGeometry args={[0.15, 8, 8]} />
       <meshStandardMaterial emissive={color} color={color} />
+    </mesh>
+    <mesh position={[-0.05, 0.02, 0.12]}>
+      <sphereGeometry args={[0.025, 6, 6]} />
+      <meshStandardMaterial color="#FFFFFF" />
+    </mesh>
+    <mesh position={[0.05, 0.02, 0.12]}>
+      <sphereGeometry args={[0.025, 6, 6]} />
+      <meshStandardMaterial color="#FFFFFF" />
+    </mesh>
+    <mesh position={[-0.05, 0.02, 0.14]}>
+      <sphereGeometry args={[0.015, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
+    </mesh>
+    <mesh position={[0.05, 0.02, 0.14]}>
+      <sphereGeometry args={[0.015, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
     </mesh>
     <mesh position={[0.3, 0.3, 0]} rotation={[0, 0, 0.5]}>
       <boxGeometry args={[0.4, 0.05, 0.2]} />
@@ -116,6 +163,14 @@ const KnightModel = () => (
       <sphereGeometry args={[0.2, 8, 8]} />
       <meshStandardMaterial color="#ffccaa" />
     </mesh>
+    <mesh position={[-0.08, 0.55, 0.15]}>
+      <sphereGeometry args={[0.04, 6, 6]} />
+      <meshStandardMaterial color="#333" />
+    </mesh>
+    <mesh position={[0.08, 0.55, 0.15]}>
+      <sphereGeometry args={[0.04, 6, 6]} />
+      <meshStandardMaterial color="#333" />
+    </mesh>
   </group>
 );
 
@@ -124,6 +179,18 @@ const TreantModel = () => (
     <mesh>
       <cylinderGeometry args={[0.3, 0.4, 0.8, 6]} />
       <meshStandardMaterial color="#228822" />
+    </mesh>
+    <mesh position={[0, 1.0, 0.1]}>
+      <sphereGeometry args={[0.15, 8, 8]} />
+      <meshStandardMaterial color="#88CC44" />
+    </mesh>
+    <mesh position={[-0.1, 1.0, 0.15]}>
+      <sphereGeometry args={[0.03, 6, 6]} />
+      <meshStandardMaterial color="#333333" />
+    </mesh>
+    <mesh position={[0.1, 1.0, 0.15]}>
+      <sphereGeometry args={[0.03, 6, 6]} />
+      <meshStandardMaterial color="#333333" />
     </mesh>
   </group>
 );
@@ -137,6 +204,22 @@ const PhoenixModel = ({ color, evolved }: { color: string, evolved: boolean }) =
     <mesh position={[0, 0.9, 0]}>
       <coneGeometry args={[0.15, 0.5, 8]} />
       <meshStandardMaterial color="#FF4400" emissive="#FF2200" emissiveIntensity={0.5} />
+    </mesh>
+    <mesh position={[-0.08, 0.55, 0.2]}>
+      <sphereGeometry args={[0.035, 6, 6]} />
+      <meshStandardMaterial color="#FFFFFF" />
+    </mesh>
+    <mesh position={[0.08, 0.55, 0.2]}>
+      <sphereGeometry args={[0.035, 6, 6]} />
+      <meshStandardMaterial color="#FFFFFF" />
+    </mesh>
+    <mesh position={[-0.08, 0.55, 0.23]}>
+      <sphereGeometry args={[0.02, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
+    </mesh>
+    <mesh position={[0.08, 0.55, 0.23]}>
+      <sphereGeometry args={[0.02, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
     </mesh>
     {evolved && (
       <>
@@ -171,6 +254,22 @@ const CatModel = () => (
       <coneGeometry args={[0.07, 0.15, 4]} />
       <meshStandardMaterial color="#333" />
     </mesh>
+    <mesh position={[-0.12, 0.52, 0.15]}>
+      <sphereGeometry args={[0.04, 6, 6]} />
+      <meshStandardMaterial color="#88FF88" />
+    </mesh>
+    <mesh position={[0.12, 0.52, 0.15]}>
+      <sphereGeometry args={[0.04, 6, 6]} />
+      <meshStandardMaterial color="#88FF88" />
+    </mesh>
+    <mesh position={[-0.12, 0.52, 0.18]}>
+      <sphereGeometry args={[0.02, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
+    </mesh>
+    <mesh position={[0.12, 0.52, 0.18]}>
+      <sphereGeometry args={[0.02, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
+    </mesh>
     <mesh position={[-0.15, 0.45, 0.25]}>
       <boxGeometry args={[0.1, 0.08, 0.15]} />
       <meshStandardMaterial color="#222" />
@@ -191,6 +290,14 @@ const WizardModel = ({ color }: { color: string }) => (
     <mesh position={[0, 0.45, 0]}>
       <sphereGeometry args={[0.18, 8, 8]} />
       <meshStandardMaterial color="#ffccaa" />
+    </mesh>
+    <mesh position={[-0.07, 0.5, 0.15]}>
+      <sphereGeometry args={[0.035, 6, 6]} />
+      <meshStandardMaterial color="#333" />
+    </mesh>
+    <mesh position={[0.07, 0.5, 0.15]}>
+      <sphereGeometry args={[0.035, 6, 6]} />
+      <meshStandardMaterial color="#333" />
     </mesh>
     <mesh position={[0, 0.7, 0]}>
       <coneGeometry args={[0.12, 0.25, 6]} />
@@ -213,6 +320,22 @@ const PriestessModel = ({ color }: { color: string }) => (
       <sphereGeometry args={[0.18, 8, 8]} />
       <meshStandardMaterial color="#ffccaa" />
     </mesh>
+    <mesh position={[-0.06, 0.53, 0.15]}>
+      <sphereGeometry args={[0.035, 6, 6]} />
+      <meshStandardMaterial color="#FFFFFF" />
+    </mesh>
+    <mesh position={[0.06, 0.53, 0.15]}>
+      <sphereGeometry args={[0.035, 6, 6]} />
+      <meshStandardMaterial color="#FFFFFF" />
+    </mesh>
+    <mesh position={[-0.06, 0.53, 0.17]}>
+      <sphereGeometry args={[0.02, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
+    </mesh>
+    <mesh position={[0.06, 0.53, 0.17]}>
+      <sphereGeometry args={[0.02, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
+    </mesh>
     <mesh position={[0, 0.65, 0]}>
       <coneGeometry args={[0.1, 0.2, 6]} />
       <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={0.3} />
@@ -229,6 +352,22 @@ const RangerModel = ({ color }: { color: string }) => (
     <mesh position={[0, 0.48, 0]}>
       <sphereGeometry args={[0.18, 8, 8]} />
       <meshStandardMaterial color="#ffccaa" />
+    </mesh>
+    <mesh position={[-0.07, 0.53, 0.15]}>
+      <sphereGeometry args={[0.035, 6, 6]} />
+      <meshStandardMaterial color="#FFFFFF" />
+    </mesh>
+    <mesh position={[0.07, 0.53, 0.15]}>
+      <sphereGeometry args={[0.035, 6, 6]} />
+      <meshStandardMaterial color="#FFFFFF" />
+    </mesh>
+    <mesh position={[-0.07, 0.53, 0.17]}>
+      <sphereGeometry args={[0.02, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
+    </mesh>
+    <mesh position={[0.07, 0.53, 0.17]}>
+      <sphereGeometry args={[0.02, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
     </mesh>
     <mesh position={[0.25, 0.35, 0]} rotation={[0, 0, -0.3]}>
       <boxGeometry args={[0.35, 0.04, 0.04]} />
@@ -255,14 +394,40 @@ const ElementalModel = ({ color }: { color: string }) => (
       <sphereGeometry args={[0.12, 8, 8]} />
       <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} />
     </mesh>
+    <mesh position={[-0.12, 0.35, 0.3]}>
+      <sphereGeometry args={[0.03, 6, 6]} />
+      <meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={0.5} />
+    </mesh>
+    <mesh position={[0.12, 0.35, 0.3]}>
+      <sphereGeometry args={[0.03, 6, 6]} />
+      <meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={0.5} />
+    </mesh>
   </group>
 );
 
 const DefaultModel = ({ color }: { color: string }) => (
-  <mesh>
-    <sphereGeometry args={[0.3, 12, 12]} />
-    <meshStandardMaterial color={color} />
-  </mesh>
+  <group>
+    <mesh>
+      <sphereGeometry args={[0.3, 12, 12]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+    <mesh position={[-0.1, 0.05, 0.25]}>
+      <sphereGeometry args={[0.04, 6, 6]} />
+      <meshStandardMaterial color="#FFFFFF" />
+    </mesh>
+    <mesh position={[0.1, 0.05, 0.25]}>
+      <sphereGeometry args={[0.04, 6, 6]} />
+      <meshStandardMaterial color="#FFFFFF" />
+    </mesh>
+    <mesh position={[-0.1, 0.05, 0.28]}>
+      <sphereGeometry args={[0.02, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
+    </mesh>
+    <mesh position={[0.1, 0.05, 0.28]}>
+      <sphereGeometry args={[0.02, 6, 6]} />
+      <meshStandardMaterial color="#000000" />
+    </mesh>
+  </group>
 );
 
 export const PetModel3D = ({ pet }: { pet: Pet }) => {
