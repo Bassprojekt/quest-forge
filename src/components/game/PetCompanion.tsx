@@ -299,9 +299,11 @@ export const PetCompanion = () => {
   const smoothSpeed = 0.1;
   const collectRange = 50;
   const pickupRange = 1.2;
-  
-  useFrame((_, delta) => {
-    if (!meshRef.current || !equippedPet) return;
+  const groundItems = useGameStore(s => s.groundItems);
+  const pickupGroundItem = useGameStore(s => s.pickupGroundItem);
+  const lastPickupTime = useRef(0);
+  const collectingRef = useRef(false);
+  const collectTargetRef = useRef<[number, number, number] | null>(null);
   
   useFrame((_, delta) => {
     if (!meshRef.current || !equippedPet) return;
@@ -385,7 +387,7 @@ export const PetCompanion = () => {
   return (
     <group ref={meshRef} position={[playerPos[0], 0, playerPos[2] - targetOffset]}>
       <PetModel pet={equippedPet} />
-      <pointLight position={[0, 0.5, 0]} color={pet.bonusType === 'heal' ? '#FFD700' : pet.bonusType === 'damage' ? '#FF4444' : pet.bonusType === 'defense' ? '#4488FF' : '#44FF44'} intensity={0.5} distance={3} />
+      <pointLight position={[0, 0.5, 0]} color={equippedPet.bonusType === 'heal' ? '#FFD700' : equippedPet.bonusType === 'damage' ? '#FF4444' : equippedPet.bonusType === 'defense' ? '#4488FF' : '#44FF44'} intensity={0.5} distance={3} />
     </group>
   );
 };
