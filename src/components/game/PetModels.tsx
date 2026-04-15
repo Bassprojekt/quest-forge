@@ -200,13 +200,13 @@ const TreantModel = () => (
       <sphereGeometry args={[0.15, 8, 8]} />
       <meshStandardMaterial color="#88CC44" />
     </mesh>
-    <mesh position={[-0.1, 0.8, 0.15]}>
-      <sphereGeometry args={[0.03, 6, 6]} />
-      <meshStandardMaterial color="#333333" />
+    <mesh position={[0, 0.82, 0.22]}>
+      <sphereGeometry args={[0.06, 8, 8]} />
+      <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={0.5} />
     </mesh>
-    <mesh position={[0.1, 0.8, 0.15]}>
+    <mesh position={[0, 0.82, 0.26]}>
       <sphereGeometry args={[0.03, 6, 6]} />
-      <meshStandardMaterial color="#333333" />
+      <meshStandardMaterial color="#000000" />
     </mesh>
     <mesh position={[-0.4, 0.4, 0]} rotation={[0, 0, 0.4]}>
       <boxGeometry args={[0.5, 0.1, 0.1]} />
