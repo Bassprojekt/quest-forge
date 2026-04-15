@@ -103,7 +103,7 @@ const WolfModel = () => (
       <boxGeometry args={[0.1, 0.1, 0.3]} />
       <meshStandardMaterial color="#333" />
     </mesh>
-    <Eyes position={[0, 0.4, 0.45]} scale={0.8} />
+    <Eyes position={[0, 0.48, 0.45]} scale={0.8} />
   </group>
 );
 
