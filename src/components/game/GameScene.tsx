@@ -114,6 +114,16 @@ export const GameScene = () => {
     };
   }, []);
   
+  // Process tournament battles every 5 seconds
+  const processTournamentBattles = useGameStore(s => s.processTournamentBattles);
+  useEffect(() => {
+    processTournamentBattles();
+    const tournamentInterval = setInterval(() => {
+      processTournamentBattles();
+    }, 5000);
+    return () => clearInterval(tournamentInterval);
+  }, [processTournamentBattles]);
+  
   // Day/Night lighting adjustment
   const isNight = timeOfDay < 0.25 || timeOfDay > 0.75;
   const nightIntensity = isNight ? 0.3 : 1;
@@ -381,7 +391,7 @@ export const GameScene = () => {
               <circleGeometry args={[3, 12]} />
               <meshStandardMaterial color="#D2B48C" roughness={0.7} />
             </mesh>
-            <HubBuildingsWithProps onOpenShop={handleOpenShop} onOpenGuild={handleOpenGuild} onOpenBank={handleOpenBank} onOpenPotionCraft={handleOpenPotionCraft} onOpenWeaponCraft={handleOpenWeaponCraft} onOpenPVPArena={handleOpenPVPArena} onOpenFriends={handleOpenFriends} onOpenEvents={handleOpenEvents} onOpenRaid={handleOpenRaid} />
+            <HubBuildingsWithProps onOpenShop={handleOpenShop} onOpenGuild={handleOpenGuild} onOpenBank={handleOpenBank} onOpenPotionCraft={handleOpenPotionCraft} onOpenWeaponCraft={handleOpenWeaponCraft} onOpenPVPArena={handleOpenPVPArena} onOpenFriends={handleOpenFriends} onOpenEvents={handleOpenEvents} onOpenRaid={handleOpenRaid} onOpenPetTournament={handleOpenPetTournament} />
             <NPCEntity name={blacksmithName} position={[-6, 0, 6]} color="#CD853F" />
             <NPCEntity name={merchantName} position={[6, 0, 6]} color="#4169E1" />
             <NPCEntity name={petMasterName} position={[-6, 0, -6]} color="#FF69B4" onClick={handleOpenPets} />

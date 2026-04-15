@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
+import { PetTournamentUI } from './PetTournamentUI';
 
 type Tab = 'items' | 'pets' | 'cosmetics';
 type ShopType = 'general' | 'weapons' | 'armor' | 'potions';
@@ -20,6 +21,7 @@ const SHOP_TITLES: Record<ShopType, string> = {
 
 export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', showOnlyPets = false }: Props) => {
   const [tab, setTab] = useState<Tab>(initialTab);
+  const [showTournament, setShowTournament] = useState(false);
   const gold = useGameStore(s => s.playerGold);
   const gems = useGameStore(s => s.playerGems);
   const shopItems = useGameStore(s => s.shopItems);
@@ -76,10 +78,19 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
             </>
           )}
           {initialTab === 'pets' && (
-            <button onClick={() => setTab('pets')}
-              className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#FF69B4] text-white">
-              🐾 PETS
-            </button>
+            <div className="flex gap-2">
+              <button onClick={() => setTab('pets')}
+                className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#FF69B4] text-white">
+                🐾 PETS
+              </button>
+              <button onClick={() => setShowTournament(true)}
+                className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#9C27B0] text-white">
+                🏆 TURIER
+              </button>
+              {showTournament && (
+                <PetTournamentUI onClose={() => setShowTournament(false)} />
+              )}
+            </div>
           )}
         </div>
 
@@ -118,7 +129,7 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
               style={{ borderColor: pet.owned ? rarityColors[pet.rarity] + '60' : undefined }}>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[#333] text-sm font-bold">{pet.name}</span>
+                  <span className="text-[#333] text-sm font-bold">{pet.name} Lv.{pet.level}</span>
                   <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold"
                     style={{ color: rarityColors[pet.rarity], background: rarityColors[pet.rarity] + '20' }}>
                     {pet.rarity.toUpperCase()}
@@ -180,6 +191,7 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
           ))}
         </div>
       </div>
+      {showTournament && <PetTournamentUI onClose={() => setShowTournament(false)} />}
     </div>
   );
 };

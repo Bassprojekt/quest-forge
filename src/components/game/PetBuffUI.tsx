@@ -62,7 +62,7 @@ export const PetBuffUI = ({ onClose }: { onClose: () => void }) => {
                 <div className="flex items-center gap-3">
                   <div className="text-3xl" style={{ color: rarityColors[pet.rarity] }}>●</div>
                   <div>
-                    <div className="text-white font-bold">{pet.name}</div>
+                    <div className="text-white font-bold">{pet.name} Lv.{pet.level}</div>
                     <div className="text-purple-300 text-xs">
                       {bonusIcons[pet.bonusType]} {pet.bonus}
                     </div>
@@ -91,7 +91,7 @@ export const PetBuffUI = ({ onClose }: { onClose: () => void }) => {
                 <div className="flex items-center gap-2">
                   <div className="text-xl" style={{ color: rarityColors[pet.rarity] }}>●</div>
                   <div>
-                    <div className="text-white text-sm font-bold">{pet.name}</div>
+                    <div className="text-white text-sm font-bold">{pet.name} Lv.{pet.level}</div>
                     <div className="text-purple-400 text-xs">{bonusIcons[pet.bonusType]} {pet.bonus}</div>
                   </div>
                 </div>

@@ -786,6 +786,7 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
         <NPCWithBuilding name="Gildenmeisterin Gabi" color="#4169E1" position={[0, 0, 4]} icon="🏛️" onClick={() => onOpenGuild?.()} />
         <NPCWithBuilding name="Arena-Leiter Max" color="#FF0000" position={[3, 0, 4]} icon="⚔️" onClick={() => onOpenPVPArena?.()} />
         <NPCWithBuilding name="Freunde-Finder Finn" color="#9C27B0" position={[-3, 0, 4]} icon="👥" onClick={() => onOpenFriends?.()} />
+        <NPCWithBuilding name="Pet-Turnier Helfer" color="#FF69B4" position={[-1.5, 0, 4]} icon="🏆" onClick={() => onOpenPetTournament?.()} />
       </group>
 
       {/* Event & Raid building - door faces center */}

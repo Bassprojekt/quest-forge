@@ -11,34 +11,66 @@ interface PetBattle {
   reward: number;
 }
 
+const ENEMY_PETS = [
+  { name: 'Wild Wolf', level: 1, hp: 50, damage: 8 },
+  { name: 'Straßenkatze', level: 3, hp: 80, damage: 12 },
+  { name: 'Wild Drache', level: 6, hp: 150, damage: 20 },
+  { name: 'Kampfphönix', level: 10, hp: 250, damage: 30 },
+];
+
+const HOUR_OPTIONS = [
+  { hours: 1, label: '1 Stunde' },
+  { hours: 2, label: '2 Stunden' },
+  { hours: 3, label: '3 Stunden' },
+  { hours: 4, label: '4 Stunden' },
+  { hours: 12, label: '12 Stunden' },
+  { hours: 24, label: '24 Stunden' },
+];
+
 export const PetTournamentUI = ({ onClose }: { onClose: () => void }) => {
   const pets = useGameStore(s => s.pets);
+  const forceUpdate = useGameStore(s => s.playerGold); // Force re-render on any store change
   const ownedPets = pets.filter(p => p.owned);
+  const tournamentPets = ownedPets.filter(p => p.inTournament);
   const playerGold = useGameStore(s => s.playerGold);
   const addGold = useGameStore(s => s.addGold);
   const addPetXp = useGameStore(s => s.addPetXp);
+  const sendPetToTournament = useGameStore(s => s.sendPetToTournament);
+  const removePetFromTournament = useGameStore(s => s.removePetFromTournament);
   
+  const [activeTab, setActiveTab] = useState<'manual' | 'auto'>('manual');
   const [selectedPet, setSelectedPet] = useState<string | null>(null);
+  const [selectedHours, setSelectedHours] = useState(1);
   const [battleResult, setBattleResult] = useState<'win' | 'lose' | null>(null);
   const [battleLog, setBattleLog] = useState<string[]>([]);
   const [isBattling, setIsBattling] = useState(false);
   const [currentBattle, setCurrentBattle] = useState<PetBattle | null>(null);
+  const [, setTick] = useState(0);
   
-  const ENEMY_PETS = [
-    { name: 'Wild Wolf', level: 5, hp: 50, damage: 10 },
-    { name: 'Straßenkatze', level: 8, hp: 80, damage: 15 },
-    { name: 'Wild Drache', level: 15, hp: 150, damage: 30 },
-    { name: 'Kampfphönix', level: 20, hp: 200, damage: 40 },
-  ];
+  useEffect(() => {
+    const interval = setInterval(() => setTick(t => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, []);
   
   const startBattle = () => {
     if (!selectedPet) return;
     const pet = pets.find(p => p.id === selectedPet);
     if (!pet) return;
+    if (playerGold < 100) return;
+    if (pet.inTournament) return;
     
-    const enemy = ENEMY_PETS[Math.floor(Math.random() * ENEMY_PETS.length)];
-    const playerMaxHp = pet.level * 50;
-    const playerDamage = pet.bonusType === 'damage' ? pet.level * 5 * (1 + pet.bonusValue) : pet.level * 5;
+    addGold(-100);
+    
+    const baseLevel = pet.level || 1;
+    const enemyIndex = Math.floor(Math.random() * ENEMY_PETS.length);
+    const baseEnemy = ENEMY_PETS[enemyIndex];
+    const levelDiff = baseLevel - baseEnemy.level;
+    let enemyHp = Math.max(30, baseEnemy.hp + levelDiff * 20);
+    let enemyDmg = Math.max(5, baseEnemy.damage + levelDiff * 3);
+    const enemy = { ...baseEnemy, hp: enemyHp, damage: enemyDmg };
+    const playerMaxHp = (pet.level || 1) * 50;
+    const playerDamage = pet.bonusType === 'damage' ? (pet.level || 1) * 5 * (1 + pet.bonusValue) : (pet.level || 1) * 5;
+    const playerDefense = pet.bonusType === 'defense' ? pet.bonusValue : 0;
     
     setIsBattling(true);
     setBattleLog([]);
@@ -55,7 +87,6 @@ export const PetTournamentUI = ({ onClose }: { onClose: () => void }) => {
     };
     setCurrentBattle(battle);
     
-    // Battle simulation
     let currentPlayerHp = playerMaxHp;
     let currentEnemyHp = enemy.hp;
     const logs: string[] = [];
@@ -63,13 +94,18 @@ export const PetTournamentUI = ({ onClose }: { onClose: () => void }) => {
     while (currentPlayerHp > 0 && currentEnemyHp > 0) {
       battle.rounds++;
       
-      currentEnemyHp -= playerDamage;
-      logs.push(`Dein ${pet.name} greift an! ${enemy.name} hat noch ${Math.max(0, currentEnemyHp)} HP`);
+      const playerCrit = Math.random() < 0.2;
+      const actualPlayerDamage = playerCrit ? playerDamage * 2 : playerDamage;
+      currentEnemyHp -= actualPlayerDamage;
+      logs.push(`Dein ${pet.name} greift an${playerCrit ? ' (KRITISCH!)' : ''}! ${enemy.name} hat noch ${Math.max(0, currentEnemyHp)} HP`);
       
       if (currentEnemyHp <= 0) break;
       
-      currentPlayerHp -= enemy.damage;
-      logs.push(`${enemy.name} greift an! Dein ${pet.name} hat noch ${Math.max(0, currentPlayerHp)} HP`);
+      const enemyCrit = Math.random() < 0.15;
+      const reducedDamage = Math.max(1, enemy.damage * (1 - playerDefense));
+      const actualEnemyDamage = enemyCrit ? reducedDamage * 2 : reducedDamage;
+      currentPlayerHp -= actualEnemyDamage;
+      logs.push(`${enemy.name} greift an${enemyCrit ? ' (KRITISCH!)' : ''}! Dein ${pet.name} hat noch ${Math.max(0, currentPlayerHp)} HP`);
     }
     
     setBattleLog(logs);
@@ -78,7 +114,7 @@ export const PetTournamentUI = ({ onClose }: { onClose: () => void }) => {
       if (currentEnemyHp <= 0) {
         setBattleResult('win');
         addGold(battle.reward);
-        addPetXp(selectedPet, enemy.level * 50);
+        addPetXp(selectedPet, 10);
       } else {
         setBattleResult('lose');
       }
@@ -86,7 +122,23 @@ export const PetTournamentUI = ({ onClose }: { onClose: () => void }) => {
     }, logs.length * 500);
   };
   
-  const selectedPetData = selectedPet ? pets.find(p => p.id === selectedPet) : null;
+  const handleSendToTournament = () => {
+    if (!selectedPet) return;
+    sendPetToTournament(selectedPet, selectedHours);
+    setSelectedPet(null);
+  };
+  
+  const handleRemoveFromTournament = (petId: string) => {
+    removePetFromTournament(petId);
+  };
+  
+  const formatTimeRemaining = (endTime: number) => {
+    const remaining = endTime - Date.now();
+    if (remaining <= 0) return 'Abgeschlossen!';
+    const hours = Math.floor(remaining / (1000 * 60 * 60));
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${minutes}m`;
+  };
   
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 pointer-events-auto">
@@ -96,91 +148,190 @@ export const PetTournamentUI = ({ onClose }: { onClose: () => void }) => {
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
         </div>
         
-        {!isBattling && !battleResult && (
+        <div className="flex gap-2 mb-4">
+          <button onClick={() => setActiveTab('manual')}
+            className={`flex-1 py-2 rounded-xl font-bold text-sm transition-all ${
+              activeTab === 'manual' 
+                ? 'bg-purple-500 text-white' 
+                : 'bg-gray-100 text-gray-600'
+            }`}>
+            ⚔️ Manuell
+          </button>
+          <button onClick={() => setActiveTab('auto')}
+            className={`flex-1 py-2 rounded-xl font-bold text-sm transition-all ${
+              activeTab === 'auto' 
+                ? 'bg-purple-500 text-white' 
+                : 'bg-gray-100 text-gray-600'
+            }`}>
+            🤖 Auto-Senden
+          </button>
+        </div>
+        
+        {activeTab === 'manual' && (
           <>
-            <p className="text-gray-600 text-sm mb-4">
-              Wähle dein Pet für das Turnier! Gewonnene Kämpfe geben Gold und XP.
-            </p>
-            
-            <div className="space-y-2 mb-4">
-              {ownedPets.map(pet => (
-                <div 
-                  key={pet.id}
-                  onClick={() => setSelectedPet(pet.id)}
-                  className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                    selectedPet === pet.id 
-                      ? 'border-purple-500 bg-purple-50' 
-                      : 'border-gray-200 hover:border-purple-300'
+            {!isBattling && !battleResult && (
+              <>
+                <div className="space-y-2 mb-4">
+                  {ownedPets.filter(p => !p.inTournament).map(pet => (
+                    <div 
+                      key={pet.id}
+                      onClick={() => setSelectedPet(pet.id)}
+                      className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                        selectedPet === pet.id 
+                          ? 'border-purple-500 bg-purple-50' 
+                          : 'border-gray-200 hover:border-purple-300'
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="font-bold text-gray-800">{pet.name} Lv.{pet.level || 1}</div>
+                          <div className="text-xs text-gray-500">Level {pet.level || 1} | {pet.bonus}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-gray-400">{pet.rarity}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={startBattle}
+                  disabled={!selectedPet || playerGold < 100}
+                  className={`w-full py-3 rounded-xl font-bold text-white transition-all ${
+                    selectedPet && playerGold >= 100
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500' 
+                      : 'bg-gray-300 cursor-not-allowed'
                   }`}
                 >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="font-bold text-gray-800">{pet.name}</div>
-                      <div className="text-xs text-gray-500">Level {pet.level} | {pet.bonus}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs text-purple-500">XP: {pet.xp}/{pet.maxLevel * 100}</div>
-                      <div className="text-xs text-gray-400">{pet.rarity}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  ⚔️ Kampf starten (100 Gold)
+                </button>
+              </>
+            )}
             
-            <button 
-              onClick={startBattle}
-              disabled={!selectedPet}
-              className={`w-full py-3 rounded-xl font-bold text-white transition-all ${
-                selectedPet 
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600' 
-                  : 'bg-gray-300 cursor-not-allowed'
-              }`}
-            >
-              ⚔️ Kampf starten (100 Gold)
-            </button>
-          </>
-        )}
-        
-        {isBattling && (
-          <div className="text-center py-8">
-            <div className="text-4xl mb-4">⚔️</div>
-            <div className="text-xl font-bold text-gray-800 mb-2">Kampf läuft...</div>
-            <div className="text-gray-500">Runde {currentBattle?.rounds || 0}</div>
-          </div>
-        )}
-        
-        {battleResult && (
-          <div className="text-center py-4">
-            <div className="text-6xl mb-4">{battleResult === 'win' ? '🏆' : '💀'}</div>
-            <div className={`text-2xl font-bold mb-4 ${battleResult === 'win' ? 'text-green-600' : 'text-red-600'}`}>
-              {battleResult === 'win' ? 'Sieg!' : 'Niederlage!'}
-            </div>
-            
-            {battleResult === 'win' && (
-              <div className="bg-green-50 rounded-xl p-4 mb-4">
-                <div className="text-green-600 font-bold">+{currentBattle?.reward || 0} Gold</div>
-                <div className="text-green-500 text-sm">+{Math.floor((currentBattle?.rounds || 0) * 10)} Pet XP</div>
+            {isBattling && (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-4">⚔️</div>
+                <div className="text-xl font-bold text-gray-800 mb-2">Kampf läuft...</div>
               </div>
             )}
             
-            <div className="bg-gray-50 rounded-xl p-4 mb-4 text-left max-h-40 overflow-y-auto">
-              <div className="text-xs font-bold text-gray-500 mb-2">Kampf-Log:</div>
-              {battleLog.map((log, i) => (
-                <div key={i} className="text-xs text-gray-600 mb-1">{log}</div>
-              ))}
+            {battleResult && (
+              <div className="text-center py-4">
+                <div className="text-6xl mb-4">{battleResult === 'win' ? '🏆' : '💀'}</div>
+                <div className={`text-2xl font-bold mb-4 ${battleResult === 'win' ? 'text-green-600' : 'text-red-600'}`}>
+                  {battleResult === 'win' ? 'Sieg!' : 'Niederlage!'}
+                </div>
+                <button 
+                  onClick={() => { setBattleResult(null); setBattleLog([]); setCurrentBattle(null); }}
+                  className="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                >
+                  Noch ein Kampf
+                </button>
+              </div>
+            )}
+          </>
+        )}
+        
+        {activeTab === 'auto' && (
+          <>
+            <div className="mb-4">
+              <div className="space-y-2 mb-4">
+                {ownedPets.filter(p => !p.inTournament).map(pet => (
+                  <div 
+                    key={pet.id}
+                    onClick={() => setSelectedPet(pet.id)}
+                    className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                      selectedPet === pet.id 
+                        ? 'border-purple-500 bg-purple-50' 
+                        : 'border-gray-200 hover:border-purple-300'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-bold text-gray-800">{pet.name} Lv.{pet.level || 1}</div>
+                        <div className="text-xs text-gray-500">Level {pet.level || 1} | {pet.bonus}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {selectedPet && (
+                <>
+                  <div className="mb-3">
+                    <label className="text-sm font-bold text-gray-600 block mb-2">Dauer:</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {HOUR_OPTIONS.map(opt => (
+                        <button
+                          key={opt.hours}
+                          onClick={() => setSelectedHours(opt.hours)}
+                          className={`py-2 rounded-lg text-sm font-bold transition-all ${
+                            selectedHours === opt.hours
+                              ? 'bg-purple-500 text-white'
+                              : 'bg-gray-100 text-gray-600'
+                          }`}
+                        >
+                          {opt.label} ({opt.hours * 200}💰)
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <button 
+                    onClick={handleSendToTournament}
+                    disabled={!selectedPet || playerGold < selectedHours * 200}
+                    className={`w-full py-3 rounded-xl font-bold text-white transition-all ${
+                      selectedPet && playerGold >= selectedHours * 200
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                        : 'bg-gray-300 cursor-not-allowed'
+                    }`}
+                  >
+                    🚀 Ins Turnier senden ({selectedHours * 200}💰)
+                  </button>
+                </>
+              )}
             </div>
             
-            <button 
-              onClick={() => {
-                setBattleResult(null);
-                setBattleLog([]);
-                setCurrentBattle(null);
-              }}
-              className="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-            >
-              Noch ein Kampf
-            </button>
-          </div>
+            {tournamentPets.length > 0 && (
+              <div className="mt-4 border-t pt-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-bold text-gray-700">🏟️ Aktive Turnier-Pets</h3>
+                  <button onClick={() => setTick(t => t + 1)} className="text-xs bg-purple-500 text-white px-2 py-1 rounded">🔄</button>
+                </div>
+                <div className="space-y-2">
+                  {tournamentPets.map(pet => (
+                    <div key={pet.id} className="p-3 rounded-xl border-2 border-purple-200 bg-purple-50">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="font-bold text-gray-800">{pet.name} Lv.{pet.level || 1}</div>
+                          <div className="text-xs text-gray-500">
+                            ⏱️ {formatTimeRemaining(pet.tournamentEndTime)}
+                          </div>
+                          <div className="mt-1 text-xs text-purple-600 font-bold">
+                            XP: {pet.xp || 0} / {((pet.level || 1) * 100)} (wins: {pet.tournamentWins})
+                          </div>
+                          <div className="w-24 h-2 bg-gray-200 rounded-full mt-1">
+                            <div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${Math.min(100, ((pet.xp || 0) / ((pet.level || 1) * 100)) * 100)}%` }} />
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-green-600">S: {pet.tournamentWins}</div>
+                          <div className="text-xs text-red-600">N: {pet.tournamentLosses}</div>
+                          <button
+                            onClick={() => handleRemoveFromTournament(pet.id)}
+                            className="mt-1 px-2 py-1 bg-purple-500 text-white text-xs rounded-lg"
+                          >
+                            Zurückholen
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

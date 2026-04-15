@@ -45,6 +45,11 @@ export interface Pet {
   xp: number;
   evolvedFrom: string | null;
   maxLevel: number;
+  inTournament: boolean;
+  tournamentEndTime: number;
+  tournamentWins: number;
+  tournamentLosses: number;
+  lastTournamentBattle: number;
 }
 
 export interface ShopItem {
@@ -301,10 +306,14 @@ export interface GameState {
   equipPet: (petId: string) => void;
   evolvePet: (petId: string) => boolean;
   addPetXp: (petId: string, xp: number) => void;
+  sendPetToTournament: (petId: string, hours: number) => boolean;
+  removePetFromTournament: (petId: string) => void;
+  processTournamentBattles: () => void;
   addGold: (amount: number) => void;
   addXp: (amount: number) => void;
   setTitle: (title: string) => void;
   addGems: (amount: number) => void;
+  fixPetData: () => void;
   unlockPetSlot: () => boolean;
   claimDailyReward: () => boolean;
   equipItem: (itemId: string) => void;
@@ -506,7 +515,7 @@ autoFight: false,
     else if (pClass === 'archer') playArrowShoot();
     else playSwordSlash();
 
-    const equippedPets = state.pets.filter(p => p.equipped);
+    const equippedPets = state.pets.filter(p => p.equipped && !p.inTournament);
     let bonusDmg = 0;
     let critBonus = 0;
     
@@ -590,8 +599,7 @@ autoFight: false,
       xpGain = Math.floor(killed.xpReward * xpMult);
       goldGain = Math.floor(killed.goldReward * goldMult);
       const isBoss = killed.name.includes('Fürst') || killed.name.includes('König') || killed.name.includes('Herr') || killed.name.includes('Meister') || killed.name.includes('Lord');
-      // Höhere Drop-Rate: Boss 1-5, Normal 50%
-      const gemGain = isBoss ? Math.floor(Math.random() * 5) + 1 : (Math.random() < 0.5 ? 1 : 0);
+      gemGain = isBoss ? Math.floor(Math.random() * 5) + 1 : (Math.random() < 0.03 ? 1 : 0);
       
       // Combo erhöhen bei Kill
       const newCombo = Date.now() - state.comboTimer < 5000 ? Math.min(state.comboCount + 1, 5) : 1;
@@ -689,7 +697,7 @@ popups.push({
       set(s => ({ playerHp: Math.min(s.playerMaxHp, s.playerHp + healAmount) }));
       return;
     }
-    const equippedPets = state.pets.filter(p => p.equipped);
+    const equippedPets = state.pets.filter(p => p.equipped && !p.inTournament);
     const equippedArmor = state.inventory.find(i => i.type === 'armor' && i.equipped);
     let reduction = state.playerDefense + (equippedArmor ? equippedArmor.value : 0);
     
@@ -896,7 +904,10 @@ popups.push({
     const state = get();
     const pet = state.pets.find(p => p.id === petId);
     if (!pet || pet.owned || state.playerGold < pet.price) return false;
-    set({ pets: state.pets.map(p => p.id === petId ? { ...p, owned: true } : p), playerGold: state.playerGold - pet.price });
+    set({ 
+      pets: state.pets.map(p => p.id === petId ? { ...p, owned: true, xp: p.xp || 0, level: p.level || 1, maxLevel: p.maxLevel || 10 } : p), 
+      playerGold: state.playerGold - pet.price 
+    });
     return true;
   },
 
@@ -909,7 +920,7 @@ popups.push({
   evolvePet: (petId) => {
     const state = get();
     const pet = state.pets.find(p => p.id === petId && p.owned);
-    if (!pet || pet.level < pet.maxLevel || !pet.evolvedFrom) return false;
+    if (!pet || (pet.level || 1) < (pet.maxLevel || 10) || !pet.evolvedFrom) return false;
     
     const evolvedPet = state.pets.find(p => p.id === pet.evolvedFrom && p.owned);
     if (!evolvedPet) return false;
@@ -928,17 +939,167 @@ popups.push({
   },
 
   addPetXp: (petId, xp) => {
-    set(s => ({
-      pets: s.pets.map(p => {
-        if (p.id !== petId || !p.owned || p.level >= p.maxLevel) return p;
-        const newXp = p.xp + xp;
-        const xpToNext = p.maxLevel * 100;
+    set((state) => ({
+      pets: state.pets.map((pet) => {
+        if (pet.id !== petId) return pet;
+
+        const xpToNext = pet.level * 100 || 100;
+        let newXp = pet.xp + xp;
+        let newLevel = pet.level;
+
         if (newXp >= xpToNext) {
-          return { ...p, level: Math.min(p.level + 1, p.maxLevel), xp: newXp - xpToNext };
+          newLevel += 1;
+          newXp = newXp - xpToNext;
         }
-        return { ...p, xp: newXp };
+
+        console.log("XP UPDATE:", pet.id, newXp);
+
+        return {
+          ...pet,
+          xp: newXp,
+          level: newLevel,
+        };
       }),
     }));
+  },
+
+  sendPetToTournament: (petId, hours) => {
+    const state = get();
+    const cost = hours * 200;
+    if (state.playerGold < cost) return false;
+    
+    const endTime = Date.now() + hours * 60 * 60 * 1000;
+    set(s => ({
+      playerGold: s.playerGold - cost,
+      pets: s.pets.map(p => {
+        if (p.id !== petId || !p.owned || p.inTournament) return p;
+        return { ...p, inTournament: true, tournamentEndTime: endTime, tournamentWins: 0, tournamentLosses: 0, lastTournamentBattle: Date.now() };
+      }),
+    }));
+    return true;
+  },
+
+  removePetFromTournament: (petId) => {
+    set(s => ({
+      pets: s.pets.map(p => {
+        if (p.id !== petId || !p.inTournament) return p;
+        return { ...p, inTournament: false, tournamentEndTime: 0, lastTournamentBattle: 0 };
+      }),
+    }));
+  },
+
+  processTournamentBattles: () => {
+    const now = Date.now();
+    
+    set(s => {
+      const updatedPets = s.pets.map(pet => {
+        if (!pet.inTournament) return pet;
+        
+        const timeRemaining = pet.tournamentEndTime - now;
+        
+        if (timeRemaining <= 0) {
+          let wins = 0;
+          let losses = 0;
+          let goldEarned = 0;
+          const battleCount = 10;
+          
+          let newXp = pet.xp;
+          let newLevel = pet.level;
+          
+          for (let i = 0; i < battleCount; i++) {
+            const petLevel = pet.level || 1;
+            const baseEnemyLevel = petLevel - 2 + Math.floor(Math.random() * 5);
+            const enemyLevel = Math.max(1, baseEnemyLevel);
+            const enemyHp = enemyLevel * 30;
+            const enemyDmg = enemyLevel * 3 + 3;
+            const playerMaxHp = petLevel * 50;
+            const playerDamage = petLevel * 6;
+            
+            let currentPlayerHp = playerMaxHp;
+            let currentEnemyHp = enemyHp;
+            
+            while (currentPlayerHp > 0 && currentEnemyHp > 0) {
+              currentEnemyHp -= playerDamage;
+              if (currentEnemyHp <= 0) break;
+              currentPlayerHp -= enemyDmg;
+            }
+            
+            if (currentEnemyHp <= 0) {
+              wins++;
+              goldEarned += enemyLevel * 20;
+              const xpEarned = enemyLevel * 10;
+              const xpToNext = newLevel * 100;
+              newXp += xpEarned;
+              if (newXp >= xpToNext) {
+                newLevel += 1;
+                newXp = newXp - xpToNext;
+              }
+            } else {
+              losses++;
+            }
+          }
+          
+          set(s => ({ playerGold: s.playerGold + goldEarned }));
+          
+          return { ...pet, xp: newXp, level: newLevel, inTournament: false, tournamentEndTime: 0, tournamentWins: pet.tournamentWins + wins, tournamentLosses: pet.tournamentLosses + losses, lastTournamentBattle: 0 };
+        }
+        
+        const battleInterval = 5000;
+        const timeSinceStart = (now - (pet.tournamentEndTime - timeRemaining));
+        const timeSinceLastBattle = pet.lastTournamentBattle ? now - pet.lastTournamentBattle : timeSinceStart;
+        
+        console.log('[TOURNAMENT CHECK] pet:', pet.name, 'inTournament:', pet.inTournament);
+        
+        if (timeSinceLastBattle >= battleInterval) {
+          const petLevel = pet.level || 1;
+          const baseEnemyLevel = petLevel - 2 + Math.floor(Math.random() * 5);
+          const enemyLevel = Math.max(1, baseEnemyLevel);
+          const enemyHp = enemyLevel * 30;
+          const enemyDmg = enemyLevel * 3 + 3;
+          const playerMaxHp = petLevel * 50;
+const playerDamage = petLevel * 6;
+          
+          let currentPlayerHp = playerMaxHp;
+          let currentEnemyHp = enemyHp;
+          
+          while (currentPlayerHp > 0 && currentEnemyHp > 0) {
+            currentEnemyHp -= playerDamage;
+            if (currentEnemyHp <= 0) break;
+            currentPlayerHp -= enemyDmg;
+          }
+          
+          const won = currentEnemyHp <= 0;
+          
+          let newXp = pet.xp;
+          let newLevel = pet.level;
+          
+          if (won) {
+            const xpEarned = enemyLevel * 10;
+            const goldEarned = enemyLevel * 20;
+            const xpToNext = newLevel * 100;
+            newXp = pet.xp + xpEarned;
+            if (newXp >= xpToNext) {
+              newLevel += 1;
+              newXp = newXp - xpToNext;
+            }
+            set(s => ({ ...s, playerGold: s.playerGold + goldEarned }));
+          }
+          
+          return {
+            ...pet,
+            xp: newXp,
+            level: newLevel,
+            tournamentWins: pet.tournamentWins + (won ? 1 : 0), 
+            tournamentLosses: pet.tournamentLosses + (won ? 0 : 1),
+            lastTournamentBattle: now,
+          };
+        }
+        
+        return pet;
+      });
+      
+      return { pets: updatedPets };
+    });
   },
 
   addGold: (amount) => set(s => ({ playerGold: s.playerGold + amount })),
@@ -965,6 +1126,17 @@ popups.push({
   }),
   setTitle: (title) => set({ playerTitle: title }),
   addGems: (amount) => set(s => ({ playerGems: s.playerGems + amount })),
+  
+  fixPetData: () => {
+    set(s => ({
+      pets: s.pets.map(p => ({
+        ...p,
+        xp: p.xp === undefined ? 0 : p.xp,
+        level: p.level === undefined ? 1 : p.level,
+        maxLevel: p.maxLevel === undefined ? 10 : p.maxLevel,
+      })),
+    }));
+  },
 
   unlockPetSlot: () => {
     const state = get();
