@@ -267,6 +267,7 @@ export interface GameState {
   weather: 'sunny' | 'rainy' | 'foggy';
   shopItems: ShopItem[];
   pets: Pet[];
+  allPets: Pet[];
   inventory: InventoryItem[];
   groundItems: GroundItem[];
   damagePopups: DamagePopup[];
@@ -471,6 +472,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   currentZone: 'hub',
   shopItems: INITIAL_SHOP_ITEMS.map(i => ({ ...i })),
   pets: INITIAL_PETS.map(p => ({ ...p })),
+  allPets: INITIAL_PETS.map(p => ({ ...p })),
 inventory: INITIAL_INVENTORY.map(i => ({ ...i })),
       groundItems: [],
       damagePopups: [],
@@ -920,10 +922,11 @@ popups.push({
   evolvePet: (petId) => {
     const state = get();
     const pet = state.pets.find(p => p.id === petId && p.owned);
-    if (!pet || (pet.level || 1) < (pet.maxLevel || 10) || !pet.evolvedFrom) return false;
+    if (!pet || (pet.level || 1) < (pet.maxLevel || 10)) return false;
     
-    const evolvedPet = state.pets.find(p => p.id === pet.evolvedFrom && p.owned);
-    if (!evolvedPet) return false;
+    const allPets = state.allPets || state.pets;
+    const nextEvolution = allPets.find(p => p.evolvedFrom === pet.id && p.rarity !== 'common');
+    if (!nextEvolution) return false;
     
     const evolutionId = pet.id + '-evolved';
     const existingEvolved = state.pets.find(p => p.id === evolutionId);
@@ -932,7 +935,7 @@ popups.push({
       set({ pets: state.pets.map(p => p.id === evolutionId ? { ...p, owned: true, equipped: true } : p) });
     } else {
       set({ 
-        pets: [...state.pets, { ...pet, id: evolutionId, name: pet.name + ' (Evolved)', level: 1, xp: 0, owned: true, equipped: true }]
+        pets: [...state.pets, { ...nextEvolution, id: evolutionId, level: 1, xp: 0, owned: true, equipped: true }]
       });
     }
     return true;

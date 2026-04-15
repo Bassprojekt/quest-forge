@@ -37,8 +37,9 @@ export const PetTournamentUI = ({ onClose }: { onClose: () => void }) => {
   const addPetXp = useGameStore(s => s.addPetXp);
   const sendPetToTournament = useGameStore(s => s.sendPetToTournament);
   const removePetFromTournament = useGameStore(s => s.removePetFromTournament);
+  const evolvePet = useGameStore(s => s.evolvePet);
   
-  const [activeTab, setActiveTab] = useState<'manual' | 'auto'>('manual');
+  const [activeTab, setActiveTab] = useState<'manual' | 'auto' | 'pets'>('manual');
   const [selectedPet, setSelectedPet] = useState<string | null>(null);
   const [selectedHours, setSelectedHours] = useState(1);
   const [battleResult, setBattleResult] = useState<'win' | 'lose' | null>(null);
@@ -164,6 +165,14 @@ export const PetTournamentUI = ({ onClose }: { onClose: () => void }) => {
                 : 'bg-gray-100 text-gray-600'
             }`}>
             🤖 Auto-Senden
+          </button>
+          <button onClick={() => setActiveTab('pets')}
+            className={`flex-1 py-2 rounded-xl font-bold text-sm transition-all ${
+              activeTab === 'pets' 
+                ? 'bg-purple-500 text-white' 
+                : 'bg-gray-100 text-gray-600'
+            }`}>
+            🐾 Meine Pets
           </button>
         </div>
         
@@ -331,6 +340,42 @@ export const PetTournamentUI = ({ onClose }: { onClose: () => void }) => {
                 </div>
               </div>
             )}
+          </>
+        )}
+
+        {activeTab === 'pets' && (
+          <>
+            <div className="space-y-2">
+              {ownedPets.map(pet => {
+                const canEvolve = (pet.level || 1) >= (pet.maxLevel || 10);
+                return (
+                  <div key={pet.id} className="p-3 rounded-xl border-2 border-gray-200 bg-white">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-bold text-gray-800">{pet.name} Lv.{pet.level || 1}</div>
+                        <div className="text-xs text-gray-500">{pet.bonus} | {pet.rarity}</div>
+                        <div className="mt-1 text-xs text-purple-600 font-bold">
+                          XP: {pet.xp || 0} / {((pet.level || 1) * 100)} (Max: {pet.maxLevel || 10})
+                        </div>
+                        <div className="w-32 h-2 bg-gray-200 rounded-full mt-1">
+                          <div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${Math.min(100, ((pet.xp || 0) / ((pet.maxLevel || 10) * 100)) * 100)}%` }} />
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {canEvolve && (
+                          <button
+                            onClick={() => evolvePet(pet.id)}
+                            className="px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded-lg"
+                          >
+                            ✨ Evolvieren
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </>
         )}
       </div>
