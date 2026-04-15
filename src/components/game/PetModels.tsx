@@ -278,7 +278,7 @@ const CatModel = () => (
       <coneGeometry args={[0.07, 0.15, 4]} />
       <meshStandardMaterial color="#333" />
     </mesh>
-    <Eyes position={[0, 0.35, 0.38]} scale={0.7} />
+    <Eyes position={[0, 0.38, 0.42]} scale={0.7} />
     <mesh position={[-0.2, 0.05, 0.35]}>
       <boxGeometry args={[0.1, 0.08, 0.15]} />
       <meshStandardMaterial color="#222" />
