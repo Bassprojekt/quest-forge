@@ -144,6 +144,7 @@ export const Player = () => {
   const setDashActive = useGameStore(s => s.setDashActive);
   const setLaserTarget = useGameStore(s => s.setLaserTarget);
   const playerMana = useGameStore(s => s.playerMana);
+  const playerMaxMana = useGameStore(s => s.playerMaxMana);
   const setPlayerMana = useGameStore(s => s.setPlayerMana);
   const enemies = useGameStore(s => s.enemies);
   const attackEnemy = useGameStore(s => s.attackEnemy);
@@ -311,7 +312,12 @@ export const Player = () => {
         const angle = Math.atan2(tx, tz);
         meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, angle, 10 * delta);
 
-        if (dist <= attackRange) {
+        const hasNoMana = playerClass === 'mage' && playerMana <= 0;
+        
+        if (hasNoMana) {
+          // Wait for 50% mana regen before attacking
+          velocity.current.set(0, 0, 0);
+        } else if (dist <= attackRange) {
           // In range - keep attacking continuously
           velocity.current.set(0, 0, 0);
           if (attackCooldown.current <= 0) {

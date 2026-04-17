@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAccountStore } from '@/store/accountStore';
 import { useGameStore } from '@/store/gameStore';
-import { deleteSave } from '@/store/saveStore';
+import { loadGame, deleteSave } from '@/store/saveStore';
 
 export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const [isRegister, setIsRegister] = useState(false);
@@ -16,6 +16,7 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const [newCharClass, setNewCharClass] = useState<'warrior' | 'mage' | 'archer'>('warrior');
 
   const [selectedChannel, setSelectedChannel] = useState<number>(1);
+  const [charLevels, setCharLevels] = useState<Record<number, number>>({});
 
   const register = useAccountStore(s => s.register);
   const login = useAccountStore(s => s.login);
@@ -104,6 +105,7 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const handleCharSlotClick = (slot: number) => {
     if (characters[slot]) {
       selectCharacter(slot);
+      setShowCharSelect(true);
     } else {
       setShowCharCreate(true);
     }
@@ -126,9 +128,16 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   };
 
   const handleStartGame = () => {
-    deleteSave();
     if (selectedChar?.class) {
+      deleteSave();
       setPlayerClass(selectedChar.class, true);
+      const saved = loadGame();
+      if (saved) {
+        const loadedClass = useGameStore.getState().playerClass;
+        if (loadedClass && loadedClass !== selectedChar.class) {
+          setPlayerClass(selectedChar.class, false);
+        }
+      }
     }
     onLogin();
   };
@@ -227,7 +236,7 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
                   <>
                     <span className="text-2xl font-bold mb-1">{getClassIcon(characters[slot].class)}</span>
                     <span className="font-bold text-sm text-gray-700">{characters[slot].name}</span>
-                    <span className="text-xs text-gray-500">Lv {characters[slot].level}</span>
+                    <span className="text-xs text-gray-500">Lv {charLevels[slot] || characters[slot].level}</span>
                   </>
                 ) : (
                   <>
@@ -349,7 +358,9 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   }
 
   if (currentUser) {
-    setShowCharSelect(true);
+    if (!showCharSelect) {
+      setShowCharSelect(true);
+    }
   }
 
   return null;

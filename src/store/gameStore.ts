@@ -561,12 +561,19 @@ autoFight: false,
   },
 
   attackEnemy: (id) => {
-    const state = get();
-    const pClass = state.playerClass;
+    const pClass = get().playerClass;
     if (pClass === 'mage') playMagicCast();
     else if (pClass === 'archer') playArrowShoot();
     else playSwordSlash();
 
+    set(s => {
+      if (s.playerClass === 'mage' && s.playerMana >= 2) {
+        return { playerMana: s.playerMana - 2 };
+      }
+      return {};
+    });
+
+    const state = get();
     const equippedPets = state.pets.filter(p => p.equipped && !p.inTournament);
     let bonusDmg = 0;
     let critBonus = 0;
@@ -823,9 +830,17 @@ popups.push({
     const state = get();
     if (state.currentZone === 'hub') return;
     const now = performance.now() / 1000;
+    
+    const skill = state.skills.find(s => s.id === skillId);
+    if (!skill) return;
+    
+    if (now - skill.lastUsed < skill.cooldown) return;
+    if (state.playerMana < skill.manaCost) return;
+    
+    set({ playerMana: state.playerMana - skill.manaCost });
+    
     const skills = state.skills.map(s => {
       if (s.id !== skillId) return s;
-      if (now - s.lastUsed < s.cooldown) return s;
       return { ...s, lastUsed: now };
     });
     set({ skills });

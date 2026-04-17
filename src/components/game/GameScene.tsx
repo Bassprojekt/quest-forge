@@ -38,7 +38,7 @@ import { useTutorialStore } from '@/store/tutorialStore';
 import { useGameStore } from '@/store/gameStore';
 import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
 import { playZoneMusic, playPortalSound } from '@/hooks/useSound';
-import { startAutoSave } from '@/store/saveStore';
+import { startAutoSave, loadGame } from '@/store/saveStore';
 
 const ZONE_SKY: Record<string, string> = {
   hub: '#87CEEB',
@@ -208,9 +208,20 @@ export const GameScene = () => {
     playZoneMusic(currentZone);
   }, [currentZone]);
 
+  const [justLoaded, setJustLoaded] = useState(false);
+
   useEffect(() => {
-    if (playerClass) startAutoSave();
+    if (playerClass) {
+      startAutoSave();
+    }
   }, [playerClass]);
+
+  useEffect(() => {
+    if (justLoaded && playerClass) {
+      const timer = setTimeout(() => setJustLoaded(false), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [justLoaded, playerClass]);
 
   useEffect(() => {
     const weatherInterval = setInterval(() => {
