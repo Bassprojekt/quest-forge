@@ -123,7 +123,7 @@ export const InventoryUI = ({ onClose }: Props) => {
                     ) : (
                       <button onClick={() => sellItem(item.id)}
                         className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-[#FF5722] text-white hover:bg-[#E64A19]">
-                        +{Math.floor(item.value * 0.5)} 💰
+                        +{Math.floor((item.price || item.value || 50) * 0.5)} 💰
                       </button>
                     )
                   ) : item.type === 'potion' ? (
@@ -135,6 +135,11 @@ export const InventoryUI = ({ onClose }: Props) => {
                           : 'bg-[#E0E0E0] text-[#999] cursor-not-allowed'
                       }`}>
                       BENUTZEN
+                    </button>
+                  ) : item.type === 'crate' ? (
+                    <button onClick={() => handleUsePotion(item.id)}
+                      className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-[#9C27B0] text-white hover:bg-[#7B1FA2]">
+                      ÖFFNEN
                     </button>
                   ) : item.type === 'material' ? (
                     <span className="text-[#999] text-[10px]">Material</span>

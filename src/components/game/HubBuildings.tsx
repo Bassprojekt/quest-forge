@@ -119,12 +119,13 @@ const getBuildingNPCColors = (color: string) => {
   };
 };
 
-const NPCWithBuilding = ({ name, color, position, icon, onClick }: { 
+const NPCWithBuilding = ({ name, color, position, icon, onClick, rotation }: { 
   name: string; 
   color: string; 
   position: [number, number, number];
   icon: string;
   onClick?: () => void;
+  rotation?: number;
 }) => {
   const meshRef = useRef<THREE.Group>(null);
   const playerPos = useGameStore(s => s.playerPosition);
@@ -137,13 +138,16 @@ const NPCWithBuilding = ({ name, color, position, icon, onClick }: {
 
   useFrame(() => {
     if (!meshRef.current) return;
-    floatPhase.current += 0.015;
+    floatPhase.current += 0.03;
     meshRef.current.position.y = Math.sin(floatPhase.current) * 0.03;
     
-    // NPCs face center (0,0,0)
-    const toCenterX = -position[0];
-    const toCenterZ = -position[2];
-    meshRef.current.rotation.y = Math.atan2(toCenterX, toCenterZ);
+    // NPCs face AWAY from center (towards outside), or use custom rotation
+    if (rotation !== undefined) {
+      meshRef.current.rotation.y = rotation;
+    } else {
+      // Face away from center
+      meshRef.current.rotation.y = Math.atan2(position[0], position[2]);
+    }
   });
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
@@ -689,9 +693,9 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <meshStandardMaterial color="#FFD700" emissive="#FFD700" emissiveIntensity={0.3} />
         </mesh>
         
-        {/* Alchemist & Handwerker - vor dem Gebäude (nahe Tür) */}
-        <NPCWithBuilding name="Alchemist Anton" color="#9C27B0" position={[0, 0, 3]} icon="⚗️" onClick={() => onOpenPotionCraft?.()} />
-        <NPCWithBuilding name="Handwerker Hagen" color="#FF9800" position={[2.5, 0, 3]} icon="🔨" onClick={() => onOpenWeaponCraft?.()} />
+        {/* Alchemist & Handwerker - VOR dem Gebäude */}
+        <NPCWithBuilding name="Alchemist Anton" color="#9C27B0" position={[0, 0, 3]} icon="⚗️" onClick={() => onOpenPotionCraft?.()} rotation={0} />
+        <NPCWithBuilding name="Handwerker Hagen" color="#FF9800" position={[2.5, 0, 3]} icon="🔨" onClick={() => onOpenWeaponCraft?.()} rotation={0} />
       </group>
 
       {/* Bank/Lager - Osten Nord - door faces center */}
@@ -711,7 +715,7 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
             <meshStandardMaterial color="#D2B48C" roughness={0.6} />
           </mesh>
         ))}
-        <NPCWithBuilding name="Bankier Boris" color="#4A4A4A" position={[0, 0, 3]} icon="🏦" onClick={() => onOpenBank?.()} />
+        <NPCWithBuilding name="Bankier Boris" color="#4A4A4A" position={[0, 0, 3]} icon="🏦" onClick={() => onOpenBank?.()} rotation={-0.785} />
       </group>
 
       {/* Hausierer (Traveling Merchant) - Südwesten - faces center */}
@@ -733,7 +737,7 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <boxGeometry args={[1, 0.4, 0.6]} />
           <meshStandardMaterial color="#D2B48C" roughness={0.6} />
         </mesh>
-        <NPCWithBuilding name="Händler Hans" color="#DEB887" position={[0, 0, 1.5]} icon="🛒" onClick={() => onOpenShop?.('items')} />
+        <NPCWithBuilding name="Händler Hans" color="#DEB887" position={[0, 0, 1.5]} icon="🛒" onClick={() => onOpenShop?.('items')} rotation={0.78} />
       </group>
 
       {/* Taverne - Südosten - door faces center */}
@@ -760,7 +764,7 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <boxGeometry args={[1.2, 1.6, 0.1]} />
           <meshStandardMaterial color="#4A3728" roughness={0.9} />
         </mesh>
-        <NPCWithBuilding name="Wirt Willi" color="#CD853F" position={[0, 0, 3]} icon="🍺" onClick={() => onOpenShop?.('items')} />
+        <NPCWithBuilding name="Wirt Willi" color="#CD853F" position={[0, 0, 3]} icon="🍺" onClick={() => onOpenShop?.('items')} rotation={0.785} />
       </group>
 
       {/* Gildenhaus - Zentrum Nord - faces center */}
@@ -783,10 +787,9 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <boxGeometry args={[1.5, 2.4, 0.1]} />
           <meshStandardMaterial color="#4A3728" roughness={0.9} />
         </mesh>
-        <NPCWithBuilding name="Gildenmeisterin Gabi" color="#4169E1" position={[0, 0, 4]} icon="🏛️" onClick={() => onOpenGuild?.()} />
-        <NPCWithBuilding name="Arena-Leiter Max" color="#FF0000" position={[3, 0, 4]} icon="⚔️" onClick={() => onOpenPVPArena?.()} />
-        <NPCWithBuilding name="Freunde-Finder Finn" color="#9C27B0" position={[-3, 0, 4]} icon="👥" onClick={() => onOpenFriends?.()} />
-        <NPCWithBuilding name="Pet-Turnier Helfer" color="#FF69B4" position={[-1.5, 0, 4]} icon="🏆" onClick={() => onOpenPetTournament?.()} />
+        <NPCWithBuilding name="Gildenmeisterin Gabi" color="#4169E1" position={[0, 0, 4]} icon="🏛️" onClick={() => onOpenGuild?.()} rotation={0} />
+        <NPCWithBuilding name="Arena-Leiter Max" color="#FF0000" position={[-3, 0, 4]} icon="⚔️" onClick={() => onOpenPVPArena?.()} rotation={0} />
+        <NPCWithBuilding name="Freunde-Finder Finn" color="#9C27B0" position={[3, 0, 4]} icon="👥" onClick={() => onOpenFriends?.()} rotation={0} />
       </group>
 
       {/* Event & Raid building - door faces center */}
@@ -799,8 +802,8 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
           <coneGeometry args={[2.2, 1.2, 4]} />
           <meshStandardMaterial color="#8B0000" roughness={0.8} />
         </mesh>
-        <NPCWithBuilding name="Event-Verkünder Evi" color="#FF9800" position={[0, 0, 4]} icon="🎉" onClick={() => onOpenEvents?.()} />
-        <NPCWithBuilding name="Raid-Leiter Roy" color="#9C27B0" position={[3, 0, 4]} icon="👹" onClick={() => onOpenRaid?.()} />
+        <NPCWithBuilding name="Event-Verkünder Evi" color="#FF9800" position={[0, 0, 4]} icon="🎉" onClick={() => onOpenEvents?.()} rotation={-0.785} />
+        <NPCWithBuilding name="Raid-Leiter Roy" color="#9C27B0" position={[3, 0, 4]} icon="👹" onClick={() => onOpenRaid?.()} rotation={-0.785} />
       </group>
 
       {/* Stone path - small ring only */}

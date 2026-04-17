@@ -1093,6 +1093,23 @@ export const EnemyEntity = ({ enemy }: Props) => {
         <MobModel config={config} isTarget={isTarget} />
       </Suspense>
 
+      {/* Boss indicator - always visible */}
+      {(enemy as any).isBoss && (
+        <Html position={[0, config.size + 1.2, 0]} center>
+          <div style={{
+            background: 'rgba(139, 0, 0, 0.9)',
+            borderRadius: 8,
+            padding: '4px 12px',
+            minWidth: 100,
+            textAlign: 'center',
+            border: '2px solid #FF0000',
+            boxShadow: '0 0 15px rgba(255,0,0,0.5)',
+          }}>
+            <div style={{ color: '#FFF', fontSize: 13, marginBottom: 2, fontFamily: 'Fredoka, sans-serif', fontWeight: 700 }}>💀 BOSS</div>
+          </div>
+        </Html>
+      )}
+
       {(hovered || isTarget) && (
         <Html position={[0, config.size + 0.8, 0]} center>
           <div style={{
@@ -1104,14 +1121,15 @@ export const EnemyEntity = ({ enemy }: Props) => {
             border: '2px solid #E0E0E0',
             boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
           }}>
-            <div style={{ color: '#333', fontSize: 11, marginBottom: 2, fontFamily: 'Fredoka, sans-serif', fontWeight: 600 }}>{enemy.name}</div>
-            <div style={{ background: '#E0E0E0', borderRadius: 4, height: 8, overflow: 'hidden' }}>
+            <div style={{ color: '#333', fontSize: 11, marginBottom: 2, fontFamily: 'Fredoka, sans-serif', fontWeight: 600 }}>{(enemy as any).isBoss ? '💀 ' : ''}{enemy.name}</div>
+            <div style={{ background: (enemy as any).isBoss ? '#8B0000' : '#E0E0E0', borderRadius: 4, height: (enemy as any).isBoss ? 12 : 8, overflow: 'hidden' }}>
               <div style={{
                 background: hpPercent > 0.5 ? '#4CAF50' : hpPercent > 0.25 ? '#FF9800' : '#F44336',
                 width: `${hpPercent * 100}%`,
                 height: '100%',
                 transition: 'width 0.2s',
                 borderRadius: 4,
+                boxShadow: (enemy as any).isBoss ? '0 0 10px #F44336' : 'none'
               }} />
             </div>
             <div style={{ color: '#888', fontSize: 9, marginTop: 2 }}>{enemy.hp}/{enemy.maxHp}</div>

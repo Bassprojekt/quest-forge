@@ -18,6 +18,8 @@ export interface Enemy {
   zone: ZoneType;
   isBoss?: boolean;
   specialAbility?: string;
+  moveTarget?: [number, number, number];
+  moveSpeed?: number;
 }
 
 export interface Skill {
@@ -67,13 +69,20 @@ export interface ShopItem {
 export interface InventoryItem {
   id: string;
   name: string;
-  type: 'weapon' | 'armor' | 'potion' | 'material' | 'cosmetic';
+  type: 'weapon' | 'armor' | 'potion' | 'material' | 'cosmetic' | 'crate' | 'scroll';
   icon: string;
   stat: string;
   value: number;
+  price: number;
   equipped: boolean;
   quantity: number;
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  attackBonus?: number;
+  defenseBonus?: number;
+  maxHpBonus?: number;
+  maxManaBonus?: number;
+  speedBonus?: number;
+  weaponType?: 'sword' | 'bow' | 'staff';
 }
 
 export interface GroundItem {
@@ -181,15 +190,18 @@ function generateEnemies(zone: ZoneType, baseLv: number): Enemy[] {
   };
   const def = zoneEnemyDefs[zone];
   if (!def) return [];
+  const ZONE_SPAWN_RADIUS = 18;
   const enemies: Enemy[] = [];
   const baseHp = 20 + baseLv * 8;
   const baseXp = 10 + baseLv * 5;
   const baseGold = 5 + baseLv * 3;
+  
   def.names.forEach((name, ni) => {
-    const count = ni === 2 ? 1 : 2;
+    const count = 2 + Math.floor(ni / 3);
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const radius = 3 + Math.random() * 12;
+      const minRadius = 2 + (i * 1.5);
+      const radius = minRadius + Math.random() * (ZONE_SPAWN_RADIUS - minRadius);
       const worldX = Math.cos(angle) * radius;
       const worldZ = Math.sin(angle) * radius;
       enemies.push({
@@ -202,12 +214,14 @@ function generateEnemies(zone: ZoneType, baseLv: number): Enemy[] {
         xpReward: Math.floor(baseXp * def.hpMult[ni]),
         goldReward: Math.floor(baseGold * def.hpMult[ni]),
         zone,
+        moveTarget: [worldX + (Math.random() - 0.5) * 8, 0.5, worldZ + (Math.random() - 0.5) * 8],
+        moveSpeed: 0.15 + Math.random() * 0.25,
       });
     }
   });
   
-  // Generate boss for this zone
-  if (def.bosses && def.bosses.length > 0) {
+  // Generate boss for this zone (only 10% chance to spawn)
+  if (def.bosses && def.bosses.length > 0 && Math.random() < 0.1) {
     const bossName = def.bosses[Math.floor(Math.random() * def.bosses.length)];
     const bossAngle = Math.random() * Math.PI * 2;
     const bossRadius = 15 + Math.random() * 5;
@@ -281,7 +295,7 @@ export interface GameState {
   totalGoldEarned: number;
   totalDamageDealt: number;
 
-  setPlayerClass: (c: PlayerClass) => void;
+  setPlayerClass: (c: PlayerClass, resetGame?: boolean) => void;
   setPlayerPosition: (pos: [number, number, number]) => void;
   attackEnemy: (id: string) => void;
   takeDamage: (amount: number) => void;
@@ -316,7 +330,8 @@ export interface GameState {
   addGems: (amount: number) => void;
   fixPetData: () => void;
   unlockPetSlot: () => boolean;
-  claimDailyReward: () => boolean;
+  claimDailyReward: () => { success: boolean; reward: { type: string; amount: number; label: string } | null };
+  getDailyRewardPreview: () => { type: string; amount: number; label: string };
   equipItem: (itemId: string) => void;
   usePotion: (itemId: string) => void;
   sellItem: (itemId: string) => void;
@@ -337,6 +352,7 @@ export interface GameState {
   setWeather: (weather: 'sunny' | 'rainy' | 'foggy') => void;
   setTimeOfDay: (time: number) => void;
   unlockAchievement: (id: string) => void;
+  updateEnemyPosition: (id: string, position: [number, number, number], newTarget?: [number, number, number]) => void;
 }
 
 export const INITIAL_SHOP_ITEMS: ShopItem[] = [
@@ -498,9 +514,31 @@ autoFight: false,
   totalGoldEarned: 0,
   totalDamageDealt: 0,
 
-  setPlayerClass: (c) => {
+  setPlayerClass: (c, resetGame = false) => {
     const skills = c ? (CLASS_SKILLS[c] || []).map(s => ({ ...s })) : [];
-    set({ playerClass: c, skills });
+    const currentState = get();
+    const currentPets = currentState.pets && currentState.pets.length > 0 ? currentState.pets : INITIAL_PETS.map(p => ({ ...p }));
+    const hasExistingGame = !resetGame && (currentState.playerLevel > 1 || currentState.playerXp > 0);
+    set({ 
+      playerClass: c, 
+      skills,
+      playerLevel: hasExistingGame ? currentState.playerLevel : 1,
+      playerXp: hasExistingGame ? currentState.playerXp : 0,
+      playerXpToLevel: hasExistingGame ? currentState.playerXpToLevel : 100,
+      playerMaxHp: hasExistingGame ? currentState.playerMaxHp : 100,
+      playerHp: hasExistingGame ? Math.min(currentState.playerHp, currentState.playerMaxHp) : 100,
+      playerMaxMana: hasExistingGame ? currentState.playerMaxMana : 50,
+      playerMana: hasExistingGame ? Math.min(currentState.playerMana, currentState.playerMaxMana) : 50,
+      playerAttackPower: hasExistingGame ? currentState.playerAttackPower : 15,
+      playerDefense: hasExistingGame ? currentState.playerDefense : 0,
+      playerSpeed: hasExistingGame ? currentState.playerSpeed : 5,
+      playerGold: hasExistingGame ? currentState.playerGold : 100,
+      playerGems: hasExistingGame ? currentState.playerGems : 0,
+      currentZone: hasExistingGame ? currentState.currentZone : 'hub',
+      inventory: hasExistingGame ? currentState.inventory : [],
+      pets: currentPets,
+      quests: hasExistingGame ? currentState.quests : [],
+    });
   },
 
   setPlayerPosition: (pos) => {
@@ -672,16 +710,49 @@ popups.push({
       useSkillTreeStore.getState().addSkillPoints(2);
     }
 
+    const baseAttack = 15 + (newLevel - 1) * 3;
+    const baseMaxHp = 100 + (newLevel - 1) * 20;
+    const baseMaxMana = 50 + (newLevel - 1) * 10;
+    
+    let attackBonus = 0;
+    let maxHpBonus = 0;
+    let maxManaBonus = 0;
+    state.inventory.forEach(i => {
+      if (i.equipped) {
+        attackBonus += i.attackBonus || 0;
+        maxHpBonus += i.maxHpBonus || 0;
+        maxManaBonus += i.maxManaBonus || 0;
+      }
+    });
+    
+    let skillAttackBonus = 0;
+    let skillDefenseBonus = 0;
+    let skillHpBonus = 0;
+    let skillManaBonus = 0;
+    let skillSpeedBonus = 0;
+    try {
+      const skillBonuses = useSkillTreeStore.getState().getAllBonuses();
+      skillAttackBonus = skillBonuses.attackBonus;
+      skillDefenseBonus = skillBonuses.defenseBonus;
+      skillHpBonus = skillBonuses.hpBonus;
+      skillManaBonus = skillBonuses.manaBonus;
+      skillSpeedBonus = skillBonuses.speedBonus;
+    } catch (e) {}
+    
+    const newAttack = baseAttack + attackBonus + skillAttackBonus;
+    const newMaxHp = baseMaxHp + maxHpBonus + skillHpBonus;
+    const newMaxMana = baseMaxMana + maxManaBonus + skillManaBonus;
+    
     set({
       enemies,
       playerXp: remainingXp,
       playerLevel: newLevel,
       playerXpToLevel: newXpToLevel,
-      playerAttackPower: 15 + (newLevel - 1) * 3,
-      playerMaxHp: 100 + (newLevel - 1) * 20,
-      playerMaxMana: 50 + (newLevel - 1) * 10,
-      playerHp: newLevel > state.playerLevel ? 100 + (newLevel - 1) * 20 : state.playerHp,
-      playerMana: newLevel > state.playerLevel ? 50 + (newLevel - 1) * 10 : state.playerMana,
+      playerAttackPower: newAttack,
+      playerMaxHp: newMaxHp,
+      playerMaxMana: newMaxMana,
+      playerHp: newLevel > state.playerLevel ? newMaxHp : Math.min(state.playerHp, newMaxHp),
+      playerMana: newLevel > state.playerLevel ? newMaxMana : Math.min(state.playerMana, newMaxMana),
       playerGold: state.playerGold + goldGain,
       playerGems: state.playerGems + gemGain,
       damagePopups: popups,
@@ -691,7 +762,10 @@ popups.push({
       totalGoldEarned: nowDead ? state.totalGoldEarned + goldGain : state.totalGoldEarned,
     });
 
-    if (didLevelUp) setTimeout(() => set({ levelUpEffect: false }), 2000);
+    if (didLevelUp) {
+      useSkillTreeStore.getState().addSkillPoints(1);
+      setTimeout(() => set({ levelUpEffect: false }), 2000);
+    }
     if (hitPos) setTimeout(() => set({ hitEffectPos: null }), 300);
     setTimeout(() => {
       set(s => ({ damagePopups: s.damagePopups.filter(p => Date.now() - p.timestamp < 1500) }));
@@ -741,6 +815,7 @@ popups.push({
 
   useSkill: (skillId) => {
     const state = get();
+    if (state.currentZone === 'hub') return;
     const now = performance.now() / 1000;
     const skills = state.skills.map(s => {
       if (s.id !== skillId) return s;
@@ -1157,33 +1232,133 @@ const playerDamage = petLevel * 6;
     const now = Date.now();
     const dayMs = 24 * 60 * 60 * 1000;
     const lastClaim = state.lastDailyReward || 0;
-    if (now - lastClaim < dayMs) return false;
-    const goldReward = 50 + state.playerLevel * 10;
-    const gemReward = state.playerLevel >= 10 ? 1 : 0;
+    if (now - lastClaim < dayMs) return { success: false, reward: null };
+    
+    const dayOfYear = Math.floor(now / dayMs) % 365;
+    const items = [
+      { type: 'gold', amount: 50 + state.playerLevel * 10, label: `${50 + state.playerLevel * 10} Gold` },
+      { type: 'gem', amount: 1, label: '1 Edelstein' },
+      { type: 'potion', amount: 3, label: '3 Heiltränke' },
+      { type: 'scroll', amount: 2, label: '2 xp-Schriftrollen' },
+      { type: 'weapon', amount: 1, label: 'Waffenkiste' },
+    ];
+    const rewardIndex = dayOfYear % items.length;
+    const reward = items[rewardIndex];
+    
+    let newGold = state.playerGold;
+    let newGems = state.playerGems;
+    let newInventory = [...state.inventory];
+    
+    if (reward.type === 'gold') {
+      newGold += reward.amount;
+    } else if (reward.type === 'gem') {
+      newGems += reward.amount;
+    } else if (reward.type === 'potion') {
+      newInventory.push({ id: `potion-${now}`, type: 'potion', name: 'Heiltrank', value: 50, price: 10, owned: true, quantity: reward.amount });
+    } else if (reward.type === 'scroll') {
+      newInventory.push({ id: `scroll-${now}`, type: 'scroll', name: 'XP-Schriftrolle', value: 50, price: 25, owned: true, quantity: reward.amount });
+    } else if (reward.type === 'weapon') {
+      newInventory.push({ id: `crate-${now}`, type: 'crate', name: 'Waffenkiste', rarity: 'rare', price: 100, owned: true });
+    }
+    
     set({ 
-      playerGold: state.playerGold + goldReward,
-      playerGems: state.playerGems + gemReward,
+      playerGold: newGold,
+      playerGems: newGems,
+      inventory: newInventory,
       lastDailyReward: now,
     });
-    return true;
+    return { success: true, reward: reward };
+  },
+
+  getDailyRewardPreview: () => {
+    const state = get();
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const dayOfYear = Math.floor(now / dayMs) % 365;
+    const items = [
+      { type: 'gold', amount: 50 + state.playerLevel * 10, label: `${50 + state.playerLevel * 10} Gold` },
+      { type: 'gem', amount: 1, label: '1 Edelstein' },
+      { type: 'potion', amount: 3, label: '3 Heiltränke' },
+      { type: 'scroll', amount: 2, label: '2 xp-Schriftrollen' },
+      { type: 'weapon', amount: 1, label: 'Waffenkiste' },
+    ];
+    return items[dayOfYear % items.length];
   },
 
   equipItem: (itemId) => {
     const state = get();
     const item = state.inventory.find(i => i.id === itemId);
-    if (!item || item.type === 'potion') return;
+    if (!item || item.type === 'potion' || item.type === 'crate' || item.type === 'scroll' || item.type === 'material') return;
+    
+    if (item.type === 'weapon' && item.weaponType) {
+      const playerClass = state.playerClass;
+      if (playerClass === 'warrior' && item.weaponType !== 'sword') return;
+      if (playerClass === 'mage' && item.weaponType !== 'staff') return;
+      if (playerClass === 'archer' && item.weaponType !== 'bow') return;
+    }
+    
+    const newInventory = state.inventory.map(i => {
+      if (i.type === item.type && i.equipped === true) return { ...i, equipped: false };
+      if (i.id === itemId && !i.equipped) return { ...i, equipped: true };
+      if (i.id === itemId && i.equipped) return { ...i, equipped: false };
+      return i;
+    });
+    
+    let attackBonus = 0;
+    let defenseBonus = 0;
+    let maxHpBonus = 0;
+    let maxManaBonus = 0;
+    let speedBonus = 0;
+    
+    newInventory.forEach(i => {
+      if (i.equipped && (i.type === 'weapon' || i.type === 'armor')) {
+        attackBonus += i.attackBonus || 0;
+        defenseBonus += i.defenseBonus || 0;
+        maxHpBonus += i.maxHpBonus || 0;
+        maxManaBonus += i.maxManaBonus || 0;
+        speedBonus += i.speedBonus || 0;
+      }
+    });
+    
+    const baseAttack = 15 + (state.playerLevel - 1) * 3;
+    const baseDefense = state.playerLevel > 1 ? Math.floor(state.playerLevel / 2) : 0;
+    const baseMaxHp = 100 + (state.playerLevel - 1) * 20;
+    const baseMaxMana = 50 + (state.playerLevel - 1) * 10;
+    const newMaxHp = baseMaxHp + maxHpBonus;
+    const newMaxMana = baseMaxMana + maxManaBonus;
+    
     set({
-      inventory: state.inventory.map(i => {
-        if (i.type === item.type && i.id !== itemId) return { ...i, equipped: false };
-        if (i.id === itemId) return { ...i, equipped: !i.equipped };
-        return i;
-      }),
+      inventory: newInventory,
+      playerAttackPower: baseAttack + attackBonus,
+      playerDefense: baseDefense + defenseBonus,
+      playerMaxHp: newMaxHp,
+      playerMaxMana: newMaxMana,
+      playerSpeed: 5 + speedBonus,
+      playerHp: Math.min(state.playerHp, newMaxHp),
+      playerMana: Math.min(state.playerMana, newMaxMana),
     });
   },
 
   usePotion: (itemId) => {
     const state = get();
-    const item = state.inventory.find(i => i.id === itemId && i.type === 'potion');
+    const item = state.inventory.find(i => i.id === itemId && (i.type === 'potion' || i.type === 'crate'));
+    if (!item || item.type === 'crate') {
+      if (item?.type === 'crate') {
+        const weapons = [
+          { id: `weapon-${Date.now()}`, type: 'weapon', name: 'Eisen Schwert', icon: '⚔️', stat: 'ATK +5', attackBonus: 5, defenseBonus: 1, rarity: 'common', price: 50, owned: true, weaponType: 'sword' },
+          { id: `weapon-${Date.now()}`, type: 'weapon', name: 'Starker Bogen', icon: '🏹', stat: 'ATK +7', attackBonus: 7, maxHpBonus: 10, rarity: 'rare', price: 75, owned: true, weaponType: 'bow' },
+          { id: `weapon-${Date.now()}`, type: 'weapon', name: 'Magischer Stab', icon: '🔮', stat: 'ATK +8', attackBonus: 8, maxManaBonus: 15, rarity: 'epic', price: 100, owned: true, weaponType: 'staff' },
+          { id: `weapon-${Date.now()}`, type: 'weapon', name: 'Goldene Klinge', icon: '⚔️', stat: 'ATK +12', attackBonus: 12, defenseBonus: 3, maxHpBonus: 20, rarity: 'legendary', price: 200, owned: true, weaponType: 'sword' },
+        ];
+        const randomWeapon = weapons[Math.floor(Math.random() * weapons.length)];
+        const newInventory = state.inventory.filter(i => i.id !== itemId);
+        set({
+          inventory: [...newInventory, randomWeapon],
+        });
+        return;
+      }
+      return;
+    }
     if (!item || item.quantity <= 0) return;
     playPotionDrink();
 
@@ -1234,7 +1409,7 @@ damagePopups: [...state.damagePopups, {
     const item = state.inventory.find(i => i.id === itemId);
     if (!item || item.equipped) return;
     
-    const sellPrice = Math.floor(item.value * 0.5);
+    const sellPrice = Math.floor((item.price || item.value || 50) * 0.5);
     const newInventory = state.inventory.filter(i => i.id !== itemId);
     
     set({
@@ -1306,8 +1481,12 @@ damagePopups: [...state.damagePopups, {
 
   spawnGroundItem: (item) => {
     const state = get();
-    const newItem: GroundItem = { ...item, id: `ground-${Date.now()}`, timestamp: Date.now() };
-    set({ groundItems: [...state.groundItems, newItem] });
+    if (state.currentZone === 'hub') return;
+    const now = Date.now();
+    const fiveMinAgo = now - (5 * 60 * 1000);
+    const filteredItems = state.groundItems.filter(i => i.timestamp > fiveMinAgo);
+    const newItem: GroundItem = { ...item, id: `ground-${Date.now()}`, timestamp: now };
+    set({ groundItems: [...filteredItems, newItem] });
   },
 
   pickupGroundItem: (itemId) => {
@@ -1346,17 +1525,53 @@ damagePopups: [...state.damagePopups, {
 
   recalcStats: () => {
     const state = get();
-    const equippedWeapons = state.inventory.filter(i => i.type === 'weapon' && i.equipped);
-    const equippedArmors = state.inventory.filter(i => i.type === 'armor' && i.equipped);
-    const atkBonus = equippedWeapons.reduce((a, i) => a + i.value, 0);
-    const defBonus = equippedArmors.reduce((a, i) => a + i.value, 0);
+    
+    let itemAttackBonus = 0;
+    let itemDefenseBonus = 0;
+    let itemHpBonus = 0;
+    let itemManaBonus = 0;
+    let itemSpeedBonus = 0;
+    
+    state.inventory.forEach(i => {
+      if (i.equipped && (i.type === 'weapon' || i.type === 'armor')) {
+        itemAttackBonus += i.attackBonus || 0;
+        itemDefenseBonus += i.defenseBonus || 0;
+        itemHpBonus += i.maxHpBonus || 0;
+        itemManaBonus += i.maxManaBonus || 0;
+        itemSpeedBonus += i.speedBonus || 0;
+      }
+    });
+    
+    let skillAttackBonus = 0;
+    let skillDefenseBonus = 0;
+    let skillHpBonus = 0;
+    let skillSpeedBonus = 0;
+    try {
+      const skillBonuses = useSkillTreeStore.getState().getAllBonuses();
+      skillAttackBonus = skillBonuses.attackBonus;
+      skillDefenseBonus = skillBonuses.defenseBonus;
+      skillHpBonus = skillBonuses.hpBonus;
+      skillSpeedBonus = skillBonuses.speedBonus;
+    } catch (e) {}
+    
+    const baseAttack = 15 + (state.playerLevel - 1) * 3;
+    const baseMaxHp = 100 + (state.playerLevel - 1) * 20;
+    const baseMaxMana = 50 + (state.playerLevel - 1) * 10;
+    const baseDefense = state.playerLevel > 1 ? Math.floor(state.playerLevel / 2) : 0;
+    
     set({
-      playerAttackPower: 15 + (state.playerLevel - 1) * 3 + atkBonus,
-      playerDefense: defBonus,
+      playerAttackPower: baseAttack + itemAttackBonus + skillAttackBonus,
+      playerDefense: baseDefense + itemDefenseBonus + skillDefenseBonus,
+      playerMaxHp: baseMaxHp + itemHpBonus + skillHpBonus,
+      playerMaxMana: baseMaxMana + itemManaBonus,
+      playerSpeed: 5 + itemSpeedBonus + skillSpeedBonus,
+      playerHp: Math.min(state.playerHp, baseMaxHp + itemHpBonus + skillHpBonus),
     });
   },
 
-  setAutoFight: (v) => set({ autoFight: v }),
+  setAutoFight: (v) => { 
+    set({ autoFight: v }); 
+  },
   setAutoRespawn: (v) => set({ autoRespawn: v }),
   setAutoLoot: (v) => set({ autoLoot: v }),
   setUIOpen: (v) => set({ isUIOpen: v }),
@@ -1364,4 +1579,11 @@ damagePopups: [...state.damagePopups, {
   setWeather: (weather) => set({ weather }),
   setTimeOfDay: (time) => set({ timeOfDay: time }),
   unlockAchievement: (id) => set(s => ({ achievements: s.achievements.includes(id) ? s.achievements : [...s.achievements, id] })),
+  updateEnemyPosition: (id, position, newTarget) => set(s => ({
+    enemies: s.enemies.map(e => e.id === id ? { 
+      ...e, 
+      position,
+      moveTarget: newTarget || e.moveTarget
+    } : e)
+  })),
 }));

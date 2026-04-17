@@ -1,21 +1,24 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
-import { Settings, Volume2, VolumeX, Globe, ChevronDown, RotateCcw, HelpCircle } from 'lucide-react';
+import { Settings, Volume2, VolumeX, Globe, ChevronDown, RotateCcw, HelpCircle, LogOut } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { useGameStore } from '@/store/gameStore';
+import { useAccountStore } from '@/store/accountStore';
 
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onOpenHelp?: () => void;
+  onLogout?: () => void;
 }
 
-export const SettingsDialog = ({ open, onOpenChange, onOpenHelp }: SettingsDialogProps) => {
+export const SettingsDialog = ({ open, onOpenChange, onOpenHelp, onLogout }: SettingsDialogProps) => {
   const { volume, language, setVolume, setLanguage } = useSettingsStore();
   const [localVolume, setLocalVolume] = useState(volume);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const resetGame = useGameStore(s => s.resetGame);
+  const logout = useAccountStore(s => s.logout);
 
   useEffect(() => {
     setLocalVolume(volume);
@@ -125,6 +128,18 @@ export const SettingsDialog = ({ open, onOpenChange, onOpenHelp }: SettingsDialo
           >
             <HelpCircle className="h-4 w-4" />
             Hilfe & Steuerung
+          </button>
+
+          <button
+            onClick={() => {
+              logout();
+              onOpenChange(false);
+              onLogout?.();
+            }}
+            className="w-full mt-3 flex items-center justify-center gap-2 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium"
+          >
+            <LogOut className="h-4 w-4" />
+            Abmelden
           </button>
         </div>
       </DialogContent>

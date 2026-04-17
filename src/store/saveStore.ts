@@ -168,6 +168,7 @@ function restoreFromData(data: SaveData): boolean {
       skillPoints: data.skillTree.skillPoints,
       nodes: data.skillTree.nodes,
     });
+    useGameStore.getState().recalcStats();
   }
 
   if (data.companions) {
@@ -290,8 +291,13 @@ export function getLastSaveTime(): string | null {
 }
 
 let autoSaveInterval: ReturnType<typeof setInterval> | null = null;
+let hasLoadedOnce = false;
 
 export function startAutoSave() {
+  if (!hasLoadedOnce) {
+    hasLoadedOnce = true;
+    loadGame();
+  }
   if (autoSaveInterval) return;
   autoSaveInterval = setInterval(() => {
     if (useGameStore.getState().playerClass) {

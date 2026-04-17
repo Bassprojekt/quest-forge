@@ -199,7 +199,7 @@ export const Player = () => {
     }
 
     // Skills
-    if (keys.current.q && !lastSkillCheck.current.q) {
+    if (currentZone !== 'hub' && keys.current.q && !lastSkillCheck.current.q) {
       const skill = skills[0];
       if (skill && now - skill.lastUsed >= skill.cooldown && playerMana >= skill.manaCost) {
         activateSkill(skill.id);
@@ -214,7 +214,7 @@ export const Player = () => {
       }
     }
 
-    if (keys.current.e && !lastSkillCheck.current.e) {
+    if (currentZone !== 'hub' && keys.current.e && !lastSkillCheck.current.e) {
       const skill = skills[1];
       if (skill && now - skill.lastUsed >= skill.cooldown && playerMana >= skill.manaCost) {
         activateSkill(skill.id);
@@ -224,7 +224,7 @@ export const Player = () => {
       }
     }
 
-    if (keys.current.shift && !lastSkillCheck.current.shift) {
+    if (currentZone !== 'hub' && keys.current.shift && !lastSkillCheck.current.shift) {
       const skill = skills[2];
       if (skill && now - skill.lastUsed >= skill.cooldown && playerMana >= skill.manaCost) {
         activateSkill(skill.id);

@@ -30,6 +30,7 @@ export const HUD = () => {
   const gems = useGameStore(s => s.playerGems);
   const claimDailyReward = useGameStore(s => s.claimDailyReward);
   const lastDailyReward = useGameStore(s => s.lastDailyReward);
+  const getDailyRewardPreview = useGameStore(s => s.getDailyRewardPreview);
   const enemies = useGameStore(s => s.enemies);
   
   const canClaimDaily = (() => {
@@ -129,7 +130,7 @@ export const HUD = () => {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50" style={{ fontFamily: "'Fredoka', sans-serif" }}>
-      {showSettings && <SettingsDialog open={showSettings} onOpenChange={setShowSettings} onOpenHelp={() => { setShowSettings(false); setShowHelp(true); }} />}
+      {showSettings && <SettingsDialog open={showSettings} onOpenChange={setShowSettings} onOpenHelp={() => { setShowSettings(false); setShowHelp(true); }} onLogout={() => window.location.reload()} />}
       {showHelp && <HelpUI onClose={() => setShowHelp(false)} />}
       {/* {showShop && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-auto">
@@ -172,11 +173,14 @@ export const HUD = () => {
                 <span>💰 {gold}</span>
                 <span>💎 {gems}</span>
               </div>
-              {canClaimDaily && (
-                <button onClick={claimDailyReward} className="ml-2 px-2 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold rounded-lg hover:from-amber-500 hover:to-orange-600 animate-pulse">
-                  🎁 Täglich!
-                </button>
-              )}
+              {canClaimDaily && (() => {
+                const reward = getDailyRewardPreview();
+                return (
+                  <button onClick={claimDailyReward} className="ml-2 px-2 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold rounded-lg hover:from-amber-500 hover:to-orange-600 animate-pulse">
+                    🎁 {reward.label}
+                  </button>
+                );
+              })()}
             </div>
           </div>
 

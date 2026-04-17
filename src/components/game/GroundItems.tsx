@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import { useGameStore } from '@/store/gameStore';
 
 export const GroundItems = () => {
@@ -29,21 +30,55 @@ export const GroundItems = () => {
     });
   });
 
+  const getItemEmoji = (item: { name: string; type: string; icon?: string }) => {
+    if (item.icon) return item.icon;
+    switch (item.name) {
+      case 'Holz': return '🪵';
+      case 'Leder': return '🟫';
+      case 'Kräuter': return '🌿';
+      case 'Erz': return '🪨';
+      case 'Federn': return '🪶';
+      case 'Fisch': return '🐟';
+      case 'Fleisch': return '🥩';
+      case 'Stahlbarren': return '🔩';
+      case 'Edelstein': return '💎';
+      case 'Mithrilbarren': return '⭐';
+      case 'Heiltrank': return '🧪';
+      case 'Manatrank': return '🧪';
+      default: return '📦';
+    }
+  };
+
+  const getRarityColor = (rarity: string) => {
+    switch (rarity) {
+      case 'common': return '#9E9E9E';
+      case 'rare': return '#2196F3';
+      case 'epic': return '#9C27B0';
+      case 'legendary': return '#FF9800';
+      default: return '#9E9E9E';
+    }
+  };
+
   return (
     <>
       {groundItems.map(item => {
         const dist = getDistance(playerPosition, item.position);
         if (dist > 10) return null;
+        
+        const emoji = getItemEmoji(item);
+        const color = getRarityColor(item.rarity);
+        
         return (
           <group key={item.id} position={item.position}>
-            <mesh>
-              <boxGeometry args={[0.4, 0.4, 0.4]} />
-              <meshStandardMaterial 
-                color={item.rarity === 'common' ? '#9E9E9E' : item.rarity === 'rare' ? '#2196F3' : item.rarity === 'epic' ? '#9C27B0' : '#FF9800'} 
-                emissive={item.rarity === 'common' ? '#9E9E9E' : item.rarity === 'rare' ? '#2196F3' : item.rarity === 'epic' ? '#9C27B0' : '#FF9800'}
-                emissiveIntensity={0.5}
-              />
-            </mesh>
+            <Html position={[0, 0.5, 0]} center style={{ pointerEvents: 'none' }}>
+              <div style={{
+                fontSize: '28px',
+                textShadow: '0 0 5px black, 0 0 5px black',
+                filter: `drop-shadow(0 0 3px ${color})`,
+              }}>
+                {emoji}
+              </div>
+            </Html>
           </group>
         );
       })}

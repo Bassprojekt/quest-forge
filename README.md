@@ -67,11 +67,24 @@ Quest Forge ist ein klassisches Fantasy-MMORPG, das du direkt im Browser spielst
 - Pets sammeln automatisch Items in der Nähe ein
 - Verschiedene Buff-Typen: Schaden, Defense, Speed, Krit, Heilung
 - Bis zu 5 Pet-Slots (mit 💎 freischaltbar)
-- Pets folgen dem Spieler und heilen alle 5 Sekunden
+- Pets folgen dem Spieler und heilen alle 10 Sekunden
 - **Pet-Turnier Arena** - Schicke dein Pet ins Turnier für automatische Kämpfe
-  - Manuelle Kämpfe oder Auto-Send Modus
+  - Manuelle Kämpfe (100 Gold) oder Auto-Send Modus (200 Gold/Stunde)
   - XP und Gold bei jedem Sieg
-  - Pets evolvieren bei Level 10 auf höhere Stufen
+  - Neue "Meine Pets" Tab zeigt alle Pets mit XP-Balken
+
+### Pet-Evolution System ✨
+- Pets evolvieren wenn sie ihr Max-Level erreichen
+- Klicke auf "✨ Evolvieren" im "Meine Pets" Tab
+- Das Pet wird auf die nächste Stufe upgegraded:
+  - Baby Wolf → Erwachsener Wolf → Alpha Wolf
+  - Flauschkatze → Ninja Katze
+  - Mini Drache → Elder Drache
+  - Wald Fee → Magische Fee → Verzauberte Fee
+  - Geist Gigi → Phantom Gigi → Schreckens Gigi
+  - Ritter Baldur → Champion Baldur
+  - Priesterin Aria → Hohepriesterin Aria
+- Evolvierte Pets haben bessere Stats und einzigartige 3D-Modelle
 
 ### Zone-Wände
 - Jede Zone hat Wände an allen 4 Seiten

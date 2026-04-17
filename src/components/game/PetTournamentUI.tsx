@@ -143,7 +143,7 @@ export const PetTournamentUI = ({ onClose }: { onClose: () => void }) => {
   
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 pointer-events-auto">
-      <div className="bg-white/95 backdrop-blur-md border-2 border-purple-300 rounded-2xl p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+      <div className="bg-white/95 backdrop-blur-md border-2 border-purple-300 rounded-2xl p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto" onWheel={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-purple-600 font-bold text-xl">🐾 Pet-Turnier Arena</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">✕</button>

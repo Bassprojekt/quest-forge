@@ -94,7 +94,7 @@ export const ShopUI = ({ onClose, initialTab = 'items', shopType = 'general', sh
           )}
         </div>
 
-        <div className="space-y-2 max-h-64 overflow-y-auto">
+        <div className="space-y-2 max-h-64 overflow-y-auto" onWheel={e => e.stopPropagation()}>
           {tab === 'items' && shopItems.filter(item => {
             if (shopType === 'potions') return item.type === 'potion';
             if (shopType === 'weapons') return item.type === 'weapon';

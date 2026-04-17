@@ -9,7 +9,8 @@ export const HelpUI = ({ onClose }: Props) => {
       data-help-open="true">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative bg-white/95 backdrop-blur-md border-2 border-[#4169E1] rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto"
-        style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.2)' }}>
+        style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.2)' }}
+        onWheel={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[#4169E1] font-bold text-xl">📖 Hilfe & Steuerung</h2>
           <button onClick={onClose} className="text-[#AAA] hover:text-[#333] text-xl">✕</button>
@@ -53,8 +54,6 @@ export const HelpUI = ({ onClose }: Props) => {
           <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
             <h3 className="font-bold text-purple-800 mb-2">🌍 Zonen & Fortschritt</h3>
             <div className="space-y-2 text-purple-700">
-              <div>Zonen werden durch <span className="font-bold">rote Tore</span> am Rand betreten</div>
-              <div>Je höher die Zone, desto stärker die Gegner</div>
               <div>Bosse erscheinen als <span className="font-bold">💀</span> mit viel HP</div>
               <div>Sammle <span className="font-bold">Materialien</span> vom Boden für Crafting</div>
               <div>Dein <span className="font-bold">Begleiter</span> sammelt Items automatisch ein</div>

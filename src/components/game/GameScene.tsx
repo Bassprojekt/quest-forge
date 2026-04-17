@@ -279,16 +279,12 @@ export const GameScene = () => {
   const seenTutorial = useTutorialStore(s => s.seenTutorial);
   const markTutorialSeen = useTutorialStore(s => s.markTutorialSeen);
 
-  if (!isLoggedIn) {
+  if (!isLoggedIn || !playerClass) {
     return <LoginScreen onLogin={() => {}} />;
   }
 
   if (!seenTutorial && playerClass) {
     return <TutorialScreen onComplete={markTutorialSeen} />;
-  }
-
-  if (!playerClass) {
-    return <ClassSelect />;
   }
 
   return (
