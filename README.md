@@ -25,8 +25,13 @@ Das Spiel folgt einem klassischen MMORPG-Login-System:
 ## 🧑 Klassen
 
 - **Krieger** - Nahkampf-Spezialist mit hohem Leben
-- **Magier** - Fernkampf-Magie mit hoher Krit-Rate
+- **Magier** - Fernkampf-Magie mit hoher Krit-Rate, verliert 2 MP pro Angriff
 - **Bogenschütze** - Schneller Angriff aus der Ferne
+
+### Magier Besonderheit 🔮
+- Verliert 2 MP bei jedem normalen Angriff
+- Bei 0 MP wartet er bis 50% Mana regeneriert ist, bevor er weiterkämpft
+- Fähigkeiten kosten zusätzliche MP
 
 ## 🌳 Klassenspezifische Skill-Bäume
 

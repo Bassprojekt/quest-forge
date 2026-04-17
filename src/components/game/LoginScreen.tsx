@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAccountStore } from '@/store/accountStore';
 import { useGameStore } from '@/store/gameStore';
-import { loadGame, deleteSave } from '@/store/saveStore';
+import { deleteSave } from '@/store/saveStore';
+import { useSkillTreeStore } from '@/store/skillTreeStore';
 
 export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const [isRegister, setIsRegister] = useState(false);
@@ -16,7 +17,6 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const [newCharClass, setNewCharClass] = useState<'warrior' | 'mage' | 'archer'>('warrior');
 
   const [selectedChannel, setSelectedChannel] = useState<number>(1);
-  const [charLevels, setCharLevels] = useState<Record<number, number>>({});
 
   const register = useAccountStore(s => s.register);
   const login = useAccountStore(s => s.login);
@@ -105,7 +105,6 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const handleCharSlotClick = (slot: number) => {
     if (characters[slot]) {
       selectCharacter(slot);
-      setShowCharSelect(true);
     } else {
       setShowCharCreate(true);
     }
@@ -116,12 +115,11 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
       setError('Name at least 2 characters');
       return;
     }
-    const success = createCharacter(newCharName, newCharClass);
+    const classToCreate = newCharClass;
+    const success = createCharacter(newCharName, classToCreate);
     if (success) {
       setShowCharCreate(false);
       setNewCharName('');
-      const newSlot = characters.findIndex(c => c === null);
-      selectCharacter(newSlot);
     } else {
       setError('All 3 slots taken');
     }
@@ -129,15 +127,7 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
 
   const handleStartGame = () => {
     if (selectedChar?.class) {
-      deleteSave();
-      setPlayerClass(selectedChar.class, true);
-      const saved = loadGame();
-      if (saved) {
-        const loadedClass = useGameStore.getState().playerClass;
-        if (loadedClass && loadedClass !== selectedChar.class) {
-          setPlayerClass(selectedChar.class, false);
-        }
-      }
+      setPlayerClass(selectedChar.class, false);
     }
     onLogin();
   };
@@ -236,7 +226,7 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
                   <>
                     <span className="text-2xl font-bold mb-1">{getClassIcon(characters[slot].class)}</span>
                     <span className="font-bold text-sm text-gray-700">{characters[slot].name}</span>
-                    <span className="text-xs text-gray-500">Lv {charLevels[slot] || characters[slot].level}</span>
+                    <span className="text-xs text-gray-500">Lv {characters[slot].level}</span>
                   </>
                 ) : (
                   <>
@@ -262,7 +252,12 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
                 {(['warrior', 'mage', 'archer'] as const).map(c => (
                   <button
                     key={c}
-                    onClick={() => setNewCharClass(c)}
+                    type="button"
+                    onClick={(e) => { 
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setNewCharClass(c); 
+                    }}
                     className={`
                       py-2 rounded-lg font-bold text-sm transition-all
                       ${newCharClass === c 
@@ -311,8 +306,10 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
             </button>
             <button
               onClick={() => {
-                if (confirm('Reset all characters?')) {
+                if (confirm('Reset all characters, skills and save?')) {
                   resetCharacters();
+                  deleteSave();
+                  useSkillTreeStore.getState().resetTreeFully();
                 }
               }}
               className="px-4 py-3 text-red-500 hover:text-red-700 text-sm"
