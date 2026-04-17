@@ -61,10 +61,10 @@ const WarriorWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> })
 );
 
 const MageWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> }) => (
-  <group ref={swingRef} position={[0.48, 0.55, 0.1]} rotation={[-0.2, 0, 0.15]}>
+  <group ref={swingRef} position={[-0.38, 0.92, 0.15]} rotation={[0.3, 0, 0.15]}>
     {/* Staff shaft */}
     <mesh position={[0, 0.2, 0]} castShadow>
-      <boxGeometry args={[0.06, 1.2, 0.06]} />
+      <boxGeometry args={[0.05, 1.2, 0.05]} />
       <meshStandardMaterial color="#5C3A1E" flatShading />
     </mesh>
     {/* Staff orb */}
@@ -79,33 +79,52 @@ const MageWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> }) =>
     </mesh>
     {/* Staff bottom crystal */}
     <mesh position={[0, -0.42, 0]} castShadow rotation={[0, 0, Math.PI / 4]}>
-      <boxGeometry args={[0.06, 0.06, 0.06]} />
+      <boxGeometry args={[0.05, 0.05, 0.05]} />
       <meshStandardMaterial color="#7B1FA2" flatShading metalness={0.5} />
     </mesh>
   </group>
 );
 
 const ArcherWeapon = ({ swingRef }: { swingRef: React.RefObject<THREE.Group> }) => (
-  <group ref={swingRef} position={[0.48, 0.7, 0.1]} rotation={[0, 0, 0.2]}>
-    {/* Bow body */}
+  <group ref={swingRef} position={[-0.38, 0.92, 0.15]} rotation={[0, -Math.PI / 2, 0]}>
+    {/* Bow upper limb - curved top */}
+    <mesh position={[0, 0.18, 0]} rotation={[0, 0, 0.3]} castShadow>
+      <cylinderGeometry args={[0.02, 0.025, 0.32, 8]} />
+      <meshStandardMaterial color="#4A3728" flatShading />
+    </mesh>
+    {/* Bow lower limb - curved bottom */}
+    <mesh position={[0, -0.18, 0]} rotation={[0, 0, -0.3]} castShadow>
+      <cylinderGeometry args={[0.02, 0.025, 0.32, 8]} />
+      <meshStandardMaterial color="#4A3728" flatShading />
+    </mesh>
+    {/* Bow grip - middle handle */}
     <mesh position={[0, 0, 0]} castShadow>
-      <torusGeometry args={[0.4, 0.03, 6, 12, Math.PI]} />
-      <meshStandardMaterial color="#8B4513" flatShading />
+      <cylinderGeometry args={[0.025, 0.025, 0.18, 8]} />
+      <meshStandardMaterial color="#2D1B0E" flatShading />
     </mesh>
-    {/* Bowstring */}
-    <mesh position={[0, 0, 0]}>
-      <cylinderGeometry args={[0.005, 0.005, 0.78, 4]} />
-      <meshStandardMaterial color="#F5DEB3" />
+    {/* Bowstring - vertical from top to bottom, pushed back on X axis */}
+    <mesh position={[-0.04, 0, 0]}>
+      <cylinderGeometry args={[0.003, 0.003, 0.58, 4]} />
+      <meshStandardMaterial color="#DDDDDD" />
     </mesh>
-    {/* Arrow */}
-    <mesh position={[0.05, 0, 0.02]} rotation={[Math.PI / 2, 0, 0]}>
-      <cylinderGeometry args={[0.015, 0.015, 0.6, 4]} />
-      <meshStandardMaterial color="#DEB887" flatShading />
+    {/* Arrow shaft - horizontal */}
+    <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+      <cylinderGeometry args={[0.006, 0.006, 0.42, 6]} />
+      <meshStandardMaterial color="#8B6914" />
     </mesh>
     {/* Arrow tip */}
-    <mesh position={[0.05, 0, 0.33]} rotation={[Math.PI / 2, 0, 0]}>
-      <coneGeometry args={[0.03, 0.08, 4]} />
-      <meshStandardMaterial color="#C0C0C0" flatShading metalness={0.8} />
+    <mesh position={[0.22, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
+      <coneGeometry args={[0.015, 0.05, 6]} />
+      <meshStandardMaterial color="#A8A8A8" metalness={0.9} roughness={0.2} />
+    </mesh>
+    {/* Fletching - red feathers */}
+    <mesh position={[-0.18, 0.018, 0]}>
+      <boxGeometry args={[0.05, 0.012, 0.003]} />
+      <meshStandardMaterial color="#C62828" />
+    </mesh>
+    <mesh position={[-0.18, -0.018, 0]}>
+      <boxGeometry args={[0.05, 0.012, 0.003]} />
+      <meshStandardMaterial color="#C62828" />
     </mesh>
   </group>
 );
@@ -178,9 +197,9 @@ export const Player = () => {
         swingTimer.current -= delta;
         const swingProgress = 1 - (swingTimer.current / 0.3);
         if (playerClass === 'mage') {
-          // Staff thrust forward
-          swordRef.current.rotation.x = Math.sin(swingProgress * Math.PI) * -1.0;
-          swordRef.current.position.z = 0.1 + Math.sin(swingProgress * Math.PI) * 0.3;
+          // Staff thrust forward (upward)
+          swordRef.current.rotation.x = Math.sin(swingProgress * Math.PI) * 1.0;
+          swordRef.current.position.z = 0.15 + Math.sin(swingProgress * Math.PI) * 0.2;
         } else if (playerClass === 'archer') {
           // Bow pull back then release
           swordRef.current.rotation.x = Math.sin(swingProgress * Math.PI) * -0.3;
@@ -192,7 +211,7 @@ export const Player = () => {
           swordRef.current.position.z = 0.1 - swing * 0.3;
         }
       } else {
-        swordRef.current.rotation.x = THREE.MathUtils.lerp(swordRef.current.rotation.x, playerClass === 'mage' ? -0.2 : 0.3, 8 * delta);
+        swordRef.current.rotation.x = THREE.MathUtils.lerp(swordRef.current.rotation.x, playerClass === 'mage' ? 0.3 : 0.3, 8 * delta);
         swordRef.current.rotation.z = THREE.MathUtils.lerp(swordRef.current.rotation.z, playerClass === 'archer' ? 0.2 : 0.1, 8 * delta);
         if (playerClass !== 'archer') swordRef.current.position.z = THREE.MathUtils.lerp(swordRef.current.position.z, 0.1, 8 * delta);
       }

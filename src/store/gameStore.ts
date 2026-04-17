@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { playSwordSlash, playMagicCast, playArrowShoot, playLevelUp, playHitSound, playPotionDrink } from '@/hooks/useSound';
-import { useSkillTreeStore } from './skillTreeStore';
+import { useSkillTreeStore, initSkillTreeForClass } from './skillTreeStore';
 import { useQuestStore } from './questStore';
 
 export type ZoneType = 'hub' | 'grasslands' | 'mushroom_forest' | 'frozen_peaks' | 'lava_caverns' | 'coral_reef' | 'shadow_swamp' | 'crystal_highlands' | 'void_nexus' | 'dragon_lair' | 'enchanted_forest' | 'floating_islands' | 'abyss' | 'celestial_plains' | 'shadow_realm' | 'pvp_arena' | 'raid_dungeon' | 'arena_colosseum';
@@ -519,6 +519,12 @@ autoFight: false,
     const currentState = get();
     const currentPets = currentState.pets && currentState.pets.length > 0 ? currentState.pets : INITIAL_PETS.map(p => ({ ...p }));
     const hasExistingGame = !resetGame && (currentState.playerLevel > 1 || currentState.playerXp > 0);
+    
+    if (resetGame && c) {
+      useSkillTreeStore.getState().resetTreeFully();
+      initSkillTreeForClass(c);
+    }
+    
     set({ 
       playerClass: c, 
       skills,
