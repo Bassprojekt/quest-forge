@@ -28,6 +28,28 @@ Das Spiel folgt einem klassischen MMORPG-Login-System:
 - **Magier** - Fernkampf-Magie mit hoher Krit-Rate
 - **Bogenschütze** - Schneller Angriff aus der Ferne
 
+## 🌳 Klassenspezifische Skill-Bäume
+
+Jede Klasse hat ihren eigenen einzigartigen Skill-Baum:
+
+### ⚔️ Krieger
+- Schwertschlag, Kampfeswut, Wirbelschlag
+- Rüstung, Schildblock, Kampfgeist
+- Wundenheilung, Kriegsraserei
+- Sturmangriff, Plünderer
+
+### 🔮 Magier
+- Feuerball, Verbrennung, Meteor
+- Eis, Frostschild, Manareserven
+- Meditation, Teleport
+- Fokus, Studium
+
+### 🏹 Bogenschütze
+- Bogenschuss, Scharfschütze, Mehrfachschuss
+- Schnellläufer, Ausweichen, Ausdauer
+- Schatten, Fernsicht
+- Jagdprämie, Kopfschuss
+
 ## 🎯 Spielziele
 
 1. **Level aufsteigen** - Werde stärker durch Erfahrungspunkte
