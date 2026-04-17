@@ -4,11 +4,11 @@ Ein MMORPG-Browserspiel mit 3D-Grafik, gebaut mit React, TypeScript und Three.js
 
 ## 🎮 Was ist Quest Forge?
 
-Quest Forge ist ein klassisches Fantasy-MMORPG im Flyff-Stil, das du direkt im Browser spielst. Wähle deinen Helden, besiege Monster, sammle Beute und werde zum legendären Krieger!
+Quest Forge ist ein klassisches Fantasy-MMORPG, das du direkt im Browser spielst. Wähle deinen Helden, besiege Monster, sammle Beute und werde zum legendären Krieger!
 
-## 🚀 Login-Flow (Flyff-Style)
+## 🚀 Login-Flow
 
-Das Spiel folgt dem klassischen Flyff-Login-System:
+Das Spiel folgt einem klassischen MMORPG-Login-System:
 
 1. **Login Screen** - Account erstellen oder einloggen
    - Account + Passwort
