@@ -99,19 +99,6 @@ export const useAccountStore = create<AccountState>()(
         return user.characters[state.currentCharacterSlot] || null;
       },
 
-      const loadCharactersFromBackend = async () => {
-        try {
-        const res = await fetch("http://localhost:3001/characters");
-        const data = await res.json();
-
-        // 👉 ersetzt NUR die Daten
-        set({ characters: data });
-
-        } catch (err) {
-        console.error("Backend Fehler:", err);
-          }
-      };
-
       resetCharacters: () => {
         const state = get();
         const userIndex = state.users.findIndex(u => u.username === state.currentUser);
