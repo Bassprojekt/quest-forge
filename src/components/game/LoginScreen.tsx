@@ -10,7 +10,7 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const [password, setPassword] = useState('');
   const [saveLogin, setSaveLogin] = useState(false);
   const [error, setError] = useState('');
-  
+
   const [showCharSelect, setShowCharSelect] = useState(false);
   const [showCharCreate, setShowCharCreate] = useState(false);
   const [newCharName, setNewCharName] = useState('');
@@ -28,6 +28,7 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const selectCharacter = useAccountStore(s => s.selectCharacter);
   const currentCharacterSlot = useAccountStore(s => s.currentCharacterSlot);
   const resetCharacters = useAccountStore(s => s.resetCharacters);
+  loadCharactersFromBackend();
 
   const setPlayerClass = useGameStore(s => s.setPlayerClass);
 
