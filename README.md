@@ -164,6 +164,33 @@ Jede Klasse hat ihren eigenen einzigartigen Skill-Baum:
 - Tailwind CSS
 - Zustand (State Management)
 - LocalStorage (Save System)
+- Web Audio API (Procedural Sounds)
+- MP3 Support für Custom Sounds
+
+## 🔊 Sound-System
+
+### Prozedurale Soundeffekte
+Das Spiel verwendet die Web Audio API für dynamisch generierte Sounds:
+
+- **Schwert-Sound** - Warrior Nahkampf
+- **Magie-Sound** - Mage Zauber
+- **Bogen-Sound** - Archer Schuss (MP3)
+- **Treffer-Sound** - Schaden bei Gegnern
+- **Mob-Attack-Sounds** - 8 verschiedene Sounds (Zombie, Slime, Skelett, Geist, Spinne, Goblin, Orc, Drache)
+- **Level-Up** - Aufstiegsfanfare
+- **Portal** - Teleport-Sound
+- **Trank** - Heilung
+- **Pickup** - Item aufheben
+- **UI** - Klickgeräusche
+
+### Lautstärke-Einstellungen
+In den Settings (Zahnrad-Symbol) gibt es zwei separate Regler:
+
+- **Musik** - Hintergrundmusik (2% Default)
+- **Soundeffekte** - Alle Spielgeräusche (10% Default)
+
+### MP3 Support
+Eigene Sounds können als MP3-Dateien im `public/Sounds/` Ordner hinzugefügt werden.
 
 ## 🚀 Spiel starten
 
