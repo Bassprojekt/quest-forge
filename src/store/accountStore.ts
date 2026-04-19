@@ -97,7 +97,7 @@ export const useAccountStore = create<AccountState>()(
         const user = state.users.find(u => u.username === state.currentUser);
         if (!user) return null;
         return user.characters[state.currentCharacterSlot] || null;
-      },
+          },
 
       resetCharacters: () => {
         const state = get();

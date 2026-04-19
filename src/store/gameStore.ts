@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { playSwordSlash, playMagicCast, playArrowShoot, playLevelUp, playHitSound, playPotionDrink } from '@/hooks/useSound';
+import { playSwordSlash, playMagicCast, playArrowShoot, playArrowMp3, playLevelUp, playHitSound, playPotionDrink, playEnemyAttackSound } from '@/hooks/useSound';
 import { useSkillTreeStore, initSkillTreeForClass } from './skillTreeStore';
 import { useQuestStore } from './questStore';
 
@@ -563,7 +563,7 @@ autoFight: false,
   attackEnemy: (id) => {
     const pClass = get().playerClass;
     if (pClass === 'mage') playMagicCast();
-    else if (pClass === 'archer') playArrowShoot();
+    else if (pClass === 'archer') playArrowMp3();
     else playSwordSlash();
 
     set(s => {
@@ -804,6 +804,7 @@ popups.push({
     if (state.shieldActive) reduction += Math.floor(amount * 0.7);
     const finalDmg = Math.max(1, amount - reduction);
     set(s => ({ playerHp: Math.max(0, s.playerHp - finalDmg) }));
+    playEnemyAttackSound('default');
   },
 
   setPlayerHp: (amount: number) => {

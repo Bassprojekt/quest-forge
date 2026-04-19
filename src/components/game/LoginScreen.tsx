@@ -3,6 +3,7 @@ import { useAccountStore } from '@/store/accountStore';
 import { useGameStore } from '@/store/gameStore';
 import { deleteSave } from '@/store/saveStore';
 import { useSkillTreeStore } from '@/store/skillTreeStore';
+import { initAudio, stopAllMusic } from '@/hooks/useSound';
 
 export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const [isRegister, setIsRegister] = useState(false);
@@ -60,6 +61,7 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   };
 
   const handleLogin = () => {
+    initAudio();
     if (!username || !password) {
       setError('Please enter account and password');
       return;
@@ -230,8 +232,8 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
                   </>
                 ) : (
                   <>
-                    <span className="text-2xl text-gray-300">+</span>
-                    <span className="text-xs text-gray-400">Create</span>
+                    <span className="text-3xl text-gray-300">+</span>
+                    <span className="text-xs text-gray-400">Empty</span>
                   </>
                 )}
               </div>
@@ -344,7 +346,7 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
           </div>
 
           <button
-            onClick={() => { logout(); setShowCharSelect(false); }}
+            onClick={() => { stopAllMusic(); logout(); setShowCharSelect(false); }}
             className="w-full py-2 text-gray-500 hover:text-gray-700 text-sm mt-4"
           >
             Logout

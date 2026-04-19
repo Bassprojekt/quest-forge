@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { Html, useGLTF } from '@react-three/drei';
 import { useGameStore, Enemy } from '@/store/gameStore';
 import { useQuestStore } from '@/store/questStore';
+import { playEnemyAttackSound } from '@/hooks/useSound';
 
 interface Props {
   enemy: Enemy;
@@ -1070,6 +1071,7 @@ export const EnemyEntity = ({ enemy }: Props) => {
     const baseDmg = Math.max(3, Math.floor(enemy.maxHp * 0.08));
     if (dist < 3 && state.clock.elapsedTime - lastAttackTime.current > 2) {
       takeDamage(baseDmg + Math.floor(Math.random() * 5));
+      playEnemyAttackSound(enemy.name);
       lastAttackTime.current = state.clock.elapsedTime;
     }
   });

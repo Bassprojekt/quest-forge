@@ -14,20 +14,28 @@ interface SettingsDialogProps {
 }
 
 export const SettingsDialog = ({ open, onOpenChange, onOpenHelp, onLogout }: SettingsDialogProps) => {
-  const { volume, language, setVolume, setLanguage } = useSettingsStore();
+  const { volume, fxVolume, language, setVolume, setFxVolume, setLanguage } = useSettingsStore();
   const [localVolume, setLocalVolume] = useState(volume);
+  const [localFxVolume, setLocalFxVolume] = useState(fxVolume);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const resetGame = useGameStore(s => s.resetGame);
   const logout = useAccountStore(s => s.logout);
 
   useEffect(() => {
     setLocalVolume(volume);
-  }, [volume, open]);
+    setLocalFxVolume(fxVolume);
+  }, [volume, fxVolume, open]);
 
   const handleVolumeChange = (value: number[]) => {
     const newVolume = value[0];
     setLocalVolume(newVolume);
     setVolume(newVolume);
+  };
+
+  const handleFxVolumeChange = (value: number[]) => {
+    const newVolume = value[0];
+    setLocalFxVolume(newVolume);
+    setFxVolume(newVolume);
   };
 
   const t = (key: keyof typeof TRANSLATIONS.de) => TRANSLATIONS[language][key];
@@ -92,8 +100,8 @@ export const SettingsDialog = ({ open, onOpenChange, onOpenHelp, onLogout }: Set
 
           <div className="space-y-3">
             <label className="text-sm font-medium flex items-center gap-2">
-              {volume > 0 ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-              {t('volume')}
+              <Volume2 className="h-4 w-4" />
+              {t('music')}
             </label>
             <div className="flex items-center gap-3">
               <Slider
@@ -105,6 +113,25 @@ export const SettingsDialog = ({ open, onOpenChange, onOpenHelp, onLogout }: Set
               />
               <span className="text-sm font-mono bg-muted px-2 py-1 rounded min-w-[50px] text-center">
                 {localVolume}%
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-sm font-medium flex items-center gap-2">
+              {localFxVolume > 0 ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              {t('soundEffects')}
+            </label>
+            <div className="flex items-center gap-3">
+              <Slider
+                value={[localFxVolume]}
+                onValueChange={handleFxVolumeChange}
+                max={100}
+                step={1}
+                className="flex-1"
+              />
+              <span className="text-sm font-mono bg-muted px-2 py-1 rounded min-w-[50px] text-center">
+                {localFxVolume}%
               </span>
             </div>
           </div>

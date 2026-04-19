@@ -5,17 +5,21 @@ export type Language = 'de' | 'en';
 
 interface SettingsState {
   volume: number;
+  fxVolume: number;
   language: Language;
   setVolume: (v: number) => void;
+  setFxVolume: (v: number) => void;
   setLanguage: (l: Language) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      volume: 100,
+      volume: 2,
+      fxVolume: 10,
       language: 'de',
       setVolume: (v) => set({ volume: Math.max(0, Math.min(100, v)) }),
+      setFxVolume: (v) => set({ fxVolume: Math.max(0, Math.min(100, v)) }),
       setLanguage: (l) => set({ language: l }),
     }),
     { name: 'quest-forge-settings' }

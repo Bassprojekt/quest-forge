@@ -181,7 +181,7 @@ function applySkillBonuses() {
     playerDefense: gameState.playerLevel > 1 ? Math.floor(gameState.playerLevel / 2) + itemDefenseBonus + bonuses.defenseBonus : itemDefenseBonus + bonuses.defenseBonus,
     playerMaxHp: baseMaxHp + itemHpBonus + bonuses.hpBonus,
     playerMaxMana: baseMaxMana + itemManaBonus + bonuses.manaBonus,
-    playerSpeed: 5 + itemSpeedBonus + bonuses.speedBonus,
+    playerSpeed: 5 + itemSpeedBonus + Math.min(bonuses.speedBonus, 3),
     playerHp: Math.min(gameState.playerHp, baseMaxHp + itemHpBonus + bonuses.hpBonus),
   });
 }
