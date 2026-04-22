@@ -232,11 +232,9 @@ export function saveGame(): boolean {
     save_data: data,
     slot_number: 1,
     updated_at: new Date().toISOString(),
-  }).then(({ error }) => {
-    if (error) {
-      // Silent fail - local save works
-    }
-  });
+  }, { 
+    onConflict: 'player_id,slot_number' 
+  }).then(() => {});
   
   return true;
 }
