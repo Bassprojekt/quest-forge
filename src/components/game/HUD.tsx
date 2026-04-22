@@ -291,18 +291,19 @@ export const HUD = ({
         </div>
       )}
 
-      {/* Event Banner - Left of Mini-Map */}
-      {currentEvent && (
-        <div className="absolute top-4 right-[8.5rem] pointer-events-none z-[60]">
-          <div className="px-3 py-1.5 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-lg shadow-lg border-2 border-yellow-400 animate-pulse">
-            <div className="text-white text-xs font-bold text-center whitespace-nowrap">
-              {currentEvent.icon} {currentEvent.bonusMultiplier}x Bonus!
+      {/* Event + Mini-Map Container */}
+      <div className="absolute top-4 right-4 flex items-start gap-2 pointer-events-auto z-[60]">
+        {/* Event Banner */}
+        {currentEvent && (
+          <div className="pointer-events-none">
+            <div className="px-3 py-1.5 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-lg shadow-lg border-2 border-yellow-400 animate-pulse">
+              <div className="text-white text-xs font-bold text-center whitespace-nowrap">
+                {currentEvent.icon} {currentEvent.bonusMultiplier}x Bonus!
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      <div className="absolute top-4 right-4 flex flex-col gap-2 pointer-events-auto z-[60]">
+        )}
+        
         {/* Mini-Map */}
         <div className="bg-white/90 backdrop-blur-md border-2 border-amber-200 rounded-xl p-2 w-32">
           <div className="text-[10px] text-gray-500 font-bold mb-1 text-center">🌍 {zoneFromPosInfo?.name || 'Hub'}</div>
