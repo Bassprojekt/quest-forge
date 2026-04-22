@@ -65,7 +65,13 @@ const EVENT_CONFIGS: EventConfig[] = [
   },
 ];
 
+const DEBUG_FORCE_EVENT: EventType | null = null; // Set to 'easter', 'halloween', etc. to force an event
+
 function getCurrentEvent(): EventConfig | null {
+  if (DEBUG_FORCE_EVENT) {
+    return EVENT_CONFIGS.find(e => e.type === DEBUG_FORCE_EVENT) || null;
+  }
+  
   const month = new Date().getMonth() + 1;
   
   for (const event of EVENT_CONFIGS) {
