@@ -291,11 +291,11 @@ export const HUD = ({
         </div>
       )}
 
-      {/* Event Banner - Above Mini-Map */}
+      {/* Event Banner - Left of Mini-Map */}
       {currentEvent && (
-        <div className="absolute top-4 right-36 pointer-events-none z-[60]">
-          <div className="px-4 py-2 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl shadow-lg border-2 border-yellow-400 animate-pulse">
-            <div className="text-white text-sm font-bold text-center">
+        <div className="absolute top-4 right-[8.5rem] pointer-events-none z-[60]">
+          <div className="px-3 py-1.5 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-lg shadow-lg border-2 border-yellow-400 animate-pulse">
+            <div className="text-white text-xs font-bold text-center whitespace-nowrap">
               {currentEvent.icon} {currentEvent.bonusMultiplier}x Bonus!
             </div>
           </div>
