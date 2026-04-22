@@ -60,7 +60,7 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
     return 'bg-gray-400';
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     initAudio();
     if (!username || !password) {
       setError('Please enter account and password');
@@ -76,19 +76,19 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
         setError('Password at least 4 characters');
         return;
       }
-      const success = register(username, password);
+      const success = await register(username, password);
       if (success) {
         if (saveLogin) {
           localStorage.setItem('qf_username', username);
           localStorage.setItem('qf_password', password);
         }
-        login(username, password);
+        await login(username, password);
         setShowCharSelect(true);
       } else {
         setError('Account already exists');
       }
     } else {
-      const success = login(username, password);
+      const success = await login(username, password);
       if (success) {
         if (saveLogin) {
           localStorage.setItem('qf_username', username);

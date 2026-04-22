@@ -1,5 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { supabase } from '@/database/supabase';
+
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 interface Character {
   id: string;
@@ -20,8 +29,8 @@ interface AccountState {
   users: UserAccount[];
   currentUser: string | null;
   currentCharacterSlot: number;
-  register: (username: string, password: string) => boolean;
-  login: (username: string, password: string) => boolean;
+  register: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoggedIn: () => boolean;
   getCurrentUsername: () => string | null;
@@ -38,20 +47,44 @@ export const useAccountStore = create<AccountState>()(
       currentUser: null,
       currentCharacterSlot: 0,
 
-      register: (username: string, password: string) => {
+      register: async (username: string, password: string) => {
         const state = get();
         if (state.users.find(u => u.username === username)) {
           return false;
         }
+        
+        // Save to Supabase
+        const passwordHash = await hashPassword(password);
+        const { error } = await supabase.from('players').upsert({
+          username: username,
+          password_hash: passwordHash,
+          created_at: new Date().toISOString(),
+        }, { onConflict: 'username' });
+        
+        if (error) {
+          console.warn('Supabase registration error:', error.message);
+        }
+        
         set({ users: [...state.users, { username, password, createdAt: Date.now(), characters: [null, null, null] }] });
         return true;
       },
 
-      login: (username: string, password: string) => {
+      login: async (username: string, password: string) => {
         const state = get();
         const user = state.users.find(u => u.username === username && u.password === password);
         if (user) {
           set({ currentUser: username, currentCharacterSlot: 0 });
+          
+          // Try to load from Supabase
+          try {
+            const { data } = await supabase.from('game_saves').select('save_data').eq('player_id', username).single();
+            if (data?.save_data) {
+              console.log('☁️ Loaded from Supabase!');
+            }
+          } catch (e) {
+            console.log('No cloud save found');
+          }
+          
           return true;
         }
         return false;
