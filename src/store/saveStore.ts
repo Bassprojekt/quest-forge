@@ -5,8 +5,19 @@ import { useQuestStore } from './questStore';
 import { useGuildStore } from './guildStore';
 import { useBankStore, BankItem } from './bankStore';
 import { InventoryItem, Pet, ShopItem } from './gameStore';
+import { supabase } from '@/database/supabase';
 
 const SAVE_KEY = 'mmorpg-save-data';
+const PLAYER_ID_KEY = 'mmorpg-player-id';
+
+function getPlayerId(): string {
+  let id = localStorage.getItem(PLAYER_ID_KEY);
+  if (!id) {
+    id = `player-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem(PLAYER_ID_KEY, id);
+  }
+  return id;
+}
 
 interface SaveData {
   version: number;
@@ -203,32 +214,63 @@ function restoreFromData(data: SaveData): boolean {
 }
 
 export function saveGame(): boolean {
-  try {
-    const data = getSaveData();
-    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-    
-    useGameStore.getState().setShowSaveIndicator(true);
-    setTimeout(() => {
-      useGameStore.getState().setShowSaveIndicator(false);
-    }, 2000);
-    
-    return true;
-  } catch {
-    return false;
-  }
+  const data = getSaveData();
+  const game = useGameStore.getState();
+  
+  localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  
+  useGameStore.getState().setShowSaveIndicator(true);
+  setTimeout(() => {
+    useGameStore.getState().setShowSaveIndicator(false);
+  }, 2000);
+  
+  // Supabase Cloud Backup
+  const playerId = getPlayerId();
+  
+  supabase.from('game_saves').upsert({
+    player_id: playerId,
+    save_data: data,
+    slot_number: 1,
+    updated_at: new Date().toISOString(),
+  }).then(({ error }) => {
+    if (error) {
+      console.warn('⚠️ Supabase Save fehlgeschlagen:', error.message);
+    } else {
+      console.log('☁️ Supabase: Spielstand gespeichert!');
+    }
+  });
+  
+  return true;
 }
 
 export function loadGame(): boolean {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return false;
-    const data: SaveData = JSON.parse(raw);
-    if (!data.version) return false;
-
-    return restoreFromData(data);
-  } catch {
-    return false;
+  // First try local storage
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (raw) {
+    try {
+      const data: SaveData = JSON.parse(raw);
+      if (data.version) {
+        restoreFromData(data);
+        return true;
+      }
+    } catch {}
   }
+  
+  // Try Supabase if local fails
+  const playerId = getPlayerId();
+  supabase.from('game_saves').select('save_data').eq('player_id', playerId).single()
+    .then(({ data: saved, error }) => {
+      if (error || !saved) {
+        console.log('Kein Cloud-Save gefunden');
+        return;
+      }
+      try {
+        restoreFromData(saved.save_data);
+        console.log('☁️ Aus Supabase geladen!');
+      } catch {}
+    });
+  
+  return false;
 }
 
 export function exportSaveToFile(): boolean {
