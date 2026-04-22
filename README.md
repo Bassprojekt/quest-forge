@@ -6,6 +6,15 @@ Ein MMORPG-Browserspiel mit 3D-Grafik, gebaut mit React, TypeScript und Three.js
 
 Quest Forge ist ein klassisches Fantasy-MMORPG, das du direkt im Browser spielst. Wähle deinen Helden, besiege Monster, sammle Beute und werde zum legendären Krieger!
 
+## ✨ Neue Features
+
+- **📱 Mobile Controls** - Touch-Joystick und Buttons für Mobilgeräte
+- **🎃 Seasonal Events** - Ostern, Halloween, Weihnachten mit Boni
+- **🎨 Gilden-Logo Editor** - Erstelle dein eigenes Gilden-Logo
+- **🏆 Achievements UI** - Alle Achievements im Überblick
+- **☁️ Cloud Speicherung** - Spielstand in Supabase gespeichert
+- **🏜️ Neue Zonen** - Wüste und Tempel
+
 ## 🚀 Login-Flow
 
 Das Spiel folgt einem klassischen MMORPG-Login-System:
@@ -65,7 +74,7 @@ Jede Klasse hat ihren eigenen einzigartigen Skill-Baum:
 6. **Pet-Turnier** - Automatische Kämpfe für XP und Gold
 7. **Edelsteine sammeln** - Kosmetik und Pet-Slots kaufen
 
-## 🗺️ Zonen (18 Zonen)
+## 🗺️ Zonen (20 Zonen)
 
 1. **Hub** - Hauptstadt mit NPCs, Shop, Quests
 2. **Grüne Wiesen** - Einsteigerzone
@@ -85,6 +94,21 @@ Jede Klasse hat ihren eigenen einzigartigen Skill-Baum:
 16. **PvP Arena** - Spieler gegen Spieler
 17. **Raid Dungeon** - 8 Spieler Raid
 18. **Arena Kolosseum** - Gladiator
+19. **🏜️ Wüste** - Dünen und Skorpione (Level 5+)
+20. **🏛️ Tempel** - Ancient Ruins (Level 15+)
+
+## 🎃 Seasonal Events
+
+Automatisch basierend auf dem aktuellen Monat:
+
+| Event | Monat | Bonus |
+|-------|-------|-------|
+| 🥚 **Ostern** | März-April | 1.5x XP & Gold |
+| 🎃 **Halloween** | Oktober | 2.0x XP & Gold |
+| 🎄 **Weihnachten** | Dezember | 2.0x XP & Gold |
+| ☀️ **Sommer** | Juni-August | 1.25x XP & Gold |
+
+Aktive Events werden im HUD oben links angezeigt!
 
 ## ⚔️ Spielmechaniken
 
@@ -125,8 +149,6 @@ Jede Klasse hat ihren eigenen einzigartigen Skill-Baum:
   - Mini Drache → Elder Drache
   - Wald Fee → Magische Fee → Verzauberte Fee
   - Geist Gigi → Phantom Gigi → Schreckens Gigi
-  - Ritter Baldur → Champion Baldur
-  - Priesterin Aria → Hohepriesterin Aria
 - Evolvierte Pets haben bessere Stats und einzigartige 3D-Modelle
 
 ### Zone-Wände
@@ -150,12 +172,42 @@ Jede Klasse hat ihren eigenen einzigartigen Skill-Baum:
 - Normaler Mob: 50% Chance auf 1
 - Kosmetik-Items und Pet-Slots kaufbar
 
-## 🏆 Achievements
+## 🏆 Achievements System
 
-- **10 Kills** - Erste Schritte
-- **1000 Gold** - Wohlstand
-- **10000 Schaden** - Kraftvoll
-- **Level 10** - Aufgestiegen
+12+ Achievements mit Gold-Belohnungen:
+
+- ⚔️ **Erster Kill** - Besiege dein erstes Monster
+- 💀 **Monsterjäger** - Besiege 10/50/100 Monster
+- ⭐ **Aufsteiger** - Errreiche Level 5/10/20
+- 💰 **Goldsammler** - Sammle 1.000/10.000 Gold
+- 🐾 **Tierfreund** - Besitze dein erstes/5. Haustiere
+- 🏰 **Gründer** - Gründe eine Gilde
+
+## 🎨 Gilden-Logo Editor
+
+Erstelle dein eigenes Gilden-Logo:
+- 12 Farben zur Auswahl
+- 6 Shapes (Kreis, Quadrat, Dreieck, Stern, Raute, Schild)
+- 3-Buchstaben Kürzel
+- Live Vorschau
+- Canvas-basiert
+
+## 📱 Mobile Controls
+
+Vollständige Touch-Unterstützung für Mobilgeräte:
+
+- **Joystick** - linker Bildschirmrand für Bewegung
+- **Angriff** - Großer roter Button
+- **Skills** - 2 Skill-Buttons
+- **Auto-Fight** - Toggle für automatisches Kämpfen
+- **Ein/Ausblenden** - Button zum Verstecken
+
+## ☁️ Cloud Speicherung
+
+Spielstand wird automatisch in Supabase gespeichert:
+- Alle 30 Sekunden Auto-Save
+- LocalStorage Backup
+- Export als JSON Datei
 
 ## 🔧 Technologien
 
@@ -163,7 +215,8 @@ Jede Klasse hat ihren eigenen einzigartigen Skill-Baum:
 - Three.js / @react-three/fiber
 - Tailwind CSS
 - Zustand (State Management)
-- LocalStorage (Save System)
+- Supabase (Cloud Speicherung)
+- LocalStorage (Backup)
 - Web Audio API (Procedural Sounds)
 - MP3 Support für Custom Sounds
 
@@ -176,6 +229,7 @@ Das Spiel verwendet die Web Audio API für dynamisch generierte Sounds:
 - **Magie-Sound** - Mage Zauber
 - **Bogen-Sound** - Archer Schuss (MP3)
 - **Treffer-Sound** - Schaden bei Gegnern
+- **Sterbe-Sound** - Wenn Gegner stirbt
 - **Mob-Attack-Sounds** - 8 verschiedene Sounds (Zombie, Slime, Skelett, Geist, Spinne, Goblin, Orc, Drache)
 - **Level-Up** - Aufstiegsfanfare
 - **Portal** - Teleport-Sound
@@ -189,9 +243,6 @@ In den Settings (Zahnrad-Symbol) gibt es zwei separate Regler:
 - **Musik** - Hintergrundmusik (2% Default)
 - **Soundeffekte** - Alle Spielgeräusche (10% Default)
 
-### MP3 Support
-Eigene Sounds können als MP3-Dateien im `public/Sounds/` Ordner hinzugefügt werden.
-
 ## 🚀 Spiel starten
 
 ```bash
@@ -203,6 +254,7 @@ Dann im Browser: http://localhost:8080
 
 ## 📝 Steuerung
 
+### Desktop
 - **WASD** - Bewegung
 - **Maus** - Kamera
 - **Linksklick** - Angreifen
@@ -210,9 +262,13 @@ Dann im Browser: http://localhost:8080
 - **Shift** - Sprint/Dash
 - **F** - Nahkampf
 
+### Mobile
+- **Joystick** - Bewegung
+- **Buttons** - Angriff & Skills
+
 ## ⚠️ Hinweis
 
-Dies ist ein **Prototype/Browser-Spiel**. Das Account-System speichert Daten nur lokal im Browser (LocalStorage). Für ein echtes Online-MMORPG wäre ein Server mit Datenbank nötig.
+Dies ist ein **Browser-MMORPG** mit Cloud-Speicherung über Supabase. Alle Spieler-Daten werden in der Cloud gespeichert und können vom Admin-Panel eingesehen werden.
 
 ## 📜 Lizenz
 

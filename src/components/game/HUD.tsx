@@ -11,6 +11,7 @@ import { InventoryUI } from './InventoryUI';
 import { SkillTreeUI } from './SkillTreeUI';
 import { SettingsDialog } from './SettingsDialog';
 import { HelpUI } from './HelpUI';
+import { AchievementsUI } from './AchievementsUI';
 import { exportSaveToFile } from '@/store/saveStore';
 
 interface HUDProps {
@@ -168,6 +169,7 @@ export const HUD = ({
     <div className="fixed inset-0 pointer-events-none z-50" style={{ fontFamily: "'Fredoka', sans-serif" }}>
       {showSettings && <SettingsDialog open={showSettings} onOpenChange={setShowSettings} onOpenHelp={() => { setShowSettings(false); setShowHelp(true); }} onLogout={() => window.location.reload()} />}
       {showHelp && <HelpUI onClose={() => setShowHelp(false)} />}
+        {showAchievements && <AchievementsUI onClose={() => setShowAchievements(false)} />}
       {/* {showShop && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-auto">
           <div className="text-red-500 text-2xl font-bold">SHOP SHOULD SHOW HERE - showShop={String(showShop)} shopTab={shopTab}</div>
