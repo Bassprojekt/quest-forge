@@ -215,12 +215,6 @@ export const HUD = ({
                 <span>💰 {gold}</span>
                 <span>💎 {gems}</span>
               </div>
-              
-              {currentEvent && (
-                <div className="mt-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white text-sm font-bold animate-pulse">
-                  {currentEvent.icon} {currentEvent.name} — {currentEvent.bonusMultiplier}x EXP & Gold!
-                </div>
-              )}
               {canClaimDaily && (() => {
                 const reward = getDailyRewardPreview();
                 return (
@@ -293,6 +287,17 @@ export const HUD = ({
           <div className="bg-white/90 backdrop-blur-md border-2 border-amber-200 rounded-xl px-4 py-2 text-center">
             <div className="text-gray-800 text-sm font-bold">{zoneFromPosInfo.name}</div>
             <div className="text-gray-500 text-xs">{t('requiredLevel')}{zoneFromPosInfo.requiredLevel}+</div>
+          </div>
+        </div>
+      )}
+
+      {/* Event Banner - Top Center */}
+      {currentEvent && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-[60]">
+          <div className="px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-2xl shadow-xl border-2 border-yellow-400 animate-pulse">
+            <div className="text-white text-lg font-bold text-center drop-shadow-lg">
+              {currentEvent.icon} {currentEvent.name} {currentEvent.icon} — {currentEvent.bonusMultiplier}x EXP & Gold!
+            </div>
           </div>
         </div>
       )}
