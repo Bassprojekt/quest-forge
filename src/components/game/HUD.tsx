@@ -291,12 +291,12 @@ export const HUD = ({
         </div>
       )}
 
-      {/* Event Banner - Top Center */}
+      {/* Event Banner - Above Mini-Map */}
       {currentEvent && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-[60]">
-          <div className="px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-2xl shadow-xl border-2 border-yellow-400 animate-pulse">
-            <div className="text-white text-lg font-bold text-center drop-shadow-lg">
-              {currentEvent.icon} {currentEvent.name} {currentEvent.icon} — {currentEvent.bonusMultiplier}x EXP & Gold!
+        <div className="absolute top-4 right-36 pointer-events-none z-[60]">
+          <div className="px-4 py-2 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl shadow-lg border-2 border-yellow-400 animate-pulse">
+            <div className="text-white text-sm font-bold text-center">
+              {currentEvent.icon} {currentEvent.bonusMultiplier}x Bonus!
             </div>
           </div>
         </div>
