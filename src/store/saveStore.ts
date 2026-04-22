@@ -234,9 +234,7 @@ export function saveGame(): boolean {
     updated_at: new Date().toISOString(),
   }).then(({ error }) => {
     if (error) {
-      console.warn('⚠️ Supabase Save fehlgeschlagen:', error.message);
-    } else {
-      console.log('☁️ Supabase: Spielstand gespeichert!');
+      // Silent fail - local save works
     }
   });
   
@@ -260,13 +258,9 @@ export function loadGame(): boolean {
   const playerId = getPlayerId();
   supabase.from('game_saves').select('save_data').eq('player_id', playerId).single()
     .then(({ data: saved, error }) => {
-      if (error || !saved) {
-        console.log('Kein Cloud-Save gefunden');
-        return;
-      }
+      if (error || !saved) return;
       try {
         restoreFromData(saved.save_data);
-        console.log('☁️ Aus Supabase geladen!');
       } catch {}
     });
   

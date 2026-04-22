@@ -95,21 +95,20 @@ interface EventState {
 }
 
 export const useEventStore = create<EventState>((set, get) => ({
-  currentEvent: null,
-  eventXpBonus: 1,
-  eventGoldBonus: 1,
-  collectedEventItems: [],
-  
-  checkEvent: () => {
-    const event = getCurrentEvent();
-    if (event) {
-      set({
-        currentEvent: event,
-        eventXpBonus: event.bonusMultiplier,
-        eventGoldBonus: event.bonusMultiplier,
-      });
-      console.log(`🎉 ${event.name} ist aktiv! ${event.bonusMultiplier}x Bonus!`);
-    } else {
+currentEvent: null,
+    eventXpBonus: 1,
+    eventGoldBonus: 1,
+    collectedEventItems: [],
+    
+    checkEvent: () => {
+      const event = getCurrentEvent();
+      if (event) {
+        set({
+          currentEvent: event,
+          eventXpBonus: event.bonusMultiplier,
+          eventGoldBonus: event.bonusMultiplier,
+        });
+      } else {
       set({
         currentEvent: null,
         eventXpBonus: 1,
@@ -124,7 +123,6 @@ export const useEventStore = create<EventState>((set, get) => ({
       set({
         collectedEventItems: [...state.collectedEventItems, itemName],
       });
-      console.log(`🎁 ${itemName} gesammelt!`);
     }
   },
   

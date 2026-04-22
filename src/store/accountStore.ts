@@ -61,10 +61,6 @@ export const useAccountStore = create<AccountState>()(
           created_at: new Date().toISOString(),
         }, { onConflict: 'username' });
         
-        if (error) {
-          console.warn('Supabase registration error:', error.message);
-        }
-        
         set({ users: [...state.users, { username, password, createdAt: Date.now(), characters: [null, null, null] }] });
         return true;
       },
@@ -74,17 +70,6 @@ export const useAccountStore = create<AccountState>()(
         const user = state.users.find(u => u.username === username && u.password === password);
         if (user) {
           set({ currentUser: username, currentCharacterSlot: 0 });
-          
-          // Try to load from Supabase
-          try {
-            const { data } = await supabase.from('game_saves').select('save_data').eq('player_id', username).single();
-            if (data?.save_data) {
-              console.log('☁️ Loaded from Supabase!');
-            }
-          } catch (e) {
-            console.log('No cloud save found');
-          }
-          
           return true;
         }
         return false;
