@@ -65,7 +65,7 @@ const EVENT_CONFIGS: EventConfig[] = [
   },
 ];
 
-const DEBUG_FORCE_EVENT: EventType | null = null; // Set to 'easter', 'halloween', etc. to force an event
+const DEBUG_FORCE_EVENT: EventType | null = 'easter'; // Set to 'easter', 'halloween', etc. to force an event
 
 function getCurrentEvent(): EventConfig | null {
   if (DEBUG_FORCE_EVENT) {
