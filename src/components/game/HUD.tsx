@@ -3,6 +3,7 @@ import { useGameStore, ZONES } from '@/store/gameStore';
 import { useQuestStore } from '@/store/questStore';
 import { useSkillTreeStore } from '@/store/skillTreeStore';
 import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
+import { useEventStore, EVENT_CONFIGS } from '@/store/eventStore';
 import { QuestUI } from './QuestUI';
 import { ShopUI } from './ShopUI';
 import { PetBuffUI } from './PetBuffUI';
@@ -12,7 +13,23 @@ import { SettingsDialog } from './SettingsDialog';
 import { HelpUI } from './HelpUI';
 import { exportSaveToFile } from '@/store/saveStore';
 
-export const HUD = () => {
+interface HUDProps {
+  showInventory?: boolean;
+  setShowInventory?: (show: boolean) => void;
+  showShop?: boolean;
+  setShowShop?: (show: boolean) => void;
+  shopTab?: 'items' | 'pets';
+  setShopTab?: (tab: 'items' | 'pets') => void;
+}
+
+export const HUD = ({ 
+  showInventory: externalShowInventory, 
+  setShowInventory: externalSetShowInventory,
+  showShop: externalShowShop,
+  setShowShop: externalSetShowShop,
+  shopTab: externalShopTab,
+  setShopTab: externalSetShopTab
+}: HUDProps) => {
   const hp = useGameStore(s => s.playerHp);
   const maxHp = useGameStore(s => s.playerMaxHp);
   const hpPercent = (hp / maxHp) * 100;
@@ -65,11 +82,30 @@ export const HUD = () => {
   const totalKills = useGameStore(s => s.totalKills);
   const totalGoldEarned = useGameStore(s => s.totalGoldEarned);
   const totalDamageDealt = useGameStore(s => s.totalDamageDealt);
+  
+  // Event System
+  const currentEvent = useEventStore(s => s.currentEvent);
+  const eventXpBonus = useEventStore(s => s.eventXpBonus);
+  const checkEvent = useEventStore(s => s.checkEvent);
+  
+  useEffect(() => {
+    checkEvent();
+  }, []);
 
-  const [showShop, setShowShop] = useState(false);
+  const [showShopInternal, setShowShopInternal] = useState(false);
   const [showPetBuff, setShowPetBuff] = useState(false);
-  const [shopTab, setShopTab] = useState<'items' | 'pets'>('items');
-  const [showInventory, setShowInventory] = useState(false);
+  const [shopTabInternal, setShopTabInternal] = useState<'items' | 'pets'>('items');
+  const [showInventoryInternal, setShowInventoryInternal] = useState(false);
+  
+  const showShop = externalShowShop ?? showShopInternal;
+  const setShowShop = externalSetShowShop ?? setShowShopInternal;
+  const shopTab = externalShopTab ?? shopTabInternal;
+  const setShopTab = externalSetShopTab ?? setShopTabInternal;
+  const showInventory = externalShowInventory !== undefined ? externalShowInventory : showInventoryInternal;
+  const setShowInventory = externalSetShowInventory 
+    ? externalSetShowInventory 
+    : setShowInventoryInternal;
+  
   const [showSkillTree, setShowSkillTree] = useState(false);
   const [showParty, setShowParty] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -137,7 +173,11 @@ export const HUD = () => {
           <div className="text-red-500 text-2xl font-bold">SHOP SHOULD SHOW HERE - showShop={String(showShop)} shopTab={shopTab}</div>
         </div>
       )} */}
-      {showShop && <ShopUI onClose={() => setShowShop(false)} initialTab={shopTab} />}
+      {showShop && <ShopUI 
+        onClose={() => setShowShop(false)} 
+        initialTab={shopTab} 
+        onOpenInventory={() => setShowInventory(true)}
+      />}
         {showPetBuff && <PetBuffUI onClose={() => setShowPetBuff(false)} />}
       {showInventory && <InventoryUI onClose={() => setShowInventory(false)} />}
       {showSkillTree && <SkillTreeUI onClose={() => setShowSkillTree(false)} />}
@@ -173,6 +213,12 @@ export const HUD = () => {
                 <span>💰 {gold}</span>
                 <span>💎 {gems}</span>
               </div>
+              
+              {currentEvent && (
+                <div className="mt-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white text-sm font-bold animate-pulse">
+                  {currentEvent.icon} {currentEvent.name} — {currentEvent.bonusMultiplier}x EXP & Gold!
+                </div>
+              )}
               {canClaimDaily && (() => {
                 const reward = getDailyRewardPreview();
                 return (
