@@ -4,6 +4,8 @@ import { useFrame } from '@react-three/fiber';
 import { useGameStore } from '@/store/gameStore';
 import { PetModel3D, getPetColor } from './PetModels';
 
+type PetState = 'FOLLOW' | 'COLLECT' | 'RETURN' | 'IDLE';
+
 const getDistance = (pos1: [number, number, number], pos2: [number, number, number]) => {
   const dx = pos2[0] - pos1[0];
   const dz = pos2[2] - pos1[2];
@@ -12,95 +14,119 @@ const getDistance = (pos1: [number, number, number], pos2: [number, number, numb
 
 export const PetCompanion = () => {
   const meshRef = useRef<THREE.Group>(null);
+  const stateRef = useRef<PetState>('FOLLOW');
+  const targetRef = useRef<[number, number, number] | null>(null);
+  const lastStateChange = useRef(0);
+  const idleTimeRef = useRef(0);
+  const leftOrRight = useRef(Math.random() > 0.5 ? 1 : -1);
+
   const playerPos = useGameStore(s => s.playerPosition);
   const pets = useGameStore(s => s.pets);
   const pet = pets.find(p => p.equipped && !p.inTournament);
   const groundItems = useGameStore(s => s.groundItems);
   const pickupGroundItem = useGameStore(s => s.pickupGroundItem);
-  const lastPickupTime = useRef(0);
-  const collectingRef = useRef(false);
-  const collectTargetRef = useRef<[number, number, number] | null>(null);
 
-  const targetOffset = 1.5;
-  const smoothSpeed = 0.1;
-  const collectRange = 50;
-  const pickupRange = 1.2;
-
-  useFrame(() => {
+  useFrame((_, delta) => {
     if (!meshRef.current || !pet) return;
 
-    const petPos: [number, number, number] = [meshRef.current.position.x, 0, meshRef.current.position.z];
+    const petPos = meshRef.current.position;
     const now = Date.now();
-    const playerDist = getDistance(petPos, playerPos);
 
-    if (!collectingRef.current) {
-      const itemsInRange = groundItems.filter(item => {
-        const itemDist = getDistance(petPos, item.position);
-        return itemDist < collectRange;
+    const speed = 4 * delta;
+    const playerTarget = new THREE.Vector3(playerPos[0], 0, playerPos[2] - 1.5 - (leftOrRight.current * 0.8));
+    const distanceToPlayer = petPos.distanceTo(playerTarget);
+
+    // =============================
+    // 🧠 STATE SWITCHING
+    // =============================
+    if (stateRef.current !== 'COLLECT' && stateRef.current !== 'RETURN') {
+      const item = groundItems.find(item => {
+        const d = new THREE.Vector3(item.position[0], 0, item.position[2]).distanceTo(petPos);
+        return d < 6;
       });
 
-      if (itemsInRange.length > 0 && now - lastPickupTime.current > 600) {
-        let closestItem = itemsInRange[0];
-        let closestDist = getDistance(petPos, closestItem.position);
-
-        for (const item of itemsInRange) {
-          const d = getDistance(petPos, item.position);
-          if (d < closestDist) {
-            closestDist = d;
-            closestItem = item;
-          }
-        }
-
-        collectTargetRef.current = closestItem.position;
-        collectingRef.current = true;
+      if (item) {
+        targetRef.current = item.position;
+        stateRef.current = 'COLLECT';
+        lastStateChange.current = now;
       }
     }
 
-    if (collectingRef.current && collectTargetRef.current) {
-      const itemStillExists = groundItems.some(item => 
-        item.position[0] === collectTargetRef.current![0] && 
-        item.position[2] === collectTargetRef.current![2]
-      );
+    // =============================
+    // 🎯 COLLECT STATE
+    // =============================
+    if (stateRef.current === 'COLLECT' && targetRef.current) {
+      const target = new THREE.Vector3(targetRef.current[0], 0, targetRef.current[2]);
+      const dist = petPos.distanceTo(target);
 
-      if (!itemStillExists) {
-        collectingRef.current = false;
-        collectTargetRef.current = null;
+      if (dist > 0.8) {
+        petPos.lerp(target, 0.1);
       } else {
-        const targetX = collectTargetRef.current[0];
-        const targetZ = collectTargetRef.current[2];
-        const toItemDist = getDistance(petPos, collectTargetRef.current);
+        const item = groundItems.find(i =>
+          i.position[0] === targetRef.current![0] &&
+          i.position[2] === targetRef.current![2]
+        );
 
-        if (toItemDist > pickupRange) {
-          meshRef.current.position.x += (targetX - meshRef.current.position.x) * smoothSpeed;
-          meshRef.current.position.z += (targetZ - meshRef.current.position.z) * smoothSpeed;
-        } else {
-          const item = groundItems.find(item => 
-            item.position[0] === collectTargetRef.current![0] && 
-            item.position[2] === collectTargetRef.current![2]
-          );
-          if (item) {
-            pickupGroundItem(item.id);
-            lastPickupTime.current = now;
-          }
-          collectingRef.current = false;
-          collectTargetRef.current = null;
+        if (item) {
+          pickupGroundItem(item.id);
         }
-        return;
+
+        stateRef.current = 'RETURN';
+        targetRef.current = null;
+      }
+      return;
+    }
+
+    // =============================
+    // 🔄 RETURN TO PLAYER
+    // =============================
+    if (stateRef.current === 'RETURN') {
+      if (distanceToPlayer > 0.5) {
+        petPos.lerp(playerTarget, 0.1);
+      } else {
+        stateRef.current = 'IDLE';
+        idleTimeRef.current = now;
+        leftOrRight.current = Math.random() > 0.5 ? 1 : -1;
+      }
+      return;
+    }
+
+    // =============================
+    // 😴 IDLE
+    // =============================
+    if (stateRef.current === 'IDLE') {
+      if (distanceToPlayer > 2.5) {
+        stateRef.current = 'FOLLOW';
+      }
+
+      if (now - idleTimeRef.current > 2000 && now - lastStateChange.current > 1000) {
+        stateRef.current = 'FOLLOW';
+        lastStateChange.current = now;
+      }
+
+      petPos.y = Math.sin(now * 0.003) * 0.08;
+      return;
+    }
+
+    // =============================
+    // 🧍 FOLLOW PLAYER
+    // =============================
+    if (stateRef.current === 'FOLLOW') {
+      if (distanceToPlayer > 1.5) {
+        petPos.lerp(playerTarget, 0.08);
       }
     }
 
-    const targetX = playerPos[0];
-    const targetZ = playerPos[2] - targetOffset;
-
-    if (playerDist > 2.5) {
-      meshRef.current.position.x += (targetX - meshRef.current.position.x) * smoothSpeed;
-      meshRef.current.position.z += (targetZ - meshRef.current.position.z) * smoothSpeed;
-    }
-    meshRef.current.position.y = 0;
-
-    const dx = playerPos[0] - meshRef.current.position.x;
-    const dz = playerPos[2] - meshRef.current.position.z;
-    meshRef.current.rotation.y = Math.atan2(dx, dz);
+    // =============================
+    // 🔄 ROTATION
+    // =============================
+    const dir = new THREE.Vector3().subVectors(playerTarget, petPos);
+    const angle = Math.atan2(dir.x, dir.z);
+    meshRef.current.rotation.y = THREE.MathUtils.lerp(
+      meshRef.current.rotation.y,
+      angle,
+      0.1
+    );
   });
 
   if (!pet) return null;
@@ -108,7 +134,7 @@ export const PetCompanion = () => {
   const color = getPetColor(pet);
 
   return (
-    <group ref={meshRef} position={[playerPos[0], 0, playerPos[2] - targetOffset]}>
+    <group ref={meshRef} position={[playerPos[0], 0, playerPos[2] - 1.5]}>
       <PetModel3D pet={pet} />
       <pointLight intensity={0.5} distance={3} color={color} />
     </group>

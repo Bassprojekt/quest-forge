@@ -13,7 +13,8 @@ export const QuestUI = () => {
 
   if (!showDialog || !selectedNpc) return null;
 
-  const npcQuests = quests.filter(q => q.npcName === selectedNpc);
+  const showAllQuests = selectedNpc === 'Quest Altar';
+  const npcQuests = showAllQuests ? quests : quests.filter(q => q.npcName === selectedNpc);
 
   const handleClaim = (id: string) => {
     const reward = claimReward(id);

@@ -539,6 +539,160 @@ export function playErrorSound() {
   osc.stop(ctx.currentTime + 0.15);
 }
 
+// Desert mob sounds
+export function playDesertSound() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(200, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.2);
+  gain.gain.setValueAtTime(0.05 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.25);
+}
+
+export function playSnakeSound() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(800, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.15);
+  osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.25);
+  gain.gain.setValueAtTime(0.04 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.3);
+}
+
+export function playScorpionSound() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(150, ctx.currentTime);
+  osc.frequency.setValueAtTime(200, ctx.currentTime + 0.08);
+  osc.frequency.setValueAtTime(150, ctx.currentTime + 0.16);
+  gain.gain.setValueAtTime(0.05 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.2);
+}
+
+export function playDeathSound() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  // Heavy thud
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(80, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.3);
+  gain.gain.setValueAtTime(0.2 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.4);
+  // Crack sound
+  const noise = ctx.createBufferSource();
+  const bufSize = ctx.sampleRate * 0.15;
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize * 0.15));
+  noise.buffer = buf;
+  const ng = ctx.createGain();
+  ng.gain.setValueAtTime(0.08 * vol, ctx.currentTime);
+  ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+  noise.connect(ng).connect(ctx.destination);
+  noise.start();
+}
+
+export function playBossSound() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  // Deep rumble
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(60, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.5);
+  gain.gain.setValueAtTime(0.15 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.6);
+  // Thunder crack
+  const noise = ctx.createBufferSource();
+  const bufSize = ctx.sampleRate * 0.3;
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize * 0.1));
+  noise.buffer = buf;
+  const ng = ctx.createGain();
+  const nf = ctx.createBiquadFilter();
+  nf.type = 'lowpass';
+  nf.frequency.value = 1000;
+  ng.gain.setValueAtTime(0.08 * vol, ctx.currentTime);
+  ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+  noise.connect(nf).connect(ng).connect(ctx.destination);
+  noise.start();
+}
+
+export function playTeleportSound() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  const notes = [400, 500, 600, 800];
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.05);
+    gain.gain.linearRampToValueAtTime(0.04 * vol, ctx.currentTime + i * 0.05 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.05 + 0.15);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(ctx.currentTime + i * 0.05);
+    osc.stop(ctx.currentTime + i * 0.05 + 0.15);
+  });
+}
+
+export function playGoldPickup() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(1200, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1800, ctx.currentTime + 0.08);
+  gain.gain.setValueAtTime(0.03 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.1);
+}
+
 let arrowAudio: HTMLAudioElement | null = null;
 export function playArrowMp3() {
   ensureCtx();
@@ -546,7 +700,7 @@ export function playArrowMp3() {
   if (vol === 0) return;
   try {
     if (!arrowAudio) {
-      arrowAudio = new Audio('/sounds/ARROW SOUND EFFECT.mp3');
+      arrowAudio = new Audio('/Sounds/ARROW SOUND EFFECT.mp3');
     }
     arrowAudio.volume = 0.5;
     arrowAudio.currentTime = 0;

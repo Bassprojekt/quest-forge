@@ -137,6 +137,8 @@ export const Player = () => {
   const rightArmRef = useRef<THREE.Group>(null);
   const leftArmRef = useRef<THREE.Group>(null);
   const keys = useKeyboard();
+  const inventory = useGameStore(s => s.inventory);
+  const equippedCosmetic = inventory.find(i => i.type === 'cosmetic' && i.equipped);
   const setPlayerPosition = useGameStore(s => s.setPlayerPosition);
   const activateSkill = useGameStore(s => s.useSkill);
   const skills = useGameStore(s => s.skills);
@@ -530,6 +532,24 @@ export const Player = () => {
         {playerClass === 'mage' && <MageWeapon swingRef={swordRef} />}
         {playerClass === 'archer' && <ArcherWeapon swingRef={swordRef} />}
       </group>
+
+      {/* Cosmetic effects - ALWAYS SHOW RAINBOW FOR ALL AURAS */}
+      {equippedCosmetic && String(equippedCosmetic.id).includes('aura') && (
+        <group>
+          <pointLight position={[1, 2.5, 0]} color="#FF0000" intensity={10} distance={25} />
+          <pointLight position={[-1, 2.5, 0]} color="#00FF00" intensity={10} distance={25} />
+          <pointLight position={[0, 2.5, 1]} color="#0000FF" intensity={10} distance={25} />
+          <pointLight position={[0, 2.5, -1]} color="#FFFF00" intensity={10} distance={25} />
+          <pointLight position={[0.7, 3, 0.7]} color="#FF00FF" intensity={8} distance={20} />
+          <pointLight position={[-0.7, 3, -0.7]} color="#00FFFF" intensity={8} distance={20} />
+          <pointLight position={[0, 3, 0]} color="#FFFFFF" intensity={5} distance={15} />
+        </group>
+      )}
+      {equippedCosmetic && !String(equippedCosmetic.id).includes('aura') && (
+        <group>
+          <pointLight position={[0, 2, 0]} color="#FF00FF" intensity={8} distance={20} />
+        </group>
+      )}
 
       {/* Shield visual */}
       {shieldActive && (

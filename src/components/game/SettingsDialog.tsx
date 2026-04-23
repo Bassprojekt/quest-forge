@@ -1,10 +1,10 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
-import { Settings, Volume2, VolumeX, Globe, ChevronDown, RotateCcw, HelpCircle, LogOut } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Slider } from '@/components/ui/slider';
 import { useGameStore } from '@/store/gameStore';
 import { useAccountStore } from '@/store/accountStore';
+import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Volume2, VolumeX, Settings, Globe, ChevronDown } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -59,7 +59,7 @@ export const SettingsDialog = ({ open, onOpenChange, onOpenHelp, onLogout }: Set
 
         <div className="space-y-6 py-4">
           <div className="space-y-3">
-            <label className="text-sm font-medium flex items-center gap-2">
+            <label className="text-sm font-medium flex items-center gap-2" title="Wähle die Sprache des Spiels">
               <Globe className="h-4 w-4" />
               {t('language')}
             </label>
@@ -99,7 +99,7 @@ export const SettingsDialog = ({ open, onOpenChange, onOpenHelp, onLogout }: Set
           </div>
 
           <div className="space-y-3">
-            <label className="text-sm font-medium flex items-center gap-2">
+            <label className="text-sm font-medium flex items-center gap-2" title="Musik-Lautstärke einstellen">
               <Volume2 className="h-4 w-4" />
               {t('music')}
             </label>
@@ -118,7 +118,7 @@ export const SettingsDialog = ({ open, onOpenChange, onOpenHelp, onLogout }: Set
           </div>
 
           <div className="space-y-3">
-            <label className="text-sm font-medium flex items-center gap-2">
+            <label className="text-sm font-medium flex items-center gap-2" title="Soundeffekte-Lautstärke einstellen">
               {localFxVolume > 0 ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
               {t('soundEffects')}
             </label>
@@ -145,7 +145,6 @@ export const SettingsDialog = ({ open, onOpenChange, onOpenHelp, onLogout }: Set
             }}
             className="w-full mt-4 flex items-center justify-center gap-2 py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium"
           >
-            <RotateCcw className="h-4 w-4" />
             Spiel zurücksetzen
           </button>
 
@@ -153,7 +152,6 @@ export const SettingsDialog = ({ open, onOpenChange, onOpenHelp, onLogout }: Set
             onClick={() => onOpenHelp?.()}
             className="w-full mt-3 flex items-center justify-center gap-2 py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium"
           >
-            <HelpCircle className="h-4 w-4" />
             Hilfe & Steuerung
           </button>
 
@@ -165,7 +163,6 @@ export const SettingsDialog = ({ open, onOpenChange, onOpenHelp, onLogout }: Set
             }}
             className="w-full mt-3 flex items-center justify-center gap-2 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium"
           >
-            <LogOut className="h-4 w-4" />
             Abmelden
           </button>
         </div>

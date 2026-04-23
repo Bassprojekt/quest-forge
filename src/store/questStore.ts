@@ -94,6 +94,27 @@ const INITIAL_QUESTS: Quest[] = [
   { id: 'q58', title: 'Seelensammler', description: 'Besiege den Seelensammler.', type: 'kill', target: 'Seelensammler', required: 1, current: 0, rewardXp: 2200, rewardGold: 1100, rewardGems: 5, status: 'available', npcName: 'Gildenmeisterin Gabi' },
   { id: 'q59', title: 'Kampfmaschine', description: 'Besiege die Kampfmaschine.', type: 'kill', target: 'Kampfmaschine', required: 1, current: 0, rewardXp: 1000, rewardGold: 500, rewardGems: 2, status: 'available', npcName: 'Arena-Leiter Max' },
   { id: 'q60', title: 'Netzkämpfer', description: 'Besiege 3 Netzkämpfer.', type: 'kill', target: 'Netzkämpfer', required: 3, current: 0, rewardXp: 600, rewardGold: 300, status: 'available', npcName: 'Arena-Leiter Max' },
+  { id: 'q61', title: 'Sternensammler', description: 'Sammle 10 Sternscherben.', type: 'collect', target: 'Sternscherbe', targetItem: 'Sternscherbe', required: 10, current: 0, rewardXp: 400, rewardGold: 200, status: 'available', npcName: 'Apothekerin Flora' },
+  { id: 'q62', title: 'Schatzjäger', description: 'Finde 3 versteckte Truhen.', type: 'collect', target: 'Truhe', targetItem: 'Truhe', required: 3, current: 0, rewardXp: 500, rewardGold: 250, status: 'available', npcName: 'Händler Mika' },
+  { id: 'q63', title: 'Drachenfeuer', description: 'Besiege 5 junge Drachen.', type: 'kill', target: 'Junger Drache', required: 5, current: 0, rewardXp: 800, rewardGold: 400, status: 'available', npcName: 'Schmied Vulkan' },
+  { id: 'q64', title: 'Eisern', description: 'Besiege den Eisenkönig.', type: 'kill', target: 'Eisenkönig', required: 1, current: 0, rewardXp: 2500, rewardGold: 1200, rewardGems: 5, status: 'available', npcName: 'Waffenhändler Erik' },
+  { id: 'q65', title: 'Schatzmeister', description: 'Sammle 50 Gold aus Truhen.', type: 'collect', target: 'Gold', targetItem: 'Gold', required: 50, current: 0, rewardXp: 300, rewardGold: 150, status: 'available', npcName: 'Bankier Boris' },
+  { id: 'q66', title: 'Runenforscher', description: 'Sammle 8 Runensteine.', type: 'collect', target: 'Runenstein', targetItem: 'Runenstein', required: 8, current: 0, rewardXp: 450, rewardGold: 225, status: 'available', npcName: 'Gildenmeisterin Gabi' },
+  { id: 'q67', title: 'Untote Armee', description: 'Besiege 15 Zombies.', type: 'kill', target: 'Zombie', required: 15, current: 0, rewardXp: 600, rewardGold: 300, status: 'available', npcName: 'Händler Mika' },
+  { id: 'q68', title: 'Elementar-Meister', description: 'Besiege alle 4 Elementare.', type: 'kill', target: 'Elementar', required: 4, current: 0, rewardXp: 1500, rewardGold: 750, rewardGems: 3, status: 'available', npcName: 'Schmied Vulkan' },
+  // Wüsten Quests
+  { id: 'q69', title: 'Sandkrabbler', description: 'Töte 5 Wüstensandkriecher.', type: 'kill', target: 'Wüstensandkriecher', required: 5, current: 0, rewardXp: 120, rewardGold: 60, status: 'available', npcName: 'Händler Mika' },
+  { id: 'q70', title: 'Skarabäus', description: 'Besiege 3 Skarabäen.', type: 'kill', target: 'Skarabäus', required: 3, current: 0, rewardXp: 180, rewardGold: 90, status: 'available', npcName: 'Wüsten-Händler' },
+  { id: 'q71', title: 'Schlangenfänger', description: 'Töte 4 Giftnattern.', type: 'kill', target: 'Giftnatter', required: 4, current: 0, rewardXp: 200, rewardGold: 100, status: 'available', npcName: 'Apothekerin Flora' },
+  { id: 'q72', title: 'Fuchsjagd', description: 'Besiege den Wüstenfuchs.', type: 'kill', target: 'Wüstenfuchs', required: 1, current: 0, rewardXp: 250, rewardGold: 125, status: 'available', npcName: 'Pet-Meisterin Luna' },
+  { id: 'q73', title: 'Skorpion-König', description: 'Besiege den Skorpion.', type: 'kill', target: 'Skorpion', required: 1, current: 0, rewardXp: 300, rewardGold: 150, status: 'available', npcName: 'Wüsten-Händler' },
+  { id: 'q74', title: 'Sonnenlord', description: 'Besiege den Sonnenfürst.', type: 'kill', target: 'Sonnenfürst', required: 1, current: 0, rewardXp: 500, rewardGold: 250, status: 'available', npcName: 'Wüsten-Händler' },
+  // Tempel Quests
+  { id: 'q75', title: 'Tempelwächter', description: 'Besiege 3 Tempelwächter.', type: 'kill', target: 'Tempelwächter', required: 3, current: 0, rewardXp: 280, rewardGold: 140, status: 'available', npcName: 'Waffenhändler Erik' },
+  { id: 'q76', title: 'Mumienfluch', description: 'Besiege 2 Mumien.', type: 'kill', target: 'Mumie', required: 2, current: 0, rewardXp: 350, rewardGold: 175, status: 'available', npcName: 'Apothekerin Flora' },
+  { id: 'q77', title: 'Sanddämon', description: 'Besiege den Sandschattulje.', type: 'kill', target: 'Sandschattulje', required: 1, current: 0, rewardXp: 400, rewardGold: 200, status: 'available', npcName: 'Schmied Vulkan' },
+  { id: 'q78', title: 'Goldkäfer', description: 'Töte 5 Skarabäen-König.', type: 'kill', target: 'Skarabäus-König', required: 5, current: 0, rewardXp: 450, rewardGold: 225, status: 'available', npcName: 'Wüsten-Händler' },
+  { id: 'q79', title: 'Pharao', description: 'Besiege den Pharao.', type: 'kill', target: 'Pharao', required: 1, current: 0, rewardXp: 800, rewardGold: 400, rewardGems: 3, status: 'available', npcName: 'Event-Verkünder Evi' },
 ];
 
 export const useQuestStore = create<QuestState>((set, get) => ({

@@ -13,8 +13,9 @@ import { LaserBeam } from './LaserBeam';
 import { HUD } from './HUD';
 import { RainParticles } from './RainParticles';
 import { DamageNumbers } from './DamageNumbers';
+import { useQuestStore } from '@/store/questStore';
 import { GroundItems } from './GroundItems';
-import { HitParticles, LevelUpEffect } from './HitParticles';
+import { HitParticles, LevelUpEffect, DeathParticles } from './HitParticles';
 import { ClassSelect } from './ClassSelect';
 import { ShopUI } from './ShopUI';
 import { CraftingUI } from './CraftingUI';
@@ -130,6 +131,7 @@ export const GameScene = () => {
   const [showTeleportDialog, setShowTeleportDialog] = useState(false);
   const [shopTab, setShopTab] = useState<'items' | 'pets'>('items');
   const [showShop, setShowShop] = useState(false);
+  const [showInventory, setShowInventory] = useState(false);
   const [showGuild, setShowGuild] = useState(false);
   const [showBank, setShowBank] = useState(false);
   const [showPetTournament, setShowPetTournament] = useState(false);
@@ -200,7 +202,7 @@ export const GameScene = () => {
   const blacksmithName = 'Schmied Vulkan';
   const merchantName = 'Händler Mika';
   const petMasterName = 'Pet-Meisterin Luna';
-  const rebirthAltarName = 'Rebirth Altar';
+  const rebirthAltarName = 'Quest Altar';
   const setWeather = useGameStore(s => s.setWeather);
 
   useEffect(() => {
@@ -313,7 +315,14 @@ export const GameScene = () => {
       {showRaid && <RaidUI onClose={() => setShowRaid(false)} />}
       <ChatUI onClose={() => {}} />
       <MobileControls />
-      <HUD />
+      <HUD 
+        showInventory={showInventory} 
+        setShowInventory={setShowInventory}
+        showShop={showShop}
+        setShowShop={setShowShop}
+        shopTab={shopTab}
+        setShopTab={setShopTab}
+      />
       <Canvas
         shadows
         camera={{ fov: 55, near: 0.1, far: 1200 }}
@@ -378,6 +387,7 @@ export const GameScene = () => {
         <GroundItems />
         <HitParticles />
         <LevelUpEffect />
+        <DeathParticles />
 
         {/* Hub ground - no overlaps */}
         {currentZone === 'hub' && (
@@ -399,10 +409,10 @@ export const GameScene = () => {
               <meshStandardMaterial color="#D2B48C" roughness={0.7} />
             </mesh>
             <HubBuildingsWithProps onOpenShop={handleOpenShop} onOpenGuild={handleOpenGuild} onOpenBank={handleOpenBank} onOpenPotionCraft={handleOpenPotionCraft} onOpenWeaponCraft={handleOpenWeaponCraft} onOpenPVPArena={handleOpenPVPArena} onOpenFriends={handleOpenFriends} onOpenEvents={handleOpenEvents} onOpenRaid={handleOpenRaid} onOpenPetTournament={handleOpenPetTournament} />
-            <NPCEntity name={blacksmithName} position={[-6, 0, 6]} color="#CD853F" />
+            <NPCEntity name={blacksmithName} position={[-6, 0, 6]} color="#CD853F" onClick={() => setShowWeaponCraft(true)} />
             <NPCEntity name={merchantName} position={[6, 0, 6]} color="#4169E1" />
             <NPCEntity name={petMasterName} position={[-6, 0, -6]} color="#FF69B4" onClick={handleOpenPets} />
-            <NPCEntity name={rebirthAltarName} position={[6, 0, -6]} color="#FFD700" />
+            <NPCEntity name={rebirthAltarName} position={[6, 0, -6]} color="#FFD700" onClick={() => { useQuestStore.getState().setSelectedNpc('Quest Altar'); useQuestStore.getState().setShowQuestDialog(true); }} />
             <LeaderboardBoard />
           </>
         )}
