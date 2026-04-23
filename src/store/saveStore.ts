@@ -5,6 +5,7 @@ import { useQuestStore } from './questStore';
 import { useGuildStore } from './guildStore';
 import { useBankStore, BankItem } from './bankStore';
 import { InventoryItem, Pet, ShopItem } from './gameStore';
+import { supabase } from '@/database/supabase';
 
 const SAVE_KEY = 'mmorpg-save-data';
 const PLAYER_ID_KEY = 'mmorpg-player-id';
@@ -223,6 +224,17 @@ localStorage.setItem(SAVE_KEY, JSON.stringify(data));
      useGameStore.getState().setShowSaveIndicator(false);
    }, 2000);
    
+   // Supabase Cloud Backup
+   const playerId = getPlayerId();
+   supabase.from('game_saves').upsert({
+     player_id: playerId,
+     save_data: data,
+     slot_number: 1,
+     updated_at: new Date().toISOString(),
+   }, { 
+     onConflict: 'player_id' 
+   }).then(() => {});
+   
    return true;
 }
 
@@ -242,11 +254,12 @@ export function loadGame(): boolean {
   // Try Supabase if local fails
   const playerId = getPlayerId();
   supabase.from('game_saves').select('save_data').eq('player_id', playerId).single()
-    .then(({ data: saved, error }) => {
-      if (error || !saved) return;
-      try {
-        restoreFromData(saved.save_data);
-      } catch {}
+    .then(({ data: saved }) => {
+      if (saved?.save_data) {
+        try {
+          restoreFromData(saved.save_data);
+        } catch {}
+      }
     });
   
   return false;
