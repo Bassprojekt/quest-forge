@@ -387,7 +387,41 @@ export const Player = () => {
       walkCycle.current = 0;
     }
 
-    meshRef.current.position.addScaledVector(velocity.current, delta);
+    // Calculate new position before applying
+    const newX = meshRef.current.position.x + velocity.current.x * delta;
+    const newZ = meshRef.current.position.z + velocity.current.z * delta;
+    
+    // Hub collision check - block movement into buildings
+    let canMove = true;
+    if (currentZone === 'hub') {
+      const collisionZones = [
+        { x: 0, z: 0, radius: 7 },
+        { x: -25, z: 5, radius: 6 },
+        { x: 25, z: 5, radius: 6 },
+        { x: -25, z: -25, radius: 7 },
+        { x: 25, z: -25, radius: 7 },
+        { x: 0, z: -35, radius: 6 },
+        { x: -35, z: 0, radius: 5 },
+        { x: 35, z: 0, radius: 5 },
+        { x: -15, z: 20, radius: 5 },
+        { x: 15, z: 20, radius: 5 },
+        { x: -20, z: -10, radius: 4 },
+        { x: 20, z: -10, radius: 4 },
+      ];
+      
+      for (const zone of collisionZones) {
+        const distToBuilding = Math.sqrt(Math.pow(newX - zone.x, 2) + Math.pow(newZ - zone.z, 2));
+        if (distToBuilding < zone.radius) {
+          canMove = false;
+          break;
+        }
+      }
+    }
+    
+    // Only apply movement if not colliding
+    if (canMove) {
+      meshRef.current.position.addScaledVector(velocity.current, delta);
+    }
     const mapHalfSize = getMapHalfSize(currentZone);
     meshRef.current.position.x = THREE.MathUtils.clamp(meshRef.current.position.x, -mapHalfSize, mapHalfSize);
     meshRef.current.position.z = THREE.MathUtils.clamp(meshRef.current.position.z, -mapHalfSize, mapHalfSize);
