@@ -584,9 +584,34 @@ autoFight: false,
     const dz = pos[2] - currentPos[2];
     const dist = Math.sqrt(dx * dx + dz * dz);
     if (dist > 100) {
-      console.warn('Blocked teleport - too far:', dist, 'from', currentPos, 'to', pos);
       return;
     }
+    
+    // Hub collision - prevent walking through buildings and decoration
+    if (state.currentZone === 'hub') {
+      const collisionZones = [
+        { x: 0, z: 0, radius: 8 },      // Center fountain/grave
+        { x: -25, z: 5, radius: 5 },    // Shop area
+        { x: 25, z: 5, radius: 5 },    // Bank area
+        { x: -25, z: -25, radius: 6 },  // Armor shop
+        { x: 25, z: -25, radius: 6 },   // Weapon shop
+        { x: 0, z: -35, radius: 5 },    // Guild hall
+        { x: -35, z: 0, radius: 4 },   // Events area
+        { x: 35, z: 0, radius: 4 },    // Tournament area
+        { x: -15, z: 20, radius: 4 },  // Trees left
+        { x: 15, z: 20, radius: 4 },   // Trees right
+        { x: -20, z: -10, radius: 3 },  // Deco left
+        { x: 20, z: -10, radius: 3 },   // Deco right
+      ];
+      
+      for (const zone of collisionZones) {
+        const distToBuilding = Math.sqrt(Math.pow(pos[0] - zone.x, 2) + Math.pow(pos[2] - zone.z, 2));
+        if (distToBuilding < zone.radius) {
+          return; // Block movement into collision zone
+        }
+      }
+    }
+    
     set({ playerPosition: pos });
   },
 
