@@ -394,28 +394,32 @@ export const Player = () => {
     // Hub collision check - block movement into buildings
     let canMove = true;
     if (currentZone === 'hub') {
-      const collisionZones = [
-        { x: -20, z: 20, radius: 4 },  // Waffenladen
-        { x: 20, z: 20, radius: 4 },   // Rüstungsladen
-        { x: 30, z: 5, radius: 4 },    // Tavern
-        { x: -30, z: 5, radius: 4 },   // Händler
-        { x: 20, z: -20, radius: 4 }, // Bank Ost
-        { x: -20, z: -20, radius: 4 },// Bank West
-        { x: 0, z: 30, radius: 5 },   // Gildenhaus
-        { x: 30, z: 0, radius: 4 },   // Turnier
-        { x: -30, z: 0, radius: 4 },  // Events
-        { x: 0, z: -30, radius: 4 },  // PvP Arena
-        { x: -15, z: 20, radius: 4 }, // Bäume
-        { x: 15, z: 20, radius: 4 }, // Bäume
-        { x: -25, z: -25, radius: 4 }, // Deco
-        { x: 25, z: -25, radius: 4 }, // Deco
-      ];
-      
-      for (const zone of collisionZones) {
-        const distToBuilding = Math.sqrt(Math.pow(newX - zone.x, 2) + Math.pow(newZ - zone.z, 2));
-        if (distToBuilding < zone.radius) {
-          canMove = false;
-          break;
+      // Debug logging
+      if (velocity.current.length() > 0.1) {
+        const collisionZones = [
+          { x: -20, z: 20, radius: 4 },  // Waffenladen
+          { x: 20, z: 20, radius: 4 },   // Rüstungsladen
+          { x: 30, z: 5, radius: 4 },    // Tavern
+          { x: -30, z: 5, radius: 4 },   // Händler
+          { x: 20, z: -20, radius: 4 }, // Bank Ost
+          { x: -20, z: -20, radius: 4 },// Bank West
+          { x: 0, z: 30, radius: 5 },   // Gildenhaus
+          { x: 30, z: 0, radius: 4 },   // Turnier
+          { x: -30, z: 0, radius: 4 },  // Events
+          { x: 0, z: -30, radius: 4 },  // PvP Arena
+          { x: -15, z: 20, radius: 4 }, // Bäume
+          { x: 15, z: 20, radius: 4 }, // Bäume
+          { x: -25, z: -25, radius: 4 }, // Deco
+          { x: 25, z: -25, radius: 4 }, // Deco
+        ];
+        
+        for (const zone of collisionZones) {
+          const distToBuilding = Math.sqrt(Math.pow(newX - zone.x, 2) + Math.pow(newZ - zone.z, 2));
+          if (distToBuilding < zone.radius) {
+            canMove = false;
+            console.log('BLOCKED:', zone, 'at', newX, newZ);
+            break;
+          }
         }
       }
     }
