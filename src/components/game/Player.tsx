@@ -395,20 +395,12 @@ export const Player = () => {
     let canMove = true;
     if (currentZone === 'hub' && velocity.current.length() > 0.1) {
       const collisionZones = [
-        { x: -20, z: 20, radius: 4 },  // Waffenladen
-        { x: 20, z: 20, radius: 4 },   // Rüstungsladen
-        { x: 30, z: 5, radius: 4 },    // Tavern
-        { x: -30, z: 5, radius: 4 },   // Händler
-        { x: 20, z: -20, radius: 4 }, // Bank Ost
-        { x: -20, z: -20, radius: 4 },// Bank West
-        { x: 0, z: 30, radius: 5 },   // Gildenhaus
-        { x: 30, z: 0, radius: 4 },   // Turnier
-        { x: -30, z: 0, radius: 4 },  // Events
-        { x: 0, z: -30, radius: 4 },  // PvP Arena
-        { x: -15, z: 20, radius: 4 }, // Bäume
-        { x: 15, z: 20, radius: 4 }, // Bäume
-        { x: -25, z: -25, radius: 4 }, // Deco
-        { x: 25, z: -25, radius: 4 }, // Deco
+        { x: -20, z: 20, radius: 3.5 },  // Waffenladen
+        { x: 20, z: -20, radius: 3.5 },   // Bank
+        { x: -30, z: 5, radius: 3 },    // Händler
+        { x: 30, z: 5, radius: 3 },    // Tavern
+        { x: 0, z: 30, radius: 4 },   // Gildenhaus
+        { x: 30, z: -10, radius: 4 },  // PvP Arena
       ];
       
       for (const zone of collisionZones) {
