@@ -423,6 +423,9 @@ export const Player = () => {
     // Only apply movement if not colliding
     if (canMove) {
       meshRef.current.position.addScaledVector(velocity.current, delta);
+    } else {
+      // Stop velocity when blocked
+      velocity.current.set(0, 0, 0);
     }
     const mapHalfSize = getMapHalfSize(currentZone);
     meshRef.current.position.x = THREE.MathUtils.clamp(meshRef.current.position.x, -mapHalfSize, mapHalfSize);
