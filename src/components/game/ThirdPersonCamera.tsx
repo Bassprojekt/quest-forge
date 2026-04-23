@@ -105,10 +105,8 @@ export const ThirdPersonCamera = () => {
       dist * Math.cos(theta) * Math.cos(phi)
     );
 
-    // Prevent camera from freezing at center - ensure target always has some minimum values
-    const safeTarget = target.clone();
-    camera.position.lerp(safeTarget.add(offset), 0.1);
-    camera.lookAt(safeTarget);
+    camera.position.lerp(target.clone().add(offset), 0.1);
+    camera.lookAt(target);
   });
 
   return null;
