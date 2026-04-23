@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
 import { useAccountStore } from '@/store/accountStore';
-import { updateMusicVolume } from '@/hooks/useSound';
+import { updateMusicVolume } from '@/hooks/musicPlayer';
 
 interface SettingsDialogProps {
   open: boolean;

@@ -3,7 +3,8 @@ import { useAccountStore } from '@/store/accountStore';
 import { useGameStore } from '@/store/gameStore';
 import { deleteSave } from '@/store/saveStore';
 import { useSkillTreeStore } from '@/store/skillTreeStore';
-import { initAudio, stopAllMusic, startBackgroundMusic } from '@/hooks/useSound';
+import { initAudio, stopAllMusic } from '@/hooks/useSound';
+import { startBackgroundMusic } from '@/hooks/musicPlayer';
 
 export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const [isRegister, setIsRegister] = useState(false);

@@ -46,73 +46,173 @@ function getFxVolumeMultiplier(): number {
   return useSettingsStore.getState().fxVolume / 100;
 }
 
-// Background music player
-let bgMusic: HTMLAudioElement | null = null;
+export function playSwordSlash() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 2000;
+  filter.Q.value = 0.5;
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(800, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.15);
+  gain.gain.setValueAtTime(0.05 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+  osc.connect(filter).connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.2);
+  // Noise burst
+  const bufSize = ctx.sampleRate * 0.1;
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * 0.15;
+  const noise = ctx.createBufferSource();
+  noise.buffer = buf;
+  const ng = ctx.createGain();
+  ng.gain.setValueAtTime(0.04 * vol, ctx.currentTime);
+  ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+  noise.connect(ng).connect(ctx.destination);
+  noise.start();
+  noise.stop(ctx.currentTime + 0.1);
+}
+
+export function playMagicCast() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(400, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.3);
+  osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.5);
+  gain.gain.setValueAtTime(0.05 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.5);
+}
+
+export function playArrowShoot() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  // Bowstring twang
+  const osc1 = ctx.createOscillator();
+  const gain1 = ctx.createGain();
+  osc1.type = 'triangle';
+  osc1.frequency.setValueAtTime(400, ctx.currentTime);
+  osc1.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.12);
+  gain1.gain.setValueAtTime(0.03 * vol, ctx.currentTime);
+  gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+  osc1.connect(gain1).connect(ctx.destination);
+  osc1.start();
+  osc1.stop(ctx.currentTime + 0.15);
+  // Subtle swipe for arrow flight
+  const bufSize = ctx.sampleRate * 0.1;
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) {
+    const env = Math.sin((i / bufSize) * Math.PI);
+    data[i] = (Math.random() * 2 - 1) * env * 0.5;
+  }
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 800;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.03 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+  src.connect(filter).connect(gain).connect(ctx.destination);
+  src.start();
+  src.stop(ctx.currentTime + 0.1);
+}
+
+export function playLevelUp() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  const notes = [523.25, 659.25, 783.99, 1046.50];
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
+    gain.gain.linearRampToValueAtTime(0.05 * vol, ctx.currentTime + i * 0.12 + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.4);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(ctx.currentTime + i * 0.12);
+    osc.stop(ctx.currentTime + i * 0.12 + 0.4);
+  });
+}
+
+export function playPortalSound() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(200, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.5);
+  osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 1.0);
+  gain.gain.setValueAtTime(0.03 * vol, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.05 * vol, ctx.currentTime + 0.3);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.0);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 1.0);
+}
+
+export function playPotionDrink() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  for (let i = 0; i < 4; i++) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 300 + i * 80;
+    gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.08);
+    gain.gain.linearRampToValueAtTime(0.06 * vol, ctx.currentTime + i * 0.08 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.1);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(ctx.currentTime + i * 0.08);
+    osc.stop(ctx.currentTime + i * 0.08 + 0.1);
+  }
+}
+
+export function playHitSound() {
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = getFxVolumeMultiplier();
+  if (vol === 0) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(150, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.1);
+  gain.gain.setValueAtTime(0.04 * vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.1);
+}
+
+// Ambient zone music - simple looping pads
+let currentMusic: { osc: OscillatorNode; gain: GainNode; interval: ReturnType<typeof setInterval>; zone: string } | null = null;
 let musicInitialized = false;
-let currentTrackIndex = 0;
-
-const ambientTracks = [
-  '/Sounds/mp3/Ambient 1 Loop.mp3',
-  '/Sounds/mp3/Ambient 2 Loop.mp3',
-  '/Sounds/mp3/Ambient 3 Loop.mp3',
-  '/Sounds/mp3/Ambient 4 Loop.mp3',
-  '/Sounds/mp3/Ambient 5 Loop.mp3',
-  '/Sounds/mp3/Ambient 6 Loop.mp3',
-  '/Sounds/mp3/Ambient 7 Loop.mp3',
-  '/Sounds/mp3/Ambient 8 Loop.mp3',
-  '/Sounds/mp3/Ambient 9 Loop.mp3',
-  '/Sounds/mp3/Ambient 10 Loop.mp3',
-];
-
-function getMusicVolume(): number {
-  return useSettingsStore.getState().volume / 100;
-}
-
-export function startBackgroundMusic() {
-  if (musicInitialized) return;
-  musicInitialized = true;
-  
-  function playNext() {
-    if (!bgMusic) {
-      bgMusic = new Audio();
-    }
-    
-    const vol = getMusicVolume();
-    if (vol === 0) {
-      setTimeout(playNext, 1000);
-      return;
-    }
-    
-    bgMusic.src = ambientTracks[currentTrackIndex];
-    bgMusic.volume = vol;
-    bgMusic.loop = false;
-    
-    bgMusic.play().then(() => {
-      console.log('🎵 Now playing:', ambientTracks[currentTrackIndex]);
-    }).catch(() => {});
-    
-    bgMusic.onended = () => {
-      currentTrackIndex = (currentTrackIndex + 1) % ambientTracks.length;
-      playNext();
-    };
-  }
-  
-  playNext();
-}
-
-export function stopBackgroundMusic() {
-  if (bgMusic) {
-    bgMusic.pause();
-    bgMusic = null;
-  }
-  musicInitialized = false;
-}
-
-export function updateMusicVolume() {
-  if (bgMusic) {
-    bgMusic.volume = getMusicVolume();
-  }
-}
 
 const ZONE_MUSIC_NOTES: Record<string, number[]> = {
   hub: [261.63, 329.63, 392.00],
@@ -380,7 +480,7 @@ export function playEnemyAttackSound(mobType: string) {
       playDragonSound();
       break;
     default:
-      break;
+      playHitSound();
   }
 }
 
