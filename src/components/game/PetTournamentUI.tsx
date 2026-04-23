@@ -16,6 +16,10 @@ const ENEMY_PETS = [
   { name: 'Straßenkatze', level: 3, hp: 80, damage: 12 },
   { name: 'Wild Drache', level: 6, hp: 150, damage: 20 },
   { name: 'Kampfphönix', level: 10, hp: 250, damage: 30 },
+  { name: 'Eis Löwe', level: 15, hp: 400, damage: 45 },
+  { name: 'Donner Tiger', level: 20, hp: 550, damage: 60 },
+  { name: 'König Drache', level: 30, hp: 800, damage: 80 },
+  { name: 'Legendärer Phönix', level: 50, hp: 1200, damage: 120 },
 ];
 
 const HOUR_OPTIONS = [
@@ -84,7 +88,7 @@ export const PetTournamentUI = ({ onClose }: { onClose: () => void }) => {
       playerHp: playerMaxHp,
       enemyHp: enemy.hp,
       rounds: 0,
-      reward: enemy.level * 100,
+      reward: enemy.level * 100 + (enemy.level >= 15 ? 1 : 0) + (enemy.level >= 30 ? 2 : 0),
     };
     setCurrentBattle(battle);
     

@@ -4,6 +4,7 @@ import { useGameStore } from '@/store/gameStore';
 let bgMusic: HTMLAudioElement | null = null;
 let currentTrackIndex = 0;
 let musicStarted = false;
+let volumeCheckInterval: ReturnType<typeof setInterval> | null = null;
 
 const ambientTracks = [
   '/Sounds/mp3/Ambient 1 Loop.mp3',
@@ -19,25 +20,42 @@ const ambientTracks = [
 ];
 
 function getVolume(): number {
-  return (useSettingsStore.getState().volume || 10) / 100;
+  return useSettingsStore.getState().volume || 10;
+}
+
+function checkAndUpdateVolume() {
+  const volRaw = useSettingsStore.getState().volume;
+  const vol = volRaw !== undefined ? volRaw : 10;
+  
+  if (vol <= 0) {
+    if (bgMusic) {
+      bgMusic.pause();
+    }
+    musicStarted = false;
+  } else if (!musicStarted && vol > 0) {
+    startBackgroundMusic();
+  } else if (bgMusic) {
+    bgMusic.volume = vol / 100;
+  }
 }
 
 export function startBackgroundMusic() {
-  const vol = getVolume();
-  console.log('Starting music with volume:', vol);
+  const volRaw = useSettingsStore.getState().volume;
+  const vol = volRaw !== undefined ? volRaw : 10;
   
   if (vol <= 0) {
     musicStarted = false;
     return;
   }
   
+  musicStarted = true;
+  
   if (bgMusic) {
     bgMusic.pause();
   }
   
-  musicStarted = true;
   bgMusic = new Audio(ambientTracks[0]);
-  bgMusic.volume = vol;
+  bgMusic.volume = (vol || 10) / 100;
   bgMusic.loop = false;
   
   bgMusic.onended = () => {
@@ -48,17 +66,21 @@ export function startBackgroundMusic() {
     }
   };
   
-  bgMusic.onerror = (e) => {
-    console.log('Audio error:', e);
-  };
+  bgMusic.onerror = () => {};
   
-  bgMusic.play()
-    .then(() => console.log('Music playing!'))
-    .catch((e) => console.log('Play failed:', e));
+  bgMusic.play().catch(() => {});
+    
+  if (!volumeCheckInterval) {
+    volumeCheckInterval = setInterval(checkAndUpdateVolume, 500);
+  }
 }
 
 export function stopBackgroundMusic() {
   musicStarted = false;
+  if (volumeCheckInterval) {
+    clearInterval(volumeCheckInterval);
+    volumeCheckInterval = null;
+  }
   if (bgMusic) {
     bgMusic.pause();
     bgMusic = null;
@@ -66,14 +88,5 @@ export function stopBackgroundMusic() {
 }
 
 export function updateMusicVolume() {
-  const vol = getVolume();
-  console.log('updateMusicVolume:', vol);
-  
-  if (vol <= 0) {
-    stopBackgroundMusic();
-  } else if (!bgMusic && musicStarted === false) {
-    startBackgroundMusic();
-  } else if (bgMusic) {
-    bgMusic.volume = vol;
-  }
+  checkAndUpdateVolume();
 }
