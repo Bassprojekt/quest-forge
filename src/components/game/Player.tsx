@@ -397,7 +397,6 @@ export const Player = () => {
       const collisionZones = [
         { x: -20, z: 20, radius: 3.5 },  // Waffenladen
         { x: 20, z: -20, radius: 3.5 },   // Bank
-        { x: -30, z: 5, radius: 3 },    // Händler
         { x: 30, z: 5, radius: 3 },    // Tavern
         { x: 0, z: 30, radius: 4 },   // Gildenhaus
         { x: 30, z: -10, radius: 4 },  // PvP Arena
