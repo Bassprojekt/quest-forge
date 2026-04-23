@@ -1,9 +1,10 @@
 import { create } from 'zustand';
-import { playSwordSlash, playMagicCast, playArrowShoot, playArrowMp3, playLevelUp, playHitSound, playPotionDrink, playEnemyAttackSound } from '@/hooks/useSound';
+import { playSwordSlash, playMagicCast, playArrowShoot, playArrowMp3, playLevelUp, playHitSound, playPotionDrink, playEnemyAttackSound, playDeathSound, playBossSound } from '@/hooks/useSound';
 import { useSkillTreeStore, initSkillTreeForClass } from './skillTreeStore';
 import { useQuestStore } from './questStore';
+import { savePlayerFirebase, loadPlayerFirebase } from '@/database/firebase';
 
-export type ZoneType = 'hub' | 'grasslands' | 'mushroom_forest' | 'frozen_peaks' | 'lava_caverns' | 'coral_reef' | 'shadow_swamp' | 'crystal_highlands' | 'void_nexus' | 'dragon_lair' | 'enchanted_forest' | 'floating_islands' | 'abyss' | 'celestial_plains' | 'shadow_realm' | 'pvp_arena' | 'raid_dungeon' | 'arena_colosseum';
+export type ZoneType = 'hub' | 'grasslands' | 'mushroom_forest' | 'frozen_peaks' | 'lava_caverns' | 'coral_reef' | 'shadow_swamp' | 'crystal_highlands' | 'void_nexus' | 'dragon_lair' | 'enchanted_forest' | 'floating_islands' | 'abyss' | 'celestial_plains' | 'shadow_realm' | 'pvp_arena' | 'raid_dungeon' | 'arena_colosseum' | 'desert' | 'temple';
 export type PlayerClass = 'warrior' | 'mage' | 'archer' | null;
 
 export interface Enemy {
@@ -101,6 +102,7 @@ export interface CraftingRecipe {
   id: string;
   name: string;
   type: 'weapon' | 'armor' | 'potion';
+  weaponType?: 'sword' | 'staff' | 'bow';
   icon: string;
   stat: string;
   value: number;
@@ -129,7 +131,9 @@ export interface ZoneInfo {
 
 export const ZONES: ZoneInfo[] = [
   { id: 'grasslands', name: 'Grüne Wiesen', requiredLevel: 1, color: '#4caf50', center: [120, 0], radius: 100, skyColor: '#87CEEB', groundColor: '#6DBE6D' },
+  { id: 'desert', name: 'Sonnenwüste', requiredLevel: 5, color: '#E6B800', center: [120, 150], radius: 80, skyColor: '#FFE4B5', groundColor: '#C2B280' },
   { id: 'mushroom_forest', name: 'Pilzwald', requiredLevel: 10, color: '#9C27B0', center: [280, 100], radius: 120, skyColor: '#9966CC', groundColor: '#4A3728' },
+  { id: 'temple', name: 'Alter Tempel', requiredLevel: 15, color: '#8B4513', center: [280, 250], radius: 90, skyColor: '#DAA520', groundColor: '#654321' },
   { id: 'frozen_peaks', name: 'Frostgipfel', requiredLevel: 20, color: '#00BCD4', center: [480, 0], radius: 140, skyColor: '#B0E0E6', groundColor: '#E8F4F8' },
   { id: 'lava_caverns', name: 'Lavahöhlen', requiredLevel: 30, color: '#FF5722', center: [680, 120], radius: 150, skyColor: '#FF4500', groundColor: '#2D1B1B' },
   { id: 'coral_reef', name: 'Korallenriff', requiredLevel: 40, color: '#E91E63', center: [900, 0], radius: 140, skyColor: '#87CEEB', groundColor: '#2F4F4F' },
@@ -171,7 +175,9 @@ function generateEnemies(zone: ZoneType, baseLv: number): Enemy[] {
   
   const zoneEnemyDefs: Record<string, { names: string[]; hpMult: number[]; bosses: string[] }> = {
     grasslands: { names: ['Zombie', 'Pilzling', 'Blauer Schleim', 'Riesenbiene', 'Haustier Schnecke', 'Waldameise', 'Käfer'], hpMult: [0.8, 1, 1.6, 2.4, 0.5, 0.6, 0.7], bosses: ['König der Wiesen'] },
+    desert: { names: ['Wüstensandkriecher', 'Skarabäus', 'Giftnatter', 'Wüstenfuchs', 'Skorpion', 'Tumbler'], hpMult: [0.8, 1.2, 1.4, 1.6, 1.8, 2.2], bosses: ['Sonnenfürst'] },
     mushroom_forest: { names: ['Sporenpilz', 'Giftwurm', 'Pilzgolem', 'Pilzwespe', 'Farnfox'], hpMult: [1, 1.5, 2.5, 1.8, 2.0], bosses: ['Pilzkönig'] },
+    temple: { names: ['Tempelwächter', 'Mumie', ' Sandschatulje', 'Skarabäus-König', 'Fluchgeist'], hpMult: [1.2, 1.8, 2.0, 2.5, 2.8], bosses: ['Pharao'] },
     frozen_peaks: { names: ['Eiskobold', 'Frostwolf', 'Eisriese', 'Schneejäger', 'Frostgeist'], hpMult: [1, 1.5, 3, 2.0, 2.2], bosses: ['Kältefürst'] },
     lava_caverns: { names: ['Magmaschleimer', 'Feuerdämon', 'Lavawurm', 'Feuerkäfer', 'Glühwurm'], hpMult: [1, 1.8, 3, 2.2, 2.5], bosses: ['Feuerfürst'] },
     coral_reef: { names: ['Quallenfisch', 'Krabbenkrieger', 'Tiefseeschlange', 'Seeigel', 'Seepferdchen'], hpMult: [1, 1.6, 2.8, 1.4, 1.2], bosses: ['Meereskönig'] },
@@ -287,6 +293,7 @@ export interface GameState {
   damagePopups: DamagePopup[];
   levelUpEffect: boolean;
   hitEffectPos: [number, number, number] | null;
+  deathEffectPos: [number, number, number] | null;
   comboCount: number;
   comboTimer: number;
   timeOfDay: number;
@@ -408,21 +415,45 @@ export const INITIAL_SHOP_ITEMS: ShopItem[] = [
   { id: 'cosm-aura-fire', name: 'Feuer-Aura', type: 'cosmetic', stat: '+30% XP', value: 30, price: 35, owned: false, icon: '🔥' },
   { id: 'cosm-aura-ice', name: 'Frost-Aura', type: 'cosmetic', stat: '+30% XP', value: 30, price: 35, owned: false, icon: '❄️' },
   { id: 'cosm-aura-electric', name: 'Blitz-Aura', type: 'cosmetic', stat: '+35% XP', value: 35, price: 40, owned: false, icon: '⚡' },
+  { id: 'cosm-wing-angel', name: 'Engelsflügel', type: 'cosmetic', stat: '+40% XP', value: 40, price: 60, owned: false, icon: '👼' },
+  { id: 'cosm-wing-demon', name: 'Dämonenflügel', type: 'cosmetic', stat: '+40% XP', value: 40, price: 60, owned: false, icon: '😈' },
+  { id: 'cosm-crown-gold', name: 'Goldene Krone', type: 'cosmetic', stat: '+50% XP', value: 50, price: 80, owned: false, icon: '👑' },
+  { id: 'cosm-halo', name: 'Heiligenschein', type: 'cosmetic', stat: '+60% XP', value: 60, price: 100, owned: false, icon: '😇' },
+  { id: 'cosm-trail-fish', name: 'Fisch-Spur', type: 'cosmetic', stat: '+20% XP', value: 20, price: 20, owned: false, icon: '🐟' },
+  { id: 'cosm-aura-void', name: 'Void-Aura', type: 'cosmetic', stat: '+70% XP', value: 70, price: 120, owned: false, icon: '🕳️' },
+  { id: 'cosm-trail-dragon', name: 'Drachen-Spur', type: 'cosmetic', stat: '+30% XP', value: 30, price: 35, owned: false, icon: '🐉' },
 ];
 
 export const CRAFTING_RECIPES: CraftingRecipe[] = [
-  { id: 'craft-iron-sword', name: 'Eisenschwert', type: 'weapon', icon: '⚔️', stat: '+10 ATK', value: 10, rarity: 'common', ingredients: [{ name: 'Eisenerz', quantity: 3 }] },
-  { id: 'craft-steel-sword', name: 'Stahlschwert', type: 'weapon', icon: '⚔️', stat: '+20 ATK', value: 20, rarity: 'rare', ingredients: [{ name: 'Stahlbarren', quantity: 2 }, { name: 'Eisenerz', quantity: 5 }] },
-  { id: 'craft-mithril-sword', name: 'Mithrilschwert', type: 'weapon', icon: '⚔️', stat: '+40 ATK', value: 40, rarity: 'epic', ingredients: [{ name: 'Mithrilbarren', quantity: 3 }, { name: 'Edelstein', quantity: 2 }] },
-  { id: 'craft-abyss-sword', name: 'Abgrundsklinge', type: 'weapon', icon: '⚔️', stat: '+60 ATK', value: 60, rarity: 'legendary', ingredients: [{ name: 'Mithrilbarren', quantity: 5 }, { name: 'Edelstein', quantity: 5 }] },
-  { id: 'craft-iron-armor', name: 'Eisenrüstung', type: 'armor', icon: '🛡️', stat: '+10 DEF', value: 10, rarity: 'common', ingredients: [{ name: 'Eisenerz', quantity: 5 }] },
-  { id: 'craft-steel-armor', name: 'Stahlrüstung', type: 'armor', icon: '🛡️', stat: '+20 DEF', value: 20, rarity: 'rare', ingredients: [{ name: 'Stahlbarren', quantity: 3 }, { name: 'Eisenerz', quantity: 8 }] },
-  { id: 'craft-mithril-armor', name: 'Mithrilrüstung', type: 'armor', icon: '🛡️', stat: '+40 DEF', value: 40, rarity: 'epic', ingredients: [{ name: 'Mithrilbarren', quantity: 3 }, { name: 'Edelstein', quantity: 3 }] },
-  { id: 'craft-abyss-armor', name: 'Abgrundsrüstung', type: 'armor', icon: '🛡️', stat: '+60 DEF', value: 60, rarity: 'legendary', ingredients: [{ name: 'Mithrilbarren', quantity: 5 }, { name: 'Edelstein', quantity: 5 }] },
-  { id: 'craft-health-potion', name: 'Großer HP Trank', type: 'potion', icon: '🧪', stat: '+150 HP', value: 150, rarity: 'common', ingredients: [{ name: 'Heilkräuter', quantity: 3 }] },
-  { id: 'craft-mana-potion', name: 'Großer MP Trank', type: 'potion', icon: '🧪', stat: '+100 MP', value: 100, rarity: 'common', ingredients: [{ name: 'Manablüte', quantity: 3 }] },
-  { id: 'craft-super-health', name: 'Epischer HP-Trank', type: 'potion', icon: '🧪', stat: '+300 HP', value: 300, rarity: 'epic', ingredients: [{ name: 'Heilkräuter', quantity: 5 }, { name: 'Edelstein', quantity: 1 }] },
-  { id: 'craft-legendary-pot', name: 'Legendärer Trank', type: 'potion', icon: '🧪', stat: '+500 HP', value: 500, rarity: 'legendary', ingredients: [{ name: 'Heilkräuter', quantity: 10 }, { name: 'Edelstein', quantity: 3 }] },
+  // Warrior Weapons (Sword)
+  { id: 'craft-iron-sword', name: 'Eisenschwert', type: 'weapon', weaponType: 'sword', icon: '⚔️', stat: '+10 ATK', value: 10, rarity: 'common', ingredients: [{ name: 'Eisenerz', quantity: 30 }] },
+  { id: 'craft-steel-sword', name: 'Stahlschwert', type: 'weapon', weaponType: 'sword', icon: '⚔️', stat: '+20 ATK', value: 20, rarity: 'rare', ingredients: [{ name: 'Stahlbarren', quantity: 50 }, { name: 'Eisenerz', quantity: 100 }] },
+  { id: 'craft-mithril-sword', name: 'Mithrilschwert', type: 'weapon', weaponType: 'sword', icon: '⚔️', stat: '+40 ATK', value: 40, rarity: 'epic', ingredients: [{ name: 'Mithrilbarren', quantity: 100 }, { name: 'Edelstein', quantity: 50 }] },
+  { id: 'craft-abyss-sword', name: 'Abgrundsklinge', type: 'weapon', weaponType: 'sword', icon: '⚔️', stat: '+60 ATK', value: 60, rarity: 'legendary', ingredients: [{ name: 'Mithrilbarren', quantity: 500 }, { name: 'Edelstein', quantity: 200 }] },
+  
+  // Mage Weapons (Staff)
+  { id: 'craft-iron-staff', name: 'Eisenstab', type: 'weapon', weaponType: 'staff', icon: '🪄', stat: '+8 ATK', value: 8, rarity: 'common', ingredients: [{ name: 'Eisenerz', quantity: 25 }, { name: 'Manablüte', quantity: 25 }] },
+  { id: 'craft-steel-staff', name: 'Stahlstab', type: 'weapon', weaponType: 'staff', icon: '🪄', stat: '+16 ATK', value: 16, rarity: 'rare', ingredients: [{ name: 'Stahlbarren', quantity: 50 }, { name: 'Manablüte', quantity: 80 }] },
+  { id: 'craft-mithril-staff', name: 'Mithrilstab', type: 'weapon', weaponType: 'staff', icon: '🪄', stat: '+32 ATK', value: 32, rarity: 'epic', ingredients: [{ name: 'Mithrilbarren', quantity: 100 }, { name: 'Edelstein', quantity: 50 }] },
+  { id: 'craft-abyss-staff', name: 'Abgrundstab', type: 'weapon', weaponType: 'staff', icon: '🪄', stat: '+50 ATK', value: 50, rarity: 'legendary', ingredients: [{ name: 'Mithrilbarren', quantity: 500 }, { name: 'Edelstein', quantity: 200 }] },
+  
+  // Archer Weapons (Bow)
+  { id: 'craft-iron-bow', name: 'Eisenbogen', type: 'weapon', weaponType: 'bow', icon: '🏹', stat: '+9 ATK', value: 9, rarity: 'common', ingredients: [{ name: 'Eisenerz', quantity: 25 }, { name: 'Heilkräuter', quantity: 25 }] },
+  { id: 'craft-steel-bow', name: 'Stahlbogen', type: 'weapon', weaponType: 'bow', icon: '🏹', stat: '+18 ATK', value: 18, rarity: 'rare', ingredients: [{ name: 'Stahlbarren', quantity: 50 }, { name: 'Heilkräuter', quantity: 80 }] },
+  { id: 'craft-mithril-bow', name: 'Mithrilbogen', type: 'weapon', weaponType: 'bow', icon: '🏹', stat: '+36 ATK', value: 36, rarity: 'epic', ingredients: [{ name: 'Mithrilbarren', quantity: 100 }, { name: 'Edelstein', quantity: 50 }] },
+  { id: 'craft-abyss-bow', name: 'Abgrundbogen', type: 'weapon', weaponType: 'bow', icon: '🏹', stat: '+55 ATK', value: 55, rarity: 'legendary', ingredients: [{ name: 'Mithrilbarren', quantity: 500 }, { name: 'Edelstein', quantity: 200 }] },
+  
+  // Armor (all classes can use)
+  { id: 'craft-iron-armor', name: 'Eisenrüstung', type: 'armor', icon: '🛡️', stat: '+10 DEF', value: 10, rarity: 'common', ingredients: [{ name: 'Eisenerz', quantity: 40 }] },
+  { id: 'craft-steel-armor', name: 'Stahlrüstung', type: 'armor', icon: '🛡️', stat: '+20 DEF', value: 20, rarity: 'rare', ingredients: [{ name: 'Stahlbarren', quantity: 60 }, { name: 'Eisenerz', quantity: 100 }] },
+  { id: 'craft-mithril-armor', name: 'Mithrilrüstung', type: 'armor', icon: '🛡️', stat: '+40 DEF', value: 40, rarity: 'epic', ingredients: [{ name: 'Mithrilbarren', quantity: 100 }, { name: 'Edelstein', quantity: 60 }] },
+  { id: 'craft-abyss-armor', name: 'Abgrundsrüstung', type: 'armor', icon: '🛡️', stat: '+60 DEF', value: 60, rarity: 'legendary', ingredients: [{ name: 'Mithrilbarren', quantity: 500 }, { name: 'Edelstein', quantity: 200 }] },
+  
+  // Potions
+  { id: 'craft-health-potion', name: 'Großer HP Trank', type: 'potion', icon: '🧪', stat: '+150 HP', value: 150, rarity: 'common', ingredients: [{ name: 'Heilkräuter', quantity: 30 }] },
+  { id: 'craft-mana-potion', name: 'Großer MP Trank', type: 'potion', icon: '🧪', stat: '+100 MP', value: 100, rarity: 'common', ingredients: [{ name: 'Manablüte', quantity: 30 }] },
+  { id: 'craft-super-health', name: 'Epischer HP-Trank', type: 'potion', icon: '🧪', stat: '+300 HP', value: 300, rarity: 'epic', ingredients: [{ name: 'Heilkräuter', quantity: 80 }, { name: 'Edelstein', quantity: 20 }] },
+  { id: 'craft-legendary-pot', name: 'Legendärer Trank', type: 'potion', icon: '🧪', stat: '+500 HP', value: 500, rarity: 'legendary', ingredients: [{ name: 'Heilkräuter', quantity: 150 }, { name: 'Edelstein', quantity: 50 }] },
 ];
 
 const INITIAL_PETS: Pet[] = [
@@ -431,23 +462,21 @@ const INITIAL_PETS: Pet[] = [
   { id: 'pet-wolf-alpha', name: 'Alpha Wolf', bonus: '+35% Schaden', bonusValue: 0.35, bonusType: 'damage', price: 0, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-wolf-adult', maxLevel: 30 },
   { id: 'pet-cat', name: 'Flauschkatze', bonus: '+15% Speed', bonusValue: 0.15, bonusType: 'speed', price: 100, rarity: 'rare', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 10 },
   { id: 'pet-cat-ninja', name: 'Ninja Katze', bonus: '+25% Speed', bonusValue: 0.25, bonusType: 'speed', price: 0, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-cat', maxLevel: 20 },
-  { id: 'pet-dragon', name: 'Mini Drache', bonus: '+20% Schaden', bonusValue: 0.2, bonusType: 'damage', price: 250, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 15 },
-  { id: 'pet-dragon-elder', name: 'Elder Drache', bonus: '+40% Schaden', bonusValue: 0.4, bonusType: 'damage', price: 0, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-dragon', maxLevel: 30 },
-  { id: 'pet-phoenix', name: 'Goldener Phönix', bonus: '+25% Defense', bonusValue: 0.25, bonusType: 'defense', price: 500, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 25 },
-  { id: 'pet-knight', name: 'Ritter Baldur', bonus: '+30% Defense', bonusValue: 0.3, bonusType: 'defense', price: 1500, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 15 },
+  { id: 'pet-phoenix', name: 'Goldener Phönix', bonus: '+25% Defense', bonusValue: 0.25, bonusType: 'defense', price: 5000, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 25 },
+  { id: 'pet-knight', name: 'Ritter Baldur', bonus: '+30% Defense', bonusValue: 0.3, bonusType: 'defense', price: 2500, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 15 },
   { id: 'pet-knight-champion', name: 'Champion Baldur', bonus: '+45% Defense', bonusValue: 0.45, bonusType: 'defense', price: 0, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-knight', maxLevel: 30 },
-  { id: 'pet-priestess', name: 'Priesterin Aria', bonus: '+20 HP/10s', bonusValue: 20, bonusType: 'heal', price: 1200, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 15 },
+  { id: 'pet-priestess', name: 'Priesterin Aria', bonus: '+20 HP/10s', bonusValue: 20, bonusType: 'heal', price: 2000, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 15 },
   { id: 'pet-priestess-high', name: 'Hohepriesterin Aria', bonus: '+35 HP/10s', bonusValue: 35, bonusType: 'heal', price: 0, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-priestess', maxLevel: 30 },
-  { id: 'pet-ranger', name: 'Waldläufer Finn', bonus: '+35% Schaden', bonusValue: 0.35, bonusType: 'damage', price: 2000, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 25 },
-  { id: 'pet-wizard', name: 'Zauberer Merlin', bonus: '+40% Schaden', bonusValue: 0.4, bonusType: 'damage', price: 3000, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 30 },
+  { id: 'pet-ranger', name: 'Waldläufer Finn', bonus: '+35% Schaden', bonusValue: 0.35, bonusType: 'damage', price: 8000, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 25 },
+  { id: 'pet-wizard', name: 'Zauberer Merlin', bonus: '+40% Schaden', bonusValue: 0.4, bonusType: 'damage', price: 10000, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 30 },
   { id: 'pet-fairy', name: 'Wald Fee', bonus: '+10% Krit', bonusValue: 0.1, bonusType: 'crit', price: 400, rarity: 'rare', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 10 },
   { id: 'pet-fairy-magical', name: 'Magische Fee', bonus: '+18% Krit', bonusValue: 0.18, bonusType: 'crit', price: 0, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-fairy', maxLevel: 20 },
   { id: 'pet-fairy-enchanted', name: 'Verzauberte Fee', bonus: '+30% Krit', bonusValue: 0.3, bonusType: 'crit', price: 0, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-fairy-magical', maxLevel: 30 },
-  { id: 'pet-ghost', name: 'Geist Gigi', bonus: '+25% Speed', bonusValue: 0.25, bonusType: 'speed', price: 600, rarity: 'rare', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 15 },
+  { id: 'pet-ghost', name: 'Geist Gigi', bonus: '+25% Speed', bonusValue: 0.25, bonusType: 'speed', price: 800, rarity: 'rare', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 15 },
   { id: 'pet-ghost-phantom', name: 'Phantom Gigi', bonus: '+35% Speed', bonusValue: 0.35, bonusType: 'speed', price: 0, rarity: 'epic', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-ghost', maxLevel: 25 },
   { id: 'pet-ghost-dread', name: 'Schreckens Gigi', bonus: '+50% Speed', bonusValue: 0.5, bonusType: 'speed', price: 0, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: 'pet-ghost-phantom', maxLevel: 35 },
-  { id: 'pet-treant', name: 'Treant Torin', bonus: '+35% Defense', bonusValue: 0.35, bonusType: 'defense', price: 2500, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 25 },
-  { id: 'pet-elemental', name: 'Elementar Emil', bonus: '+50% Schaden', bonusValue: 0.5, bonusType: 'damage', price: 5000, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 30 },
+  { id: 'pet-treant', name: 'Treant Torin', bonus: '+35% Defense', bonusValue: 0.35, bonusType: 'defense', price: 9000, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 25 },
+  { id: 'pet-elemental', name: 'Elementar Emil', bonus: '+50% Schaden', bonusValue: 0.5, bonusType: 'damage', price: 15000, rarity: 'legendary', owned: false, equipped: false, level: 1, xp: 0, evolvedFrom: null, maxLevel: 30 },
 ];
 
 const INITIAL_INVENTORY: InventoryItem[] = [
@@ -498,8 +527,9 @@ export const useGameStore = create<GameState>((set, get) => ({
 inventory: INITIAL_INVENTORY.map(i => ({ ...i })),
       groundItems: [],
       damagePopups: [],
-  levelUpEffect: false,
-  hitEffectPos: null,
+      levelUpEffect: false,
+      hitEffectPos: null,
+      deathEffectPos: null,
 autoFight: false,
       autoRespawn: true,
       autoLoot: true,
@@ -634,6 +664,11 @@ autoFight: false,
       // Update quest progress
       useQuestStore.getState().updateKillProgress(killed.name);
       
+      // Trigger death effect
+      const deathPos: [number, number, number] = [killed.position[0], killed.position[1] + 0.5, killed.position[2]];
+      set({ deathEffectPos: deathPos });
+      setTimeout(() => set({ deathEffectPos: null }), 800);
+      
       // Level-Gap XP Berechnung
       const enemyLevel = ZONES.find(z => z.id === killed.zone)?.requiredLevel || 1;
       const levelDiff = state.playerLevel - enemyLevel;
@@ -659,6 +694,13 @@ autoFight: false,
       goldGain = Math.floor(killed.goldReward * goldMult);
       const isBoss = killed.name.includes('Fürst') || killed.name.includes('König') || killed.name.includes('Herr') || killed.name.includes('Meister') || killed.name.includes('Lord');
       gemGain = isBoss ? Math.floor(Math.random() * 5) + 1 : (Math.random() < 0.03 ? 1 : 0);
+      
+      // Play death sound
+      if (isBoss) {
+        playBossSound();
+      } else {
+        playDeathSound();
+      }
       
       // Combo erhöhen bei Kill
       const newCombo = Date.now() - state.comboTimer < 5000 ? Math.min(state.comboCount + 1, 5) : 1;
@@ -686,20 +728,43 @@ popups.push({
           timestamp: Date.now() + 350,
         });
       }
-      if (Math.random() < 0.35) {
-        const isBoss = killed.name.includes('Fürst') || killed.name.includes('König') || killed.name.includes('Herr') || killed.name.includes('Meister') || killed.name.includes('Lord');
-        const dropTable = [
-          { name: 'Kleiner HP Trank', type: 'potion' as const, icon: '🧪', value: 30, quantity: 1, rarity: 'common' as const },
-          { name: 'Mittlerer HP Trank', type: 'potion' as const, icon: '🧪', value: 80, quantity: 1, rarity: 'rare' as const },
-          { name: 'Großer HP Trank', type: 'potion' as const, icon: '🧪', value: 150, quantity: 1, rarity: 'epic' as const },
-          { name: 'Eisenerz', type: 'material' as const, icon: '🪨', value: 5, quantity: isBoss ? 3 : 1, rarity: 'common' as const },
-          { name: 'Heilkräuter', type: 'material' as const, icon: '🌿', value: 3, quantity: isBoss ? 3 : 1, rarity: 'common' as const },
-          { name: 'Manablüte', type: 'material' as const, icon: '🌸', value: 3, quantity: isBoss ? 3 : 1, rarity: 'common' as const },
-          { name: 'Stahlbarren', type: 'material' as const, icon: '🔩', value: 15, quantity: isBoss ? 2 : 1, rarity: 'rare' as const },
-          { name: 'Edelstein', type: 'material' as const, icon: '💎', value: 50, quantity: isBoss ? 2 : 1, rarity: 'epic' as const },
-          { name: 'Mithrilbarren', type: 'material' as const, icon: '⭐', value: 100, quantity: isBoss ? 2 : 1, rarity: 'legendary' as const },
-        ];
-        const drop = dropTable[Math.floor(Math.random() * dropTable.length)];
+      const dropChance = isBoss ? 0.3 : 0.05;
+      if (Math.random() < dropChance) {
+        const rarityWeights = isBoss 
+          ? { common: 50, rare: 30, epic: 15, legendary: 5 }
+          : { common: 75, rare: 20, epic: 4, legendary: 1 };
+        const rarityRoll = Math.random() * 100;
+        let selectedRarity: 'common' | 'rare' | 'epic' | 'legendary';
+        let cumWeight = 0;
+        for (const [rarity, weight] of Object.entries(rarityWeights)) {
+          cumWeight += weight;
+          if (rarityRoll < cumWeight) {
+            selectedRarity = rarity as 'common' | 'rare' | 'epic' | 'legendary';
+            break;
+          }
+        }
+        const dropTableByRarity: Record<string, typeof dropTable> = {
+          common: [
+            { name: 'Kleiner HP Trank', type: 'potion' as const, icon: '🧪', value: 30, quantity: 1, rarity: 'common' as const },
+            { name: 'Eisenerz', type: 'material' as const, icon: '🪨', value: 5, quantity: isBoss ? 3 : 1, rarity: 'common' as const },
+            { name: 'Heilkräuter', type: 'material' as const, icon: '🌿', value: 3, quantity: isBoss ? 3 : 1, rarity: 'common' as const },
+            { name: 'Manablüte', type: 'material' as const, icon: '🌸', value: 3, quantity: isBoss ? 3 : 1, rarity: 'common' as const },
+          ],
+          rare: [
+            { name: 'Mittlerer HP Trank', type: 'potion' as const, icon: '🧪', value: 80, quantity: 1, rarity: 'rare' as const },
+            { name: 'Kleiner MP Trank', type: 'potion' as const, icon: '💧', value: 25, quantity: 1, rarity: 'rare' as const },
+            { name: 'Stahlbarren', type: 'material' as const, icon: '🔩', value: 15, quantity: isBoss ? 2 : 1, rarity: 'rare' as const },
+          ],
+          epic: [
+            { name: 'Großer HP Trank', type: 'potion' as const, icon: '🧪', value: 150, quantity: 1, rarity: 'epic' as const },
+            { name: 'Edelstein', type: 'material' as const, icon: '💎', value: 50, quantity: isBoss ? 2 : 1, rarity: 'epic' as const },
+          ],
+          legendary: [
+            { name: 'Mithrilbarren', type: 'material' as const, icon: '⭐', value: 100, quantity: isBoss ? 2 : 1, rarity: 'legendary' as const },
+          ],
+        };
+        const pool = dropTableByRarity[selectedRarity] || dropTableByRarity.common;
+        const drop = pool[Math.floor(Math.random() * pool.length)];
         const dropPos: [number, number, number] = [killed.position[0], 0.3, killed.position[2]];
         get().spawnGroundItem({ ...drop, position: dropPos });
       }
@@ -1608,4 +1673,108 @@ damagePopups: [...state.damagePopups, {
       moveTarget: newTarget || e.moveTarget
     } : e)
   })),
+
+  saveToMongoDB: async () => {
+    const state = get();
+    
+    const saveData = {
+      playerId: state.playerId,
+      playerName: state.playerName,
+      playerClass: state.playerClass || 'warrior',
+      playerLevel: state.playerLevel,
+      playerXp: state.playerXp,
+      playerHp: state.playerHp,
+      playerMaxHp: state.playerMaxHp,
+      playerMana: state.playerMana,
+      playerMaxMana: state.playerMaxMana,
+      playerAttack: state.playerAttackPower,
+      playerDefense: state.playerDefense,
+      playerGold: state.playerGold,
+      playerGems: state.playerGems,
+      playerTitle: state.playerTitle,
+      equipped: state.inventory.filter(i => i.equipped).map(i => i.id),
+      inventory: state.inventory.map(i => i.id),
+      pets: state.pets.map(p => p.id),
+      cosmetics: state.cosmetics?.map(c => c.id) || [],
+      quests: state.quests?.map(q => q.id) || [],
+      skills: [],
+      skillPoints: state.skillPoints,
+      language: 'de',
+      lastZone: state.currentZone,
+      achievementIds: state.achievements || [],
+      totalKills: state.totalKills,
+      totalGoldEarned: state.totalGoldEarned,
+      totalDamageDealt: state.totalDamageDealt,
+    };
+    
+    localStorage.setItem('quest-forge-save', JSON.stringify(saveData));
+    
+    try {
+      await savePlayerFirebase(saveData);
+    } catch (error) {
+      console.log('Cloud-Speicher nicht verfügbar, lokal gespeichert');
+    }
+  },
+
+  loadFromMongoDB: async (playerId: string) => {
+    const localSave = localStorage.getItem('quest-forge-save');
+    if (localSave) {
+      try {
+        const saved = JSON.parse(localSave);
+        set({
+          playerId: saved.playerId,
+          playerName: saved.playerName,
+          playerClass: saved.playerClass as PlayerClass,
+          playerLevel: saved.playerLevel,
+          playerXp: saved.playerXp,
+          playerHp: saved.playerHp,
+          playerMaxHp: saved.playerMaxHp,
+          playerMana: saved.playerMana,
+          playerMaxMana: saved.playerMaxMana,
+          playerAttackPower: saved.playerAttack,
+          playerDefense: saved.playerDefense,
+          playerGold: saved.playerGold,
+          playerGems: saved.playerGems,
+          playerTitle: saved.playerTitle,
+          currentZone: saved.lastZone as ZoneType,
+          skillPoints: saved.skillPoints,
+          totalKills: saved.totalKills,
+          totalGoldEarned: saved.totalGoldEarned,
+          totalDamageDealt: saved.totalDamageDealt,
+        });
+        console.log('✅ Spielstand loaded:', saved.playerName);
+        return;
+      } catch (e) {}
+    }
+    
+    try {
+      const saved = await loadPlayerFirebase(playerId);
+      if (saved) {
+        set({
+          playerId: saved.playerId,
+          playerName: saved.playerName,
+          playerClass: saved.playerClass as PlayerClass,
+          playerLevel: saved.playerLevel,
+          playerXp: saved.playerXp,
+          playerHp: saved.playerHp,
+          playerMaxHp: saved.playerMaxHp,
+          playerMana: saved.playerMana,
+          playerMaxMana: saved.playerMaxMana,
+          playerAttackPower: saved.playerAttack,
+          playerDefense: saved.playerDefense,
+          playerGold: saved.playerGold,
+          playerGems: saved.playerGems,
+          playerTitle: saved.playerTitle,
+          currentZone: saved.lastZone as ZoneType,
+          skillPoints: saved.skillPoints,
+          totalKills: saved.totalKills,
+          totalGoldEarned: saved.totalGoldEarned,
+          totalDamageDealt: saved.totalDamageDealt,
+        });
+        console.log('✅ Spielstand geladen:', saved.playerName);
+      }
+    } catch (error) {
+      console.log('Cloud nicht verfügbar, lokal geladen');
+    }
+  },
 }));
