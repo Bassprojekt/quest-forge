@@ -696,7 +696,6 @@ const AnimatedTorch = ({ position }: { position: [number, number, number] }) => 
         {/* Alchemist & Handwerker - VOR dem Gebäude */}
         <NPCWithBuilding name="Alchemist Anton" color="#9C27B0" position={[0, 0, 3]} icon="⚗️" onClick={() => onOpenPotionCraft?.()} rotation={0} />
         <NPCWithBuilding name="Handwerker Hagen" color="#FF9800" position={[2.5, 0, 3]} icon="🔨" onClick={() => onOpenWeaponCraft?.()} rotation={0} />
-        <NPCWithBuilding name="Quest Altar" color="#FFD700" position={[-2.5, 0, -3]} icon="📜" onClick={() => {}} rotation={Math.PI} />
       </group>
 
       {/* Bank/Lager - Osten Nord - door faces center */}
