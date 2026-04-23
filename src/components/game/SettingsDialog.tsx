@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
-import { useAccountStore } from '@/store/accountStore';
 import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Volume2, VolumeX, Settings, Globe, ChevronDown } from 'lucide-react';
-import { Slider } from '@/components/ui/slider';
+import { useAccountStore } from '@/store/accountStore';
+import { updateMusicVolume } from '@/hooks/useSound';
 
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onOpenHelp?: () => void;
-  onLogout?: () => void;
+  onOpenHelp: () => void;
+  onLogout: () => void;
 }
 
 export const SettingsDialog = ({ open, onOpenChange, onOpenHelp, onLogout }: SettingsDialogProps) => {
@@ -30,6 +28,7 @@ export const SettingsDialog = ({ open, onOpenChange, onOpenHelp, onLogout }: Set
     const newVolume = value[0];
     setLocalVolume(newVolume);
     setVolume(newVolume);
+    updateMusicVolume();
   };
 
   const handleFxVolumeChange = (value: number[]) => {
