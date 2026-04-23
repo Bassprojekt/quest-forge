@@ -3,6 +3,9 @@ import { useGameStore } from '@/store/gameStore';
 import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
 import { useAccountStore } from '@/store/accountStore';
 import { updateMusicVolume } from '@/hooks/musicPlayer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Slider } from '@/components/ui/slider';
+import { Settings, Globe, ChevronDown, Volume2, VolumeX } from 'lucide-react';
 
 interface SettingsDialogProps {
   open: boolean;

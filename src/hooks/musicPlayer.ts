@@ -1,8 +1,9 @@
 import { useSettingsStore } from '@/store/settingsStore';
+import { useGameStore } from '@/store/gameStore';
 
 let bgMusic: HTMLAudioElement | null = null;
-let musicInitialized = false;
 let currentTrackIndex = 0;
+let musicStarted = false;
 
 const ambientTracks = [
   '/Sounds/mp3/Ambient 1 Loop.mp3',
@@ -18,49 +19,61 @@ const ambientTracks = [
 ];
 
 function getVolume(): number {
-  return (useSettingsStore.getState().volume || 2) / 100;
+  return (useSettingsStore.getState().volume || 10) / 100;
 }
 
 export function startBackgroundMusic() {
-  if (musicInitialized) return;
-  musicInitialized = true;
+  const vol = getVolume();
+  console.log('Starting music with volume:', vol);
   
-  function playNext() {
-    if (!bgMusic) {
-      bgMusic = new Audio();
-    }
-    
-    const vol = getVolume();
-    if (vol <= 0.01) {
-      setTimeout(playNext, 1000);
-      return;
-    }
-    
-    bgMusic.src = ambientTracks[currentTrackIndex];
-    bgMusic.volume = vol;
-    bgMusic.loop = false;
-    
-    bgMusic.play().catch(() => {});
-    
-    bgMusic.onended = () => {
-      currentTrackIndex = (currentTrackIndex + 1) % ambientTracks.length;
-      playNext();
-    };
+  if (vol <= 0) {
+    musicStarted = false;
+    return;
   }
   
-  playNext();
+  if (bgMusic) {
+    bgMusic.pause();
+  }
+  
+  musicStarted = true;
+  bgMusic = new Audio(ambientTracks[0]);
+  bgMusic.volume = vol;
+  bgMusic.loop = false;
+  
+  bgMusic.onended = () => {
+    currentTrackIndex = (currentTrackIndex + 1) % ambientTracks.length;
+    if (bgMusic && musicStarted) {
+      bgMusic.src = ambientTracks[currentTrackIndex];
+      bgMusic.play().catch(() => {});
+    }
+  };
+  
+  bgMusic.onerror = (e) => {
+    console.log('Audio error:', e);
+  };
+  
+  bgMusic.play()
+    .then(() => console.log('Music playing!'))
+    .catch((e) => console.log('Play failed:', e));
 }
 
 export function stopBackgroundMusic() {
+  musicStarted = false;
   if (bgMusic) {
     bgMusic.pause();
     bgMusic = null;
   }
-  musicInitialized = false;
 }
 
 export function updateMusicVolume() {
-  if (bgMusic) {
-    bgMusic.volume = getVolume();
+  const vol = getVolume();
+  console.log('updateMusicVolume:', vol);
+  
+  if (vol <= 0) {
+    stopBackgroundMusic();
+  } else if (!bgMusic && musicStarted === false) {
+    startBackgroundMusic();
+  } else if (bgMusic) {
+    bgMusic.volume = vol;
   }
 }

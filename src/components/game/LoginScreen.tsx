@@ -45,6 +45,8 @@ export const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
       setPassword(savedPass);
       setSaveLogin(true);
     }
+    initAudio();
+    startBackgroundMusic();
   }, []);
 
   const getClassIcon = (c: string | null | undefined) => {

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type EventType = 'easter' | 'halloween' | 'christmas' | 'summer' | 'none';
+export type EventType = 'easter' | 'halloween' | 'christmas' | 'summer' | 'valentine' | 'newyear' | 'none';
 
 interface EventConfig {
   type: EventType;
@@ -23,6 +23,7 @@ const EVENT_CONFIGS: EventConfig[] = [
     specialItems: [
       { name: 'Osterkorb', icon: '🧺', price: 500 },
       { name: 'Osterhase Pet', icon: '🐰', price: 2000 },
+      { name: 'Goldenes Ei', icon: '🥚', price: 1000 },
     ],
   },
   {
@@ -36,6 +37,7 @@ const EVENT_CONFIGS: EventConfig[] = [
       { name: 'Kürbis-Laterne', icon: '🎃', price: 300 },
       { name: 'Vampir Umhang', icon: '🧛', price: 1500 },
       { name: 'Geister Pet', icon: '👻', price: 3000 },
+      { name: 'Skelett-Rüstung', icon: '💀', price: 2000 },
     ],
   },
   {
@@ -49,6 +51,7 @@ const EVENT_CONFIGS: EventConfig[] = [
       { name: 'Weihnachtsmütze', icon: '🎅', price: 400 },
       { name: 'Geschenk', icon: '🎁', price: 100 },
       { name: 'Rentier Pet', icon: '🦌', price: 2500 },
+      { name: 'Schneemann', icon: '⛄', price: 800 },
     ],
   },
   {
@@ -61,6 +64,32 @@ const EVENT_CONFIGS: EventConfig[] = [
     specialItems: [
       { name: 'Sonnenbrille', icon: '🕶️', price: 250 },
       { name: 'Strandball', icon: '🏖️', price: 150 },
+      { name: 'Wassermelone', icon: '🍉', price: 200 },
+    ],
+  },
+  {
+    type: 'valentine',
+    name: 'Valentinstag',
+    icon: '❤️',
+    startMonth: 2,
+    endMonth: 2,
+    bonusMultiplier: 1.75,
+    specialItems: [
+      { name: 'Herzschrift', icon: '💕', price: 500 },
+      { name: 'Rosen', icon: '🌹', price: 300 },
+      { name: 'Cupid Pet', icon: '💘', price: 2500 },
+    ],
+  },
+  {
+    type: 'newyear',
+    name: 'Neujahr',
+    icon: '🎆',
+    startMonth: 1,
+    endMonth: 1,
+    bonusMultiplier: 1.5,
+    specialItems: [
+      { name: 'Feuerwerk', icon: '🎆', price: 400 },
+      { name: 'Neujahrs-Kugel', icon: '🧧', price: 600 },
     ],
   },
 ];

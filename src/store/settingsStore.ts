@@ -15,8 +15,8 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      volume: 2,
-      fxVolume: 10,
+      volume: 10,
+      fxVolume: 50,
       language: 'de',
       setVolume: (v) => set({ volume: Math.max(0, Math.min(100, v)) }),
       setFxVolume: (v) => set({ fxVolume: Math.max(0, Math.min(100, v)) }),

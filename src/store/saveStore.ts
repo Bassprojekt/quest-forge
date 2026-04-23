@@ -217,25 +217,25 @@ export function saveGame(): boolean {
   const data = getSaveData();
   const game = useGameStore.getState();
   
-localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-   
-   useGameStore.getState().setShowSaveIndicator(true);
-   setTimeout(() => {
-     useGameStore.getState().setShowSaveIndicator(false);
-   }, 2000);
-   
-   // Supabase Cloud Backup
-   const playerId = getPlayerId();
-   supabase.from('game_saves').upsert({
-     player_id: playerId,
-     save_data: data,
-     slot_number: 1,
-     updated_at: new Date().toISOString(),
-   }, { 
-     onConflict: 'player_id' 
-   }).then(() => {});
-   
-   return true;
+  localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+     
+  useGameStore.getState().setShowSaveIndicator(true);
+  setTimeout(() => {
+    useGameStore.getState().setShowSaveIndicator(false);
+  }, 2000);
+  
+  // Supabase Cloud Backup
+  const playerId = getPlayerId();
+  supabase.from('game_saves').upsert({
+    player_id: playerId,
+    save_data: data,
+    slot_number: 1,
+    updated_at: new Date().toISOString(),
+  }, { 
+    onConflict: 'player_id' 
+  }).then(() => {});
+  
+  return true;
 }
 
 export function loadGame(): boolean {

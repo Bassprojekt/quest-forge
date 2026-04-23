@@ -39,6 +39,7 @@ import { useTutorialStore } from '@/store/tutorialStore';
 import { useGameStore } from '@/store/gameStore';
 import { useSettingsStore, TRANSLATIONS } from '@/store/settingsStore';
 import { playZoneMusic, playPortalSound } from '@/hooks/useSound';
+import { startBackgroundMusic } from '@/hooks/musicPlayer';
 import { startAutoSave, loadGame } from '@/store/saveStore';
 
 const ZONE_SKY: Record<string, string> = {
@@ -114,6 +115,13 @@ export const GameScene = () => {
       window.removeEventListener('touchstart', onInput);
     };
   }, []);
+  
+  // Start music when logged in
+  useEffect(() => {
+    if (playerClass) {
+      startBackgroundMusic();
+    }
+  }, [playerClass]);
   
   // Process tournament battles every 5 seconds
   const processTournamentBattles = useGameStore(s => s.processTournamentBattles);
